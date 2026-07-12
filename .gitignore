@@ -1,0 +1,62 @@
+# ---------------------------------------------------------------------------
+# Documentation / handoff (NOT tracked — internal notes, handoff files, specs)
+# ---------------------------------------------------------------------------
+docs/
+
+# ---------------------------------------------------------------------------
+# Secrets & sanitization (public repo — never commit these)
+# ---------------------------------------------------------------------------
+# Environment / config
+.env
+.env.*
+!.env.example
+*.local
+
+# Private keys, mnemonics, wallets, keystores
+*.pem
+*.key
+*.keystore
+*.p12
+*.pfx
+keystore/
+wallets/
+*mnemonic*
+*seed-phrase*
+secrets/
+.secret
+.secrets
+
+# Cloud / API credentials
+.aws/
+credentials.json
+service-account*.json
+
+# ---------------------------------------------------------------------------
+# Dependencies & build output (add/remove per chosen stack)
+# ---------------------------------------------------------------------------
+node_modules/
+dist/
+build/
+out/
+coverage/
+cache/
+artifacts/
+typechain/
+typechain-types/
+
+# ---------------------------------------------------------------------------
+# Logs
+# ---------------------------------------------------------------------------
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ---------------------------------------------------------------------------
+# OS / editor cruft
+# ---------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
