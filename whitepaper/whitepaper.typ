@@ -65,7 +65,7 @@ the reserve is defined as whatever was counted, not whatever is true.
 The count itself was not witnessed by camera; the Vault Keeper is shy.
 The camera's role begins afterward and is different in kind. It does not
 verify the count but attests, continuously and thereafter, that the
-sealed jar has not been opened or disturbed since. The Reserve thus
+sealed jar has not been opened or disturbed since (except through the redemption process). The Reserve thus
 proves *continuity of custody*, not the tally: the quantity is
 established once, under trust, and the seal is monitored forever.
 
@@ -119,8 +119,8 @@ endorsed by the Bead Reserve.
 
 At deployment the full supply is minted once and split between (i) the
 token contract, which holds the *open-claim pile*, and (ii) the Vault
-Keeper's *discretionary reserve* (the "treasury"), for hand-distribution
-— gifts and airdrops to correspondents at the Keeper's discretion. The
+Keeper's *discretionary reserve* (the "treasury"), for hand-distribution:
+gifts and airdrops to correspondents at the Keeper's discretion. The
 split is carved from the fixed genesis supply, not minted in addition to
 it: it changes neither total supply nor collateralization, and dilutes no
 one, there being nothing to dilute. The size of each portion is fixed at
@@ -181,7 +181,7 @@ on-chain burn, which is instantaneous and final. The postal leg is the
 physical shipment; its finality is the delivery signature. Upon shipment
 the Vault Keeper records the tracking number on-chain via
 `acknowledgeRedemption`, so that each redemption produces a complete,
-auditable cross-domain settlement record — a genuine two-legged
+auditable cross-domain settlement record, a genuine two-legged
 settlement for imaginary money.
 
 == 6.4 The ratchet
@@ -198,7 +198,7 @@ for one (1) year. The Vault Keeper may, by a deliberate on-chain act,
 at most approximately one year per action. The Keeper can never shorten a
 window that is currently open; the redemption right, once granted, cannot
 be withdrawn from a holder able to exercise it. In effect the window can
-only ever be widened, never narrowed — a renewal the Reserve must
+only ever be widened, never narrowed: a renewal the Reserve must
 affirmatively perform, or allow to lapse.
 
 Should the window lapse and not be reopened, physical redemption ceases
@@ -258,7 +258,7 @@ canonical #meta.symbol. For holders, this means:
   to migrate and let the prior series stand as a historical artifact.
 
 In short: a Keeper compromise resets the token's address and continuity.
-It moves no balances and touches no reserve — the contract itself never
+It moves no balances and touches no reserve: the contract itself never
 transfers a holder's tokens.
 
 = 9. Risk Factors
@@ -345,8 +345,8 @@ will be notified if any occur.
 
 = 12. Conclusion
 #meta.symbol demonstrates that the full apparatus of a reserve-backed
-digital bearer instrument — collateral, proof of reserves, redemption,
-settlement, and disciplined monetary policy — can be implemented
+digital bearer instrument (collateral, proof of reserves, redemption,
+settlement, and disciplined monetary policy) can be implemented
 honestly, cheaply, and in its entirety around an asset of no value. We
 submit that a system which is completely transparent, fully reserved,
 structurally incapable of inflation, and worth nothing is not a
