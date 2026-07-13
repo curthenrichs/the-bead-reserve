@@ -1,0 +1,7 @@
+{
+  "filter_paths": "lib/",
+  "exclude_dependencies": true,
+  "solc_remaps": [
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/"
+  ]
+}
