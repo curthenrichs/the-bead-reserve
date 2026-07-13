@@ -1,0 +1,42 @@
+name: contract
+
+on:
+  push:
+    paths:
+      - "contract/**"
+      - ".github/workflows/contract.yml"
+  pull_request:
+    paths:
+      - "contract/**"
+      - ".github/workflows/contract.yml"
+
+jobs:
+  build-test-analyze:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contract
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive   # fetch contract/lib/* dependency submodules
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Build
+        run: forge build --sizes
+
+      - name: Test
+        run: forge test -vvv
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Slither
+        run: pip install slither-analyzer solc-select && solc-select install 0.8.24 && solc-select use 0.8.24
+
+      - name: Static analysis (fail on Medium+High)
+        run: slither . --config-file slither.config.json --fail-medium
