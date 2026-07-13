@@ -32,7 +32,7 @@
   table.hline(stroke: 0.75pt + green-deep),
 )
 
-#let whitepaper(title: "", subtitle: "", office: "", series: "", doc) = {
+#let whitepaper(title: "", title-lines: none, subtitle: "", office: "", series: "", doc) = {
   set document(title: title)
   set page(
     paper: "a4",
@@ -77,7 +77,13 @@
   {
     plabel(office)
     v(10pt)
-    block(text(font: serif, size: 30pt, weight: "semibold", title))
+    // Title: ragged (no justification), no hyphenation, with deliberate line
+    // breaks via `title-lines` so a long title never leaves a lone syllable.
+    block({
+      set par(justify: false, leading: 0.34em)
+      set text(font: serif, size: 22pt, weight: "semibold", hyphenate: false)
+      if title-lines != none { title-lines.join(linebreak()) } else { title }
+    })
     if subtitle != "" {
       v(6pt)
       block(text(font: serif, size: 13pt, style: "italic", fill: green)[#subtitle])

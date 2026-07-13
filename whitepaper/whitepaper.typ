@@ -3,6 +3,7 @@
 
 #show: whitepaper.with(
   title: "BEADZ: A Fully-Reserved Bead-Collateralized Bearer Instrument",
+  title-lines: ("BEADZ: A Fully-Reserved", "Bead-Collateralized Bearer Instrument"),
   subtitle: "A Technical and Monetary Whitepaper of The Bead Reserve",
   office: meta.office,
   series: meta.series,
