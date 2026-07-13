@@ -1,4 +1,4 @@
-#import "template.typ": whitepaper, plabel, param-table, green, ink-soft, hairline
+#import "template.typ": whitepaper, param-table, ink-soft, hairline
 #import "metadata.typ": meta
 
 #show: whitepaper.with(
@@ -94,14 +94,14 @@ advisory. It cannot count the beads but may, from time to time, claim to.
 #param-table((
   ("Name / Symbol", "Beadz / BEADZ"),
   ("Decimals", meta.decimals),
-  ("Genesis supply", meta.genesis + " BEADZ  (= the Genesis Count)"),
+  ("Genesis supply", meta.genesis + " BEADZ (= the Genesis Count)"),
   ("Peg", "1 BEADZ = 1 bead (collectible, not monetary)"),
   ("Mint authority", "None after construction"),
   ("Supply trajectory", "Non-increasing; reducible only by redemption"),
 ))
 
 Although a bead is physically indivisible, #meta.symbol is divisible to
-10#super[-#meta.decimals]. The smallest unit is one *bead-wei*. The Bead
+10#super[−#meta.decimals]. The smallest unit is one *bead-wei*. The Bead
 Reserve makes no attempt to explain what one quintillionth of a bead is
 and advises holders against redeeming for one.
 
@@ -356,7 +356,7 @@ The jar is on camera. The count is final. One bead is one bead.
 
 = Appendix A — Glossary
 
-/ Bead-wei: the smallest divisible unit of BEADZ, 10#super[−18] of a bead. Non-redeemable in practice.
+/ Bead-wei: the smallest divisible unit of BEADZ, 10#super[−#meta.decimals] of a bead. Non-redeemable in practice.
 / The Fault: the cardboard box containing the reserve jar. Named for a vault that is also a structural flaw.
 / Creation unit: the minimum redemption lot (#meta.min_redemption beads), below which physical redemption is disallowed.
 / Genesis Count: the one-time hand-count of the jar at deployment, defining total supply.
