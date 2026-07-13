@@ -191,4 +191,58 @@ contract BeadzTest is Test {
     function test_constructor_mintsExactGenesis() public view {
         assertEq(beadz.totalSupply(), beadz.GENESIS_BEADS() * 1e18);
     }
+
+    // --- collateralizationBps ---
+
+    function test_collateralizationBps_fullyReserved() public {
+        uint256 genesisBeads = beadz.GENESIS_BEADS(); // hoisted: see prank-scoping note above
+        vm.prank(keeper);
+        beadz.attestBeadCount(genesisBeads);
+        assertEq(beadz.collateralizationBps(), 10_000);
+    }
+
+    function test_collateralizationBps_partiallyReserved() public {
+        vm.prank(keeper);
+        beadz.attestBeadCount(40_000);
+        // Compute the expected ratio from the getters rather than hardcoding a literal that
+        // would go stale if GENESIS_BEADS or the attested count ever changed.
+        uint256 attested = beadz.attestedBeads();
+        uint256 outstanding = beadz.totalSupply() / 1e18;
+        assertEq(beadz.collateralizationBps(), (attested * 10_000) / outstanding);
+    }
+
+    function test_collateralizationBps_emptySupplyReturnsMax() public {
+        Beadz b = _allToTreasury();
+        uint256 totalSupply = b.totalSupply(); // hoisted: see prank-scoping note above
+        vm.prank(treasury);
+        b.redeem(totalSupply, "empty-out");
+        assertEq(b.totalSupply(), 0);
+        assertEq(b.collateralizationBps(), type(uint256).max);
+    }
+
+    // --- setRedemptionDeadline (additional guards) ---
+
+    function test_setDeadline_revertsOnNonFutureDeadline() public {
+        vm.prank(keeper);
+        vm.expectRevert("BEADZ: deadline must be in the future");
+        beadz.setRedemptionDeadline(block.timestamp);
+    }
+
+    function test_setDeadline_reopenCapEnforced() public {
+        vm.warp(beadz.redemptionDeadline() + 30 days); // window lapsed
+        // Hoisted for the same reason as above: `beadz.MAX_EXTENSION()` inlined as part of the
+        // argument would itself be the next external call and consume the pending prank.
+        uint256 tooFar = block.timestamp + beadz.MAX_EXTENSION() + 1 days;
+        vm.prank(keeper);
+        vm.expectRevert("BEADZ: at most one year per reopen");
+        beadz.setRedemptionDeadline(tooFar);
+    }
+
+    // --- acknowledgeRedemption ---
+
+    function test_acknowledgeRedemption_onlyKeeper() public {
+        vm.prank(alice);
+        vm.expectRevert("BEADZ: caller is not the Vault Keeper");
+        beadz.acknowledgeRedemption(bob, 5, "trk");
+    }
 }

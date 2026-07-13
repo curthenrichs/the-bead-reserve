@@ -5,27 +5,29 @@ import {Test} from "forge-std/Test.sol";
 import {Beadz} from "../src/Beadz.sol";
 
 /// @dev Drives bounded, realistic actions against Beadz and records ghost state
-///      the invariants check. All supply starts in the treasury so redeem() is exercisable.
+///      the invariants check. The treasury holds half the genesis supply (funding actors and
+///      redeem()) while the other half seeds the claim pile, so both claim() and redeem() are
+///      reachable by the fuzzer.
 contract BeadzHandler is Test {
     Beadz public beadz;
     address public keeper;
     address[] internal actors;
 
-    uint256 public maxSupplySeen;      // ghost: highest totalSupply observed
-    uint256 public lastDeadline;       // ghost: last observed deadline
+    uint256 public maxSupplySeen;       // ghost: highest totalSupply observed
     bool public everShortenedWhileOpen; // ghost: violated guarantee flag
 
-    constructor(Beadz _beadz, address _keeper, address _treasury) {
+    constructor(Beadz _beadz, address _keeper, address _treasury, uint256 treasuryBeads) {
         beadz = _beadz;
         keeper = _keeper;
         maxSupplySeen = _beadz.totalSupply();
-        lastDeadline = _beadz.redemptionDeadline();
-        // seed a small actor set, funded from treasury
+        // seed a small actor set, funded from treasury — keep total funding well below the
+        // treasury's balance (treasuryBeads whole beads) so redeem() lots stay exercisable.
+        uint256 perActor = (treasuryBeads * 1e18) / 40; // 4 actors ≈ 1/10 of the treasury, total
         for (uint256 i = 0; i < 4; i++) {
             address a = address(uint160(0x1000 + i));
             actors.push(a);
             vm.prank(_treasury);
-            beadz.transfer(a, 500e18); // enough to redeem in lots
+            beadz.transfer(a, perActor);
         }
     }
 
@@ -54,6 +56,18 @@ contract BeadzHandler is Test {
         beadz.claim();
     }
 
+    /// @dev Returns a bounded portion of an actor's balance to the claim pile, refilling it (and,
+    ///      via `hasClaimed` reset, reopening that actor's own claim door) so claim() keeps having
+    ///      something to draw from instead of always early-returning once the pile drains.
+    function surrender(uint256 actorSeed, uint256 amount) external {
+        address a = _actor(actorSeed);
+        uint256 bal = beadz.balanceOf(a);
+        if (bal == 0) return;
+        amount = bound(amount, 1, bal);
+        vm.prank(a);
+        beadz.surrender(amount);
+    }
+
     function setDeadline(uint256 rawTarget) external {
         uint256 prev = beadz.redemptionDeadline();
         bool wasOpen = block.timestamp <= prev;
@@ -70,7 +84,6 @@ contract BeadzHandler is Test {
         uint256 nowDeadline = beadz.redemptionDeadline();
         // If the window was open and its deadline actually moved earlier, the guarantee broke.
         if (wasOpen && nowDeadline < prev) everShortenedWhileOpen = true;
-        lastDeadline = nowDeadline;
     }
 
     function warp(uint256 dt) external {
@@ -86,9 +99,11 @@ contract BeadzInvariants is Test {
     function setUp() public {
         address keeper = makeAddr("keeper");
         address treasury = makeAddr("treasury");
-        beadz = new Beadz(keeper, treasury, 47_318); // entire supply to treasury
+        Beadz probe = new Beadz(keeper, treasury, 0); // throwaway, just to read the genesis constant
+        uint256 airdropBeads = probe.GENESIS_BEADS() / 2; // partial airdrop: claim pile AND treasury both nonzero
+        beadz = new Beadz(keeper, treasury, airdropBeads);
         genesisSupply = beadz.totalSupply();
-        handler = new BeadzHandler(beadz, keeper, treasury);
+        handler = new BeadzHandler(beadz, keeper, treasury, airdropBeads);
         targetContract(address(handler));
     }
 
@@ -100,5 +115,11 @@ contract BeadzInvariants is Test {
     /// The redemption right cannot be rugged: an open window is never shortened.
     function invariant_openWindowNeverShortened() public view {
         assertEq(handler.everShortenedWhileOpen(), false);
+    }
+
+    /// Cross-check on the no-mint guarantee via an independently maintained ghost: the highest
+    /// totalSupply ever observed by the handler should never have risen past genesis.
+    function invariant_supplyNeverRoseAboveGenesis() public view {
+        assertEq(handler.maxSupplySeen(), genesisSupply);
     }
 }

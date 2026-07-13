@@ -107,9 +107,10 @@ The claim and proof-of-reserves front-end is hosted at
 
 ## Status
 
-**Pre-deploy.** The contract compiles cleanly. The Foundry test suite and Slither static analysis come
-before anything ships. Deployed contract addresses will be added here after the
-contract is deployed to Base and its source is verified on Basescan.
+**Pre-deploy.** The contract compiles cleanly and ships with a Foundry unit + fuzz/invariant test
+suite and a Slither static-analysis gate; see "Verifying the contract" above to run them yourself.
+Deployed contract addresses will be added here after the contract is deployed to Base and its source
+is verified on Basescan.
 
 ## Reserve facts
 
