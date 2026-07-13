@@ -69,3 +69,6 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+# Whitepaper build output
+whitepaper/out/
