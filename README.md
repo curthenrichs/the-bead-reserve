@@ -80,14 +80,27 @@ Built on OpenZeppelin ERC-20 v5.1.0, Solidity `0.8.24`.
 
 There is no `mint` in the surface. Fixed supply is confirmed by absence.
 
-## Repository contents
+## Repository layout
 
-| Path | What it is |
-|---|---|
-| `Beadz.sol` | The ERC-20 contract (compiles clean; test suite and static analysis in progress). |
-| `beadz-whitepaper.md` | Deadpan institutional whitepaper describing the design and positioning. |
+This repository has three independent parts:
 
-*(These will be added to the public tree as they clear review.)*
+| Path | What it is | Status |
+|---|---|---|
+| `contract/` | The BEADZ ERC-20 (Foundry project: build, tests, Slither) | Built |
+| `camera/` | Physical attestation / webcam infrastructure | Reserved |
+| `whitepaper/` | Typst source for the whitepaper | Reserved |
+
+`Reserved` paths exist in the tree as placeholders; their contents land as each subsystem clears review.
+
+### Verifying the contract
+
+```bash
+# clone with --recurse-submodules, or run: git submodule update --init --recursive
+cd contract
+forge build
+forge test              # unit + fuzz/invariant
+slither . --config-file slither.config.json   # static analysis
+```
 
 The claim and proof-of-reserves front-end is hosted at
 [beadz.half-built-robots.com](https://beadz.half-built-robots.com) and is not part of this repository.
