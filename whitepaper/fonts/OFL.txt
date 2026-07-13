@@ -1,7 +1,8 @@
 Fraunces © 2019 The Undercase Type Company (https://github.com/undercasetype/Fraunces)
-IBM Plex Mono © 2017 IBM Corp. (https://github.com/IBM/plex)
 
-Both families are licensed under the SIL Open Font License, Version 1.1.
+Fraunces is licensed under the SIL Open Font License, Version 1.1.
+(Roboto Mono, the other bundled family, is licensed under Apache-2.0 —
+see LICENSE-Roboto-Mono.txt.)
 
 -----------------------------------------------------------
 SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007

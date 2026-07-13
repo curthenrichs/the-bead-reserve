@@ -1,20 +1,22 @@
-// Theme for the BEADZ whitepaper: clean & typographic.
-// Fraunces (serif/display) + IBM Plex Mono (labels/tables/identifiers).
+// Theme for the BEADZ whitepaper: clean & typographic, tuned to match the
+// half-built-robots.com blog (amber accent, Roboto Mono) while staying a
+// readable, printable light document.
+// Fraunces (serif body) + Roboto Mono (headings/labels/tables/identifiers).
 
-#let ink       = rgb("#14261C")
-#let ink-soft  = rgb("#3B4A40")
-#let green     = rgb("#245C44")
-#let green-deep = rgb("#163A2C")
-#let gold      = rgb("#A6863F")
-#let hairline  = rgb("#B7B9A6")
+#let ink        = rgb("#1B140C")  // warm dark brown-black (blog background hue)
+#let ink-soft   = rgb("#6B5541")  // warm brown, secondary text
+#let amber      = rgb("#FFAA3C")  // blog primary — used for rules/accents
+#let amber-dark = rgb("#A8650F")  // darkened amber, legible on light for text
+#let paper      = rgb("#FAF7F1")  // warm near-white page background
+#let hairline   = rgb("#DDD3C4")  // subtle warm rule (footer)
 
 #let serif = "Fraunces"
-#let mono  = "IBM Plex Mono"
+#let mono  = "Roboto Mono"
 
 // Mono uppercase tracked label (section eyebrows, metadata).
 #let plabel(body) = text(
-  font: mono, size: 8.5pt, weight: "semibold",
-  tracking: 0.18em, fill: green,
+  font: mono, size: 8pt, weight: "medium",
+  tracking: 0.18em, fill: amber-dark,
 )[#upper(body)]
 
 // Two-column parameter table (Parameter | Value). `rows` is an array of
@@ -24,21 +26,22 @@
   stroke: none,
   inset: (x: 0pt, y: 7pt),
   align: (left, right),
-  table.hline(stroke: 0.75pt + green-deep),
+  table.hline(stroke: 1pt + amber),
   ..rows.map(((k, v)) => (
     text(fill: ink)[#k],
-    text(font: mono, size: 9.5pt, fill: ink, hyphenate: false)[#v],
+    text(font: mono, size: 9pt, fill: ink, hyphenate: false)[#v],
   )).flatten(),
-  table.hline(stroke: 0.75pt + green-deep),
+  table.hline(stroke: 1pt + amber),
 )
 
 #let whitepaper(title: "", title-lines: none, subtitle: "", office: "", series: "", doc) = {
   set document(title: title)
   set page(
     paper: "a4",
+    fill: paper,
     margin: (x: 2.4cm, top: 2.6cm, bottom: 2.6cm),
     footer: context {
-      set text(font: mono, size: 7.5pt, fill: ink-soft, tracking: 0.08em)
+      set text(font: mono, size: 7pt, fill: ink-soft, tracking: 0.08em)
       line(length: 100%, stroke: 0.5pt + hairline)
       v(4pt)
       grid(
@@ -57,22 +60,26 @@
   // Literal section numbers live in the prose (matching the source), so
   // Typst's own heading numbering is disabled.
   set heading(numbering: none)
-  show heading: set text(font: serif, fill: ink)
+  // Headings in Roboto Mono (the blog's face) — level 1 gets a short amber
+  // underline for the terminal accent; level 2 is set in darkened amber.
+  show heading: set text(font: mono, fill: ink)
   show heading.where(level: 1): it => {
-    v(1.1em)
-    block(text(size: 15pt, weight: "semibold", it.body))
-    v(0.2em)
+    v(1.2em)
+    block(text(size: 13pt, weight: "bold", it.body))
+    v(3.5pt)
+    line(length: 2.4em, stroke: 1.5pt + amber)
+    v(0.3em)
   }
   show heading.where(level: 2): it => {
-    v(0.6em)
-    block(text(size: 11.5pt, weight: "semibold", fill: green-deep, it.body))
+    v(0.7em)
+    block(text(size: 10.5pt, weight: "bold", fill: amber-dark, it.body))
   }
 
-  show link: set text(fill: green)
+  show link: set text(fill: amber-dark)
 
-  // Blockquote: green rule + italic (for the CRO / audit lines).
+  // Blockquote: amber rule + italic (for the CRO / audit lines).
   show quote.where(block: true): it => block(
-    inset: (left: 12pt), stroke: (left: 2pt + green),
+    inset: (left: 12pt), stroke: (left: 2pt + amber),
   )[#set text(style: "italic", fill: ink-soft); #it.body]
 
   // Title block ------------------------------------------------------------
@@ -82,18 +89,18 @@
     // Title: ragged (no justification), no hyphenation, with deliberate line
     // breaks via `title-lines` so a long title never leaves a lone syllable.
     block({
-      set par(justify: false, leading: 0.34em)
-      set text(font: serif, size: 22pt, weight: "semibold", hyphenate: false)
+      set par(justify: false, leading: 0.4em)
+      set text(font: mono, size: 17pt, weight: "bold", hyphenate: false)
       if title-lines != none { title-lines.join(linebreak()) } else { title }
     })
     if subtitle != "" {
-      v(6pt)
-      block(text(font: serif, size: 13pt, style: "italic", fill: green)[#subtitle])
+      v(7pt)
+      block(text(font: serif, size: 13pt, style: "italic", fill: amber-dark)[#subtitle])
     }
-    v(8pt)
-    text(font: mono, size: 8.5pt, fill: ink-soft, tracking: 0.14em)[#upper(series)]
-    v(6pt)
-    line(length: 100%, stroke: 0.75pt + green-deep)
+    v(9pt)
+    text(font: mono, size: 8pt, fill: ink-soft, tracking: 0.14em)[#upper(series)]
+    v(7pt)
+    line(length: 100%, stroke: 1pt + amber)
     v(14pt)
   }
 

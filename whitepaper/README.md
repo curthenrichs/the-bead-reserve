@@ -1,7 +1,9 @@
 # BEADZ Whitepaper (Typst)
 
-Source for the BEADZ whitepaper PDF. Clean, typographic A4 rendering built with
-[Typst](https://typst.app).
+Source for the BEADZ whitepaper PDF. A readable, printable A4 rendering built
+with [Typst](https://typst.app), styled to match the
+[half-built-robots.com](https://half-built-robots.com) blog it's hosted on:
+amber accents and Roboto Mono headings over a Fraunces serif body.
 
 ## Build
 
@@ -22,10 +24,10 @@ rebuilds. The build uses `--font-path fonts`, so no font installation is needed.
 
 ## Fonts & license
 
-Bundled fonts are third-party assets under the SIL Open Font License 1.1
-(`fonts/OFL.txt`); redistribution is permitted:
+Bundled fonts are third-party assets; both licenses permit redistribution:
 
-- **Fraunces** — The Undercase Type Company
-- **IBM Plex Mono** — IBM Corp.
+- **Fraunces** (serif body) — The Undercase Type Company — SIL OFL 1.1 (`fonts/OFL.txt`)
+- **Roboto Mono** (headings, labels, tables) — Google — Apache-2.0 (`fonts/LICENSE-Roboto-Mono.txt`)
 
-Re-download with `fonts/fetch-fonts.sh` (fetches from the fontsource CDN).
+Roboto Mono matches the blog, which is set in Roboto Mono. Re-download both
+with `fonts/fetch-fonts.sh` (fetches from the fontsource CDN).
