@@ -1,7 +1,8 @@
 // Theme for the BEADZ whitepaper: clean & typographic, tuned to match the
 // half-built-robots.com blog (amber accent, Roboto Mono) while staying a
 // readable, printable light document.
-// Fraunces (serif body) + Roboto Mono (headings/labels/tables/identifiers).
+// Roboto Serif (body) + Roboto Mono (headings/labels/tables/identifiers) —
+// a single type family, matching the blog and reading cleanly at text sizes.
 
 #let ink        = rgb("#1B140C")  // warm dark brown-black (blog background hue)
 #let ink-soft   = rgb("#6B5541")  // warm brown, secondary text
@@ -10,7 +11,7 @@
 #let paper      = rgb("#FAF7F1")  // warm near-white page background
 #let hairline   = rgb("#DDD3C4")  // subtle warm rule (footer)
 
-#let serif = "Fraunces"
+#let serif = "Roboto Serif"
 #let mono  = "Roboto Mono"
 
 // Mono uppercase tracked label (section eyebrows, metadata).

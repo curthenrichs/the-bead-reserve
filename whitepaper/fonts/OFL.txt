@@ -1,6 +1,6 @@
-Fraunces © 2019 The Undercase Type Company (https://github.com/undercasetype/Fraunces)
+Roboto Serif © 2020 The Roboto Serif Project Authors (https://github.com/googlefonts/RobotoSerif)
 
-Fraunces is licensed under the SIL Open Font License, Version 1.1.
+Roboto Serif is licensed under the SIL Open Font License, Version 1.1.
 (Roboto Mono, the other bundled family, is licensed under Apache-2.0 —
 see LICENSE-Roboto-Mono.txt.)
 

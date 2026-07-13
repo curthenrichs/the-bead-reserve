@@ -3,7 +3,7 @@
 Source for the BEADZ whitepaper PDF. A readable, printable A4 rendering built
 with [Typst](https://typst.app), styled to match the
 [half-built-robots.com](https://half-built-robots.com) blog it's hosted on:
-amber accents and Roboto Mono headings over a Fraunces serif body.
+amber accents and Roboto Mono headings over a Roboto Serif body.
 
 ## Build
 
@@ -26,8 +26,9 @@ rebuilds. The build uses `--font-path fonts`, so no font installation is needed.
 
 Bundled fonts are third-party assets; both licenses permit redistribution:
 
-- **Fraunces** (serif body) — The Undercase Type Company — SIL OFL 1.1 (`fonts/OFL.txt`)
+- **Roboto Serif** (body) — Google — SIL OFL 1.1 (`fonts/OFL.txt`)
 - **Roboto Mono** (headings, labels, tables) — Google — Apache-2.0 (`fonts/LICENSE-Roboto-Mono.txt`)
 
-Roboto Mono matches the blog, which is set in Roboto Mono. Re-download both
-with `fonts/fetch-fonts.sh` (fetches from the fontsource CDN).
+Both are from the Roboto family; Roboto Mono matches the blog, which is set in
+Roboto Mono. Re-download both with `fonts/fetch-fonts.sh` (fetches from the
+fontsource CDN).
