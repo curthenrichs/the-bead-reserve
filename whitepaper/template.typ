@@ -49,7 +49,9 @@
     },
   )
 
-  set text(font: serif, size: 10.5pt, fill: ink, lang: "en")
+  // Strongly penalize "runts" (a last line holding a single short word) so
+  // the justified line-breaker pulls the trailing word up onto the prior line.
+  set text(font: serif, size: 10.5pt, fill: ink, lang: "en", costs: (runt: 800%))
   set par(justify: true, leading: 0.68em, spacing: 1.05em)
 
   // Literal section numbers live in the prose (matching the source), so
