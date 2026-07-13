@@ -20,14 +20,14 @@
 // Two-column parameter table (Parameter | Value). `rows` is an array of
 // (label, value) pairs.
 #let param-table(rows) = table(
-  columns: (1fr, 1fr),
+  columns: (0.8fr, 1.2fr),
   stroke: none,
   inset: (x: 0pt, y: 7pt),
   align: (left, right),
   table.hline(stroke: 0.75pt + green-deep),
   ..rows.map(((k, v)) => (
     text(fill: ink)[#k],
-    text(font: mono, size: 9.5pt, fill: ink)[#v],
+    text(font: mono, size: 9.5pt, fill: ink, hyphenate: false)[#v],
   )).flatten(),
   table.hline(stroke: 0.75pt + green-deep),
 )
