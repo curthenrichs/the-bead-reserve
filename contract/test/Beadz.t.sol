@@ -204,11 +204,11 @@ contract BeadzTest is Test {
     function test_collateralizationBps_partiallyReserved() public {
         vm.prank(keeper);
         beadz.attestBeadCount(40_000);
-        // Compute the expected ratio from the getters rather than hardcoding a literal that
-        // would go stale if GENESIS_BEADS or the attested count ever changed.
-        uint256 attested = beadz.attestedBeads();
-        uint256 outstanding = beadz.totalSupply() / 1e18;
-        assertEq(beadz.collateralizationBps(), (attested * 10_000) / outstanding);
+        // Independent, hand-derived expectation (not recomputed from the contract's own
+        // formula) so this test can actually catch an operator-ordering bug inside
+        // collateralizationBps(), e.g. attested/outstanding*10000 would wrongly floor to 0.
+        // 40_000 * 10_000 / 47_318 = 8453 (floor)
+        assertEq(beadz.collateralizationBps(), 8453);
     }
 
     function test_collateralizationBps_emptySupplyReturnsMax() public {

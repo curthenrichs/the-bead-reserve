@@ -45,7 +45,7 @@ contract BeadzHandler is Test {
         if (block.timestamp > beadz.redemptionDeadline()) return;
         vm.prank(a);
         beadz.redeem(amount, "fuzz");
-        if (beadz.totalSupply() > maxSupplySeen) maxSupplySeen = beadz.totalSupply();
+        _trackMaxSupply();
     }
 
     function claim(uint256 actorSeed) external {
@@ -54,6 +54,7 @@ contract BeadzHandler is Test {
         if (beadz.balanceOf(address(beadz)) < beadz.CLAIM_AMOUNT()) return;
         vm.prank(a);
         beadz.claim();
+        _trackMaxSupply();
     }
 
     /// @dev Returns a bounded portion of an actor's balance to the claim pile, refilling it (and,
@@ -66,6 +67,14 @@ contract BeadzHandler is Test {
         amount = bound(amount, 1, bal);
         vm.prank(a);
         beadz.surrender(amount);
+        _trackMaxSupply();
+    }
+
+    /// @dev Updates the ghost after any handler action that could touch supply, so
+    ///      `maxSupplySeen` genuinely reflects the highest totalSupply observed on any path
+    ///      (not just redeem()).
+    function _trackMaxSupply() internal {
+        if (beadz.totalSupply() > maxSupplySeen) maxSupplySeen = beadz.totalSupply();
     }
 
     function setDeadline(uint256 rawTarget) external {
@@ -88,6 +97,7 @@ contract BeadzHandler is Test {
 
     function warp(uint256 dt) external {
         vm.warp(block.timestamp + bound(dt, 1, 30 days));
+        _trackMaxSupply();
     }
 }
 
@@ -99,8 +109,13 @@ contract BeadzInvariants is Test {
     function setUp() public {
         address keeper = makeAddr("keeper");
         address treasury = makeAddr("treasury");
-        Beadz probe = new Beadz(keeper, treasury, 0); // throwaway, just to read the genesis constant
-        uint256 airdropBeads = probe.GENESIS_BEADS() / 2; // partial airdrop: claim pile AND treasury both nonzero
+        // `Beadz.GENESIS_BEADS` (bare type-qualified access to another contract's public
+        // constant) doesn't compile under this solc/forge setup, and reading it off an instance
+        // would need one before `beadz` itself exists — i.e. exactly the throwaway `probe` this
+        // fix removes. So the split below is a literal mirroring GENESIS_BEADS (47_318) in
+        // src/Beadz.sol; every other read of the constant in this file (see `genesisSupply`
+        // just below) comes from the one real, permanently-used `beadz` instance, not a probe.
+        uint256 airdropBeads = 23_659; // GENESIS_BEADS / 2 = 47_318 / 2 (floor): claim pile AND treasury both nonzero
         beadz = new Beadz(keeper, treasury, airdropBeads);
         genesisSupply = beadz.totalSupply();
         handler = new BeadzHandler(beadz, keeper, treasury, airdropBeads);
