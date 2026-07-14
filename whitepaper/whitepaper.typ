@@ -222,8 +222,9 @@ on-chain powers are deliberately confined to:
 - extending or reopening the redemption window
   (`setRedemptionDeadline`), a power that can only ever widen access,
   never remove it; and
-- rotating its own key (`transferVaultKeeper`), including to the zero
-  address to freeze the role permanently.
+- rotating its own key (`transferVaultKeeper`), where the new key must be
+  confirmed twice to prevent a mistype, or retiring the role permanently
+  through a separate, deliberate freeze.
 
 The Vault Keeper *cannot* mint, move, freeze, or seize any holder's
 tokens. The role holds no power over balances and is therefore operable
