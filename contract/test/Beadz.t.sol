@@ -116,7 +116,7 @@ contract BeadzTest is Test {
         b.transfer(alice, minRedemption + 1e18);
         vm.prank(alice);
         vm.expectRevert("BEADZ: whole beads only");
-        b.redeem(minRedemption + 5e17, "x"); // 100.5 beads
+        b.redeem(minRedemption + 5e17, "x"); // 1.5 beads
     }
 
     function test_redeem_revertsWhenWindowClosed() public {

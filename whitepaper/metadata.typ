@@ -6,7 +6,7 @@
   decimals: "18",
   genesis: "47,318",
   chain: "Base",
-  min_redemption: "100",
+  min_redemption: "1",
   series: "Series A · 2026 · Draft for public comment",
   office: "Office of the Vault Keeper — Coordinates Undisclosed",
   contract: "to be published on deployment and verified on Basescan.",

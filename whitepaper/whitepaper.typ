@@ -7,6 +7,7 @@
   subtitle: "A Technical and Monetary Whitepaper of The Bead Reserve",
   office: meta.office,
   series: meta.series,
+  draft: true,
 )
 
 = Abstract
@@ -31,7 +32,7 @@ exist.
 
 #meta.symbol collapses this chain to a single physical object a person
 can see. The reserve is a jar. The jar is in a box. The box has a camera
-on it. There is no custodian, no rehypothecation, and no maturity
+in it pointed at the jar. There is no custodian, no rehypothecation, and no maturity
 mismatch, because beads do not earn yield and cannot be lent out, a
 property we consider a feature.
 
@@ -167,13 +168,12 @@ ability. The Reserve represents that this mapping is exact and declines
 to elaborate on how it is maintained.
 
 == 6.2 Minimum redemption lot
-Redemption is available only in lots of *#meta.min_redemption beads or
-greater* (the "creation unit"). This mirrors the authorized-participant
-model of exchange-traded funds, in which shares are created and redeemed
-only in large blocks, and has the additional effect that the cost of the
-certified-mail ceremony exceeds the value of the beads by several orders
-of magnitude. Redemption is thus a right that no rational holder
-exercises, which is precisely what keeps the reserve stable.
+Redemption is available in lots of *#meta.min_redemption bead or
+greater* (the "creation unit"). Because the cost of the certified-mail
+ceremony exceeds the value of a single bead by several orders of
+magnitude, redemption — though unrestricted in size — is a right that no
+rational holder exercises, which is precisely what keeps the reserve
+stable.
 
 == 6.3 Two-legged settlement
 A redemption has a *crypto leg* and a *postal leg*. The crypto leg is the
@@ -359,7 +359,7 @@ The jar is on camera. The count is final. One bead is one bead.
 
 / Bead-wei: the smallest divisible unit of BEADZ, 10#super[−#meta.decimals] of a bead. Non-redeemable in practice.
 / The Fault: the cardboard box containing the reserve jar. Named for a vault that is also a structural flaw.
-/ Creation unit: the minimum redemption lot (#meta.min_redemption beads), below which physical redemption is disallowed.
+/ Creation unit: the minimum redemption lot (#meta.min_redemption bead), below which physical redemption is disallowed.
 / Genesis Count: the one-time hand-count of the jar at deployment, defining total supply.
 / The ratchet: the property that supply and reserve can only decrease, via redemption.
 
@@ -370,7 +370,7 @@ entry points:
 - `claim()`: receive one bead from the genesis mint (one per address).
 - `surrender(amount)`: return #meta.symbol to the open-claim pile for
   redistribution (does not burn; reopens your claim).
-- `redeem(amount, shippingRef)`: burn ≥#meta.min_redemption beads to
+- `redeem(amount, shippingRef)`: burn ≥#meta.min_redemption bead to
   request physical shipment, while the redemption window is open.
   `shippingRef` is an off-chain reference only; no postal address is
   ever written on-chain.

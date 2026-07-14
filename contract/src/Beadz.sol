@@ -51,9 +51,10 @@ contract Beadz is ERC20 {
     /// @notice Beads distributed per claim: one (1) whole bead.
     uint256 public constant CLAIM_AMOUNT = 1e18;
 
-    /// @notice Minimum redemption lot (a "creation unit"). Redeeming below this is disallowed so
-    ///         that the certified-mail ceremony is never rationally worth exercising.
-    uint256 public constant MIN_REDEMPTION = 100e18;
+    /// @notice Minimum redemption lot (a "creation unit"): a single whole bead. The certified-mail
+    ///         ceremony still costs orders of magnitude more than one bead, so it is never rationally
+    ///         worth exercising.
+    uint256 public constant MIN_REDEMPTION = 1e18;
 
     /// @notice Maximum time a single extension or reopen may add — roughly one year. Bounds each action
     ///         so the redemption obligation can only ever be renewed in modest, deliberate steps.

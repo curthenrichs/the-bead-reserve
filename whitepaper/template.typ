@@ -35,12 +35,25 @@
   table.hline(stroke: 1pt + amber),
 )
 
-#let whitepaper(title: "", title-lines: none, subtitle: "", office: "", series: "", doc) = {
+// Diagonal "DRAFT / DO NOT DISTRIBUTE" watermark, sat behind the text on
+// every page. Faint amber so it reads as a stamp without fighting the body.
+#let draft-watermark = place(center + horizon, rotate(-30deg, align(center,
+  stack(
+    spacing: 10pt,
+    text(font: mono, size: 96pt, weight: "bold", tracking: 0.05em,
+      fill: amber.transparentize(88%))[DRAFT],
+    text(font: mono, size: 20pt, weight: "bold", tracking: 0.32em,
+      fill: amber-dark.transparentize(80%))[DO NOT DISTRIBUTE],
+  ),
+)))
+
+#let whitepaper(title: "", title-lines: none, subtitle: "", office: "", series: "", draft: false, doc) = {
   set document(title: title)
   set page(
     paper: "a4",
     fill: paper,
     margin: (x: 2.4cm, top: 2.6cm, bottom: 2.6cm),
+    background: if draft { draft-watermark },
     footer: context {
       set text(font: mono, size: 7pt, fill: ink-soft, tracking: 0.08em)
       line(length: 100%, stroke: 0.5pt + hairline)
