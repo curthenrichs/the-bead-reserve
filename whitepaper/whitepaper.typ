@@ -42,7 +42,7 @@ and the deliberately minimal governance that surrounds it.
 = 2. The Reserve
 The reserve consists of *#meta.genesis* glass seed beads (nominal; see §3
 on the genesis count) of mixed color, held loose in one (1) standard
-mason jar. The jar is stored inside a cardboard box (the "Fault") at an
+glass jar. The jar is stored inside a cardboard box (the "Fault") at an
 undisclosed interior location. The beads are indivisible; the jar is not
 insured; the box is not fireproof. These limitations are disclosed in the
 interest of the radical transparency the reserve is designed to provide.
