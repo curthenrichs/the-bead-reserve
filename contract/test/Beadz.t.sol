@@ -69,6 +69,19 @@ contract BeadzTest is Test {
         beadz.surrender(0);
     }
 
+    function test_surrender_dustDoesNotReopenClaim() public {
+        vm.prank(alice);
+        beadz.claim();
+        // Surrendering 1 wei (dust, far less than a whole bead) must NOT reopen alice's claim.
+        // Otherwise claim() -> surrender(1) -> claim() -> ... could drain the whole pile to one
+        // address while alice keeps almost the entire bead each round.
+        vm.prank(alice);
+        beadz.surrender(1);
+        vm.prank(alice);
+        vm.expectRevert("BEADZ: address already claimed");
+        beadz.claim();
+    }
+
     // --- redeem ---
 
     function test_redeem_burnsSupply() public {

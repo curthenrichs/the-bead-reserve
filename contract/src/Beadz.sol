@@ -22,9 +22,13 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
  *            balance. It is therefore safe to operate as a low-stakes hot key.
  *          - Redemption BURNS tokens, so outstanding BEADZ always equals the beads still owed —
  *            a one-way ratchet toward an empty jar.
- *          - Redemption is time-boxed. The Keeper may only ever WIDEN access to it: extend an open
- *            window outward, or reopen a lapsed one, by at most ~1 year per action. It can never
- *            shorten a window that is currently open, so the redemption right cannot be rugged.
+ *          - Redemption is time-boxed and MAY LAPSE if the Keeper does not renew it — that lapse is
+ *            an intended feature of the design, not a failure mode. What the Keeper can never do is
+ *            narrow it: every action the Keeper may take only ever WIDENS access — extending an open
+ *            window outward, or reopening a lapsed one, by at most ~1 year per action. The one
+ *            guarantee is that a redemption right, once GRANTED (i.e. a currently-open window), can
+ *            never be taken away from a holder able to exercise it: an open window can only lapse
+ *            through the ordinary passage of time, never be shortened or revoked early by the Keeper.
  *          - There is NO admin override. A lost or compromised Keeper key cannot be recovered or
  *            forcibly reclaimed through the contract. Because the Keeper controls no value, the
  *            intended response to compromise is REDEPLOYMENT of a new canonical contract, not rescue.
@@ -65,7 +69,7 @@ contract Beadz is ERC20 {
     /// @notice Timestamp of the most recent attestation.
     uint256 public lastAttestation;
 
-    /// @notice One claim per address.
+    /// @notice One live claim per address at a time (surrender a whole bead to re-open).
     mapping(address => bool) public hasClaimed;
 
     uint256 private _claimCounter;
@@ -141,13 +145,18 @@ contract Beadz is ERC20 {
 
     /**
      * @notice Surrender BEADZ back to the open-claim pile for redistribution to others.
-     * @dev    Returns the tokens to the contract (does NOT burn — supply and reserve are unchanged)
-     *         and re-enables the sender's `claim()`, so the surrendered beads can flow to new holders.
-     *         Why a holder would relinquish a free, valueless bead is not the Reserve's concern.
+     * @dev    Returns the tokens to the contract (does NOT burn — supply and reserve are unchanged).
+     *         Returning at least one whole bead (>= CLAIM_AMOUNT) re-enables the sender's own
+     *         `claim()`, so a holder can give their bead back and claim again later. Surrendering
+     *         less than a whole bead is treated as a donation to the pile only — it does NOT
+     *         reopen the claim, which prevents draining the pile via claim() -> surrender(dust) ->
+     *         claim() -> ... loops that would otherwise let one address hoover up the whole reserve.
      */
     function surrender(uint256 amount) external {
         require(amount > 0, "BEADZ: nothing to surrender");
-        hasClaimed[msg.sender] = false; // the pile replenishes; the door reopens for this address
+        // Only a full-bead-or-more return reopens the door; dust below CLAIM_AMOUNT is a
+        // one-way donation that cannot be used to re-trigger claim().
+        if (amount >= CLAIM_AMOUNT) hasClaimed[msg.sender] = false;
         _transfer(msg.sender, address(this), amount);
         emit BeadsSurrendered(msg.sender, amount);
     }

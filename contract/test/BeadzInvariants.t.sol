@@ -57,9 +57,10 @@ contract BeadzHandler is Test {
         _trackMaxSupply();
     }
 
-    /// @dev Returns a bounded portion of an actor's balance to the claim pile, refilling it (and,
-    ///      via `hasClaimed` reset, reopening that actor's own claim door) so claim() keeps having
-    ///      something to draw from instead of always early-returning once the pile drains.
+    /// @dev Returns a bounded portion of an actor's balance to the claim pile, refilling it so
+    ///      claim() keeps having something to draw from instead of always early-returning once the
+    ///      pile drains. Only reopens the actor's own claim door (via `hasClaimed` reset) when the
+    ///      returned amount is a whole bead or more; sub-bead amounts just donate to the pile.
     function surrender(uint256 actorSeed, uint256 amount) external {
         address a = _actor(actorSeed);
         uint256 bal = beadz.balanceOf(a);
