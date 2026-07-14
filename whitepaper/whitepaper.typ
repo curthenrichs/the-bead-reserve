@@ -354,7 +354,7 @@ contradiction but an achievement.
 
 The jar is on camera. The count is final. One bead is one bead.
 
-= Appendix A — Glossary
+= Appendix A: Glossary
 
 / Bead-wei: the smallest divisible unit of BEADZ, 10#super[−#meta.decimals] of a bead. Non-redeemable in practice.
 / The Fault: the cardboard box containing the reserve jar. Named for a vault that is also a structural flaw.
@@ -362,25 +362,25 @@ The jar is on camera. The count is final. One bead is one bead.
 / Genesis Count: the one-time hand-count of the jar at deployment, defining total supply.
 / The ratchet: the property that supply and reserve can only decrease, via redemption.
 
-= Appendix B — Contract Summary
+= Appendix B: Contract Summary
 Deployed on #meta.chain. Built on OpenZeppelin's audited ERC-20. Key
 entry points:
 
-- `claim()` — receive one bead from the genesis mint (one per address).
-- `surrender(amount)` — return #meta.symbol to the open-claim pile for
+- `claim()`: receive one bead from the genesis mint (one per address).
+- `surrender(amount)`: return #meta.symbol to the open-claim pile for
   redistribution (does not burn; reopens your claim).
-- `redeem(amount, shippingRef)` — burn ≥#meta.min_redemption beads to
+- `redeem(amount, shippingRef)`: burn ≥#meta.min_redemption beads to
   request physical shipment, while the redemption window is open.
   `shippingRef` is an off-chain reference only; no postal address is
   ever written on-chain.
-- `redemptionOpen()` / `redemptionDeadline` — current redemption-window
+- `redemptionOpen()` / `redemptionDeadline`: current redemption-window
   status.
-- `setRedemptionDeadline(newDeadline)` — Vault Keeper only. Extends an
+- `setRedemptionDeadline(newDeadline)`: Vault Keeper only. Extends an
   open window or reopens a lapsed one, capped at ~1 year per action;
   cannot shorten an open window.
-- `attestBeadCount(beads)` / `acknowledgeRedemption(...)` — Vault Keeper
+- `attestBeadCount(beads)` / `acknowledgeRedemption(...)`: Vault Keeper
   attestation and shipment logs.
-- `collateralizationBps()` — attested beads vs. outstanding supply, in
+- `collateralizationBps()`: attested beads vs. outstanding supply, in
   basis points.
 
 Contract address: #emph(meta.contract)
