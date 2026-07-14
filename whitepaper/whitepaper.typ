@@ -240,7 +240,7 @@ This is deliberate: a backdoor able to rescue the Keeper would be a
 larger attack surface than the powerless role it protects.
 
 Because the Keeper controls no tokens, a compromise or loss costs no
-value — only continuity. The response is to *redeploy*: a fresh contract
+value: only continuity. The response is to *redeploy*: a fresh contract
 is published with a new Keeper, and the Reserve designates it the
 canonical #meta.symbol. For holders, this means:
 
