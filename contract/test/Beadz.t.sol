@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import {Test} from "forge-std/Test.sol";
 import {Beadz} from "../src/Beadz.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
 contract BeadzTest is Test {
     Beadz internal beadz;
@@ -145,11 +146,38 @@ contract BeadzTest is Test {
 
     function test_transferVaultKeeper_rotatesKey() public {
         vm.prank(keeper);
-        beadz.transferVaultKeeper(bob);
+        beadz.transferVaultKeeper(Beadz.KeeperAction.Rotate, bob, bob);
         assertEq(beadz.vaultKeeper(), bob);
         vm.prank(bob);
         beadz.attestBeadCount(7); // new keeper works
         assertEq(beadz.attestedBeads(), 7);
+    }
+
+    function test_transferVaultKeeper_rotateMismatchReverts() public {
+        vm.prank(keeper);
+        vm.expectRevert("BEADZ: keeper address mismatch");
+        beadz.transferVaultKeeper(Beadz.KeeperAction.Rotate, bob, alice);
+    }
+
+    function test_transferVaultKeeper_rotateToZeroReverts() public {
+        vm.prank(keeper);
+        vm.expectRevert("BEADZ: rotate requires a non-zero keeper (use Freeze to retire)");
+        beadz.transferVaultKeeper(Beadz.KeeperAction.Rotate, address(0), address(0));
+    }
+
+    function test_transferVaultKeeper_freezePermanentlyDisablesKeeper() public {
+        vm.prank(keeper);
+        beadz.transferVaultKeeper(Beadz.KeeperAction.Freeze, address(0), address(0));
+        assertEq(beadz.vaultKeeper(), address(0));
+        vm.prank(keeper);
+        vm.expectRevert("BEADZ: caller is not the Vault Keeper");
+        beadz.attestBeadCount(1);
+    }
+
+    function test_transferVaultKeeper_freezeRequiresBothZero() public {
+        vm.prank(keeper);
+        vm.expectRevert("BEADZ: freeze takes the zero address in both slots");
+        beadz.transferVaultKeeper(Beadz.KeeperAction.Freeze, bob, address(0));
     }
 
     // --- setRedemptionDeadline ---
@@ -231,6 +259,17 @@ contract BeadzTest is Test {
         b.redeem(totalSupply, "empty-out");
         assertEq(b.totalSupply(), 0);
         assertEq(b.collateralizationBps(), type(uint256).max);
+    }
+
+    function test_collateralizationBps_noOverflowOnHugeAttestation() public {
+        // default setUp(): supply == GENESIS_BEADS, outstanding == 47_318.
+        vm.prank(keeper);
+        beadz.attestBeadCount(type(uint256).max);
+        // Independently computed expectation (via OZ Math.mulDiv, not the contract's own
+        // formula) so this test actually proves the huge-attestation path no longer reverts
+        // AND produces the mathematically correct floor(a*b/d), not just "didn't revert".
+        uint256 expected = Math.mulDiv(type(uint256).max, 10_000, 47_318);
+        assertEq(beadz.collateralizationBps(), expected);
     }
 
     // --- setRedemptionDeadline (additional guards) ---

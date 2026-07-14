@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
 /**
  * @title  BEADZ — The Bead Reserve
@@ -37,6 +38,13 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
  *         claim / redeem / attest paths, and run static analysis before deployment.
  */
 contract Beadz is ERC20 {
+    /// @notice The two allowed operations on the Vault Keeper role: Rotate hands the role to a new
+    ///         key (requiring double-entry confirmation); Freeze permanently retires it.
+    enum KeeperAction {
+        Rotate,
+        Freeze
+    }
+
     /// @notice Genesis supply, denominated in whole beads. Equal to the physical count in the Fault.
     uint256 public constant GENESIS_BEADS = 47_318;
 
@@ -228,10 +236,36 @@ contract Beadz is ERC20 {
         }
     }
 
-    /// @notice Rotate the Keeper hot key. Set to address(0) to permanently freeze attestations.
-    function transferVaultKeeper(address newKeeper) external onlyKeeper {
-        emit VaultKeeperTransferred(vaultKeeper, newKeeper);
-        vaultKeeper = newKeeper;
+    /**
+     * @notice Rotate the Keeper hot key, or permanently freeze the role.
+     * @param  action        Rotate to hand the role to `newKeeper`; Freeze to permanently retire it.
+     * @param  newKeeper     Rotate: the incoming keeper address, repeated in `confirmKeeper` as a
+     *                       typo check (a mistyped address here would otherwise brick the role on a
+     *                       key nobody holds). Freeze: must be `address(0)`.
+     * @param  confirmKeeper Rotate: must exactly equal `newKeeper` (double-entry confirmation).
+     *                       Freeze: must be `address(0)`.
+     * @dev    Rotate requires a non-zero key repeated in both slots — the double entry exists so a
+     *         single fat-fingered address can never silently strand the role on an address no one
+     *         controls; a mismatch reverts instead of committing. Because Rotate rejects the zero
+     *         address outright, a rotation can never *accidentally* zero out the keeper.
+     *
+     *         Freeze is the separate, explicit, irreversible path to retiring the role: both slots
+     *         must be the zero address, so it cannot be triggered by a typo either. Once frozen,
+     *         `vaultKeeper` is permanently `address(0)`, `onlyKeeper` can never pass again (no
+     *         address is `address(0)`), and attestations and redemption-window renewals cease
+     *         forever — there is no path back from Freeze.
+     */
+    function transferVaultKeeper(KeeperAction action, address newKeeper, address confirmKeeper) external onlyKeeper {
+        if (action == KeeperAction.Freeze) {
+            require(newKeeper == address(0) && confirmKeeper == address(0), "BEADZ: freeze takes the zero address in both slots");
+            emit VaultKeeperTransferred(vaultKeeper, address(0));
+            vaultKeeper = address(0);
+        } else {
+            require(newKeeper != address(0), "BEADZ: rotate requires a non-zero keeper (use Freeze to retire)");
+            require(newKeeper == confirmKeeper, "BEADZ: keeper address mismatch");
+            emit VaultKeeperTransferred(vaultKeeper, newKeeper);
+            vaultKeeper = newKeeper;
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -252,6 +286,6 @@ contract Beadz is ERC20 {
     function collateralizationBps() external view returns (uint256) {
         uint256 outstanding = totalSupply() / 1e18;
         if (outstanding == 0) return type(uint256).max; // an empty Fault is vacuously reserved
-        return (attestedBeads * 10_000) / outstanding;
+        return Math.mulDiv(attestedBeads, 10_000, outstanding);
     }
 }
