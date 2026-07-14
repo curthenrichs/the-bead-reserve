@@ -55,7 +55,7 @@ therefore, like the token, a strictly non-increasing quantity.
 
 == 3.1 The genesis count
 At genesis, the beads were poured into the jar and counted once, by hand,
-in private. The resulting figure — the *Genesis Count* — was enshrined as
+in private. The resulting figure, the *Genesis Count*, was enshrined as
 total supply and is final. The Vault Keeper makes no representation that
 the Genesis Count is arithmetically correct, only that it is honestly
 reported. A hand-count of several tens of thousands of small beads is
@@ -347,10 +347,10 @@ will be notified if any occur.
 #meta.symbol demonstrates that the full apparatus of a reserve-backed
 digital bearer instrument (collateral, proof of reserves, redemption,
 settlement, and disciplined monetary policy) can be implemented
-honestly, cheaply, and in its entirety around an asset of no value. We
-submit that a system which is completely transparent, fully reserved,
-structurally incapable of inflation, and worth nothing is not a
-contradiction but an achievement.
+honestly, cheaply, and in its entirety around an asset of no value. A
+system which is completely transparent, fully reserved, structurally
+incapable of inflation, and worth nothing sounds like a contradiction. We
+submit that it is an achievement.
 
 The jar is on camera. The count is final. One bead is one bead.
 
