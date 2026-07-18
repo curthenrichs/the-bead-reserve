@@ -55,14 +55,14 @@ def push_frame(cfg: Config, frame: QueuedFrame, session: requests.Session) -> Pu
 
 def drain(cfg: Config, state: StateDir) -> dict:
     report = {"pushed": 0, "counter_seen": 0, "failed": False, "remaining": 0}
-    session = requests.Session()
-    for frame in state.pending()[: cfg.drain_batch_max]:
-        outcome = push_frame(cfg, frame, session)
-        if outcome is PushOutcome.FAIL:
-            report["failed"] = True
-            break
-        state.archive(frame)
-        key = "pushed" if outcome is PushOutcome.OK else "counter_seen"
-        report[key] += 1
+    with requests.Session() as session:
+        for frame in state.pending()[: cfg.drain_batch_max]:
+            outcome = push_frame(cfg, frame, session)
+            if outcome is PushOutcome.FAIL:
+                report["failed"] = True
+                break
+            state.archive(frame)
+            key = "pushed" if outcome is PushOutcome.OK else "counter_seen"
+            report[key] += 1
     report["remaining"] = len(state.pending())
     return report

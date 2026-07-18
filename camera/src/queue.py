@@ -78,7 +78,10 @@ class StateDir:
     def pending(self) -> list[QueuedFrame]:
         frames = []
         for json_path in self.queue_dir.glob("*.json"):
-            counter = int(json_path.stem)
+            try:
+                counter = int(json_path.stem)
+            except ValueError:
+                continue  # not a frame file (manual artifact); ignore
             jpg = self.queue_dir / f"{counter}.jpg"
             if not jpg.exists():
                 # Two crash shapes look like this: mid-enqueue (no jpg anywhere —

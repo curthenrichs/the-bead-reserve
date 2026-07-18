@@ -23,7 +23,9 @@ frame, re-hash it, and verify against the published public key.
    install -e ./camera`.
 3. Enable tmpfs `/tmp` (raw frames must not touch the SD card): `sudo cp
    /usr/share/systemd/tmp.mount /etc/systemd/system/ && sudo systemctl
-   enable --now tmp.mount`.
+   enable --now tmp.mount`. (The systemd path already gets a private
+   tmpfs-backed /tmp from PrivateTmp=yes; the host tmp.mount matters for
+   manual runs like smoke.sh.)
 4. `sudo mkdir -p /etc/beadz-camera`, `sudo cp camera/device.env.example
    /etc/beadz-camera/device.env`, fill in, `sudo chown beadz:beadz
    /etc/beadz-camera/device.env`, `sudo chmod 0600

@@ -44,6 +44,10 @@ class Config:
             x, y, w, h = (int(p) for p in parts)
         except ValueError as exc:
             raise ValueError("CROP_RECT must be 'x,y,w,h' (four integers)") from exc
+        try:
+            drain_batch_max = int(os.environ.get("DRAIN_BATCH_MAX") or 20)
+        except ValueError as exc:
+            raise ValueError("DRAIN_BATCH_MAX must be an integer") from exc
         return cls(
             ingest_url=os.environ["INGEST_URL"],
             hmac_secret=os.environ["HMAC_SECRET"],
@@ -51,5 +55,5 @@ class Config:
             crop_rect=(x, y, w, h),
             state_dir=Path(os.environ["STATE_DIR"]),
             key_path=Path(os.environ["ED25519_KEY_PATH"]),
-            drain_batch_max=int(os.environ.get("DRAIN_BATCH_MAX") or 20),
+            drain_batch_max=drain_batch_max,
         )

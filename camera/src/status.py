@@ -19,6 +19,8 @@ def update_status(state_root: Path, **fields) -> None:
         current = {}
     current.update(fields)
     current["updated_ts"] = int(time.time())
-    tmp = path.with_name(path.name + ".tmp")
+    # PID-unique tmp: capture-once and push-drain are separate processes that
+    # can update status.json concurrently (both timers fire at the top of the hour)
+    tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
     tmp.write_text(json.dumps(current, indent=2))
     os.replace(tmp, path)
