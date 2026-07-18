@@ -1,0 +1,20 @@
+[project]
+name = "beadz-camera"
+version = "0.1.0"
+description = "Fault-Cam 01 capture-and-sign pipeline (subsystem C)"
+requires-python = ">=3.11"
+dependencies = ["pynacl>=1.5", "Pillow>=10", "requests>=2.31", "python-dotenv>=1.0"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "responses>=0.25"]
+
+[project.scripts]
+beadz-camera = "beadz_camera.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"beadz_camera" = "src"}
+packages = ["beadz_camera"]
