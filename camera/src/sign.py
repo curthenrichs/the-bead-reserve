@@ -17,8 +17,9 @@ def generate_keypair(key_path: Path) -> str:
         raise FileExistsError(f"refusing to overwrite existing key: {key_path}")
     key_path.parent.mkdir(parents=True, exist_ok=True)
     key = SigningKey.generate()
-    key_path.write_text(key.encode().hex() + "\n")
-    os.chmod(key_path, 0o600)
+    fd = os.open(key_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+    with os.fdopen(fd, "w") as f:
+        f.write(key.encode().hex() + "\n")
     pub_hex = key.verify_key.encode().hex()
     key_path.with_suffix(".pub").write_text(pub_hex + "\n")
     return pub_hex
