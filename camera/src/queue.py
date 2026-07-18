@@ -81,7 +81,12 @@ class StateDir:
             counter = int(json_path.stem)
             jpg = self.queue_dir / f"{counter}.jpg"
             if not jpg.exists():
-                continue  # crash artifact; jpg-first ordering makes this benign
+                # Two crash shapes look like this: mid-enqueue (no jpg anywhere —
+                # benign, jpg-first ordering) or mid-archive (jpg already moved to
+                # archive/). For the latter, finish the interrupted move.
+                if (self.archive_dir / f"{counter}.jpg").exists():
+                    os.replace(json_path, self.archive_dir / json_path.name)
+                continue
             frames.append(
                 QueuedFrame(counter, jpg, json_path, json.loads(json_path.read_text()))
             )

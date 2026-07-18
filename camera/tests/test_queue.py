@@ -67,3 +67,12 @@ def test_archive_moves_both_files(state, tmp_path):
     assert state.pending() == []
     assert (state.root / "archive" / "1.jpg").exists()
     assert (state.root / "archive" / "1.json").exists()
+
+
+def test_pending_heals_crashed_archive(state, tmp_path):
+    _enqueue_frame(state, tmp_path, 1)
+    # simulate a crash between archive()'s two moves: jpg archived, json left behind
+    (state.root / "queue" / "1.jpg").rename(state.root / "archive" / "1.jpg")
+    assert state.pending() == []                          # not pushable
+    assert (state.root / "archive" / "1.json").exists()   # heal completed the move
+    assert not (state.root / "queue" / "1.json").exists()
