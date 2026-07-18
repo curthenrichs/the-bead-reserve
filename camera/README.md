@@ -21,11 +21,16 @@ frame, re-hash it, and verify against the published public key.
 1. Pi OS Lite 64-bit, `beadz` service user (in `video` group), `fswebcam`.
 2. Clone to `/opt/beadz-camera`; `python3 -m venv venv && venv/bin/pip
    install -e ./camera`.
-3. `cp camera/device.env.example /etc/beadz-camera/device.env`, fill in,
-   `chmod 0600`.
-4. Run `camera/smoke.sh` — it keygens (prints the public key: publish it),
-   seeds the counter, does one real capture+push, walks the independent
-   hash verification, and installs the timers.
+3. Enable tmpfs `/tmp` (raw frames must not touch the SD card): `sudo cp
+   /usr/share/systemd/tmp.mount /etc/systemd/system/ && sudo systemctl
+   enable --now tmp.mount`.
+4. `sudo mkdir -p /etc/beadz-camera`, `sudo cp camera/device.env.example
+   /etc/beadz-camera/device.env`, fill in, `sudo chown beadz:beadz
+   /etc/beadz-camera/device.env`, `sudo chmod 0600
+   /etc/beadz-camera/device.env`.
+5. Run `bash camera/smoke.sh` — it keygens (prints the public key: publish
+   it), seeds the counter, does one real capture+push, walks the
+   independent hash verification, and installs the timers.
 
 The device holds no chain key, listens on no ports, and pushes outbound
 TLS only. Raw (uncropped) frames never touch the SD card.

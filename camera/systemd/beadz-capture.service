@@ -10,6 +10,6 @@ SupplementaryGroups=video
 EnvironmentFile=/etc/beadz-camera/device.env
 WorkingDirectory=/opt/beadz-camera
 ExecStart=/opt/beadz-camera/venv/bin/beadz-camera --env /etc/beadz-camera/device.env capture-once
-# Raw frame temp dir on tmpfs — never the SD card
+# PrivateTmp isolates /tmp; bring-up (smoke.sh step 0) verifies /tmp is tmpfs so raw frames never touch the SD card
 PrivateTmp=yes
 NoNewPrivileges=yes
