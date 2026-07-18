@@ -6,12 +6,10 @@ docs/
 # ---------------------------------------------------------------------------
 # Secrets & sanitization (public repo — never commit these)
 # ---------------------------------------------------------------------------
-# Environment / config
-.env
-.env.*
-!.env.example
-device.env
-!device.env.example
+# Environment / config — ALL env files are ignored; only *.example templates are tracked
+*.env
+*.env.*
+!*.env.example
 *.local
 
 # Private keys, mnemonics, wallets, keystores
