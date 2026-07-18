@@ -1,0 +1,15 @@
+[Unit]
+Description=Beadz Fault-Cam 01 capture-and-sign (one-shot)
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=beadz
+Group=beadz
+SupplementaryGroups=video
+EnvironmentFile=/etc/beadz-camera/device.env
+WorkingDirectory=/opt/beadz-camera
+ExecStart=/opt/beadz-camera/venv/bin/beadz-camera --env /etc/beadz-camera/device.env capture-once
+# Raw frame temp dir on tmpfs — never the SD card
+PrivateTmp=yes
+NoNewPrivileges=yes

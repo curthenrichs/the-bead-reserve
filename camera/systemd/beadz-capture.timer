@@ -1,0 +1,10 @@
+[Unit]
+Description=Hourly Fault-Cam capture
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+RandomizedDelaySec=120
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,14 @@
+[Unit]
+Description=Beadz Fault-Cam 01 queue drain (one-shot)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=beadz
+Group=beadz
+EnvironmentFile=/etc/beadz-camera/device.env
+WorkingDirectory=/opt/beadz-camera
+ExecStart=/opt/beadz-camera/venv/bin/beadz-camera --env /etc/beadz-camera/device.env push-drain
+PrivateTmp=yes
+NoNewPrivileges=yes
