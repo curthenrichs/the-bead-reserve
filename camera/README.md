@@ -22,7 +22,8 @@ frame, re-hash it, and verify against the published public key.
    `/opt/beadz-camera`.
 2. `sudo bash camera/provision.sh` — idempotent one-command setup: apt
    packages (the script is the complete manifest), `beadz` service user
-   (`video` group), tmpfs `/tmp`, venv build, and seeds
+   (`video` group), tmpfs `/tmp`, venv build, a `beadz`-owned state
+   dir, and seeds
    `/etc/beadz-camera/device.env` (mode 0600; never overwrites an existing
    one). Refuses to run on a non-apt machine.
 3. Fill in `/etc/beadz-camera/device.env`.

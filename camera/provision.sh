@@ -47,6 +47,8 @@ echo "== 4. venv + pipeline install =="
 if [ ! -x "$VENV/bin/pip" ]; then
     python3 -m venv "$VENV"
 fi
+# Runs as root; leaves root-owned (gitignored) build artifacts in the
+# checkout. Harmless, but worth noting.
 "$VENV/bin/pip" install -e "$REPO/camera"
 
 echo "== 5. device config =="
@@ -56,6 +58,14 @@ if [ ! -f "$ENV_FILE" ]; then
 fi
 chown beadz:beadz "$ENV_FILE"
 chmod 0600 "$ENV_FILE"
+
+echo "== 6. state dir (owned by the service user) =="
+STATE_DIR=$(grep '^STATE_DIR=' "$ENV_FILE" | cut -d= -f2 || true)
+if [ -z "$STATE_DIR" ]; then
+    echo "FAIL: STATE_DIR not set in $ENV_FILE" >&2
+    exit 1
+fi
+install -d -o beadz -g beadz -m 0700 "$STATE_DIR"
 
 echo "== provision complete. Next: =="
 echo "   1. edit $ENV_FILE"
