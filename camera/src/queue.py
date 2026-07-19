@@ -53,12 +53,12 @@ class StateDir:
         except FileNotFoundError as exc:
             raise CounterError(
                 f"counter file missing: {self._counter_file} — seed it explicitly "
-                "with `beadz-camera seed-counter`"
+                "with `/opt/beadz-camera/venv/bin/beadz-camera seed-counter`"
             ) from exc
         except ValueError as exc:
             raise CounterError(
                 f"counter file corrupt: {self._counter_file} — refusing to guess. "
-                "Recover with `beadz-camera seed-counter --force --value N` where N "
+                "Recover with `/opt/beadz-camera/venv/bin/beadz-camera seed-counter --force --value N` where N "
                 "is GREATER than the highest counter the backend has seen (a reused "
                 "counter is rejected as a replay)."
             ) from exc
@@ -75,6 +75,7 @@ class StateDir:
         atomic_write_text(self.queue_dir / f"{counter}.json", json.dumps(meta))
 
     def pending(self) -> list[QueuedFrame]:
+        # NOTE: a corrupt frame json raises JSONDecodeError from json.loads below, intentionally stalling the whole drain (fail-loud) rather than silently skipping frames.
         # Reclaim jpgs orphaned by a crashed enqueue (jpg written, json never
         # committed). enqueue and pending both run under the state lock, so a
         # queue jpg with no sibling json is always a dead-process artifact.
