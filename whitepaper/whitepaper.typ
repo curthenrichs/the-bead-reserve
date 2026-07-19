@@ -381,6 +381,9 @@ entry points:
   cannot shorten an open window.
 - `attestBeadCount(beads)` / `acknowledgeRedemption(...)`: Vault Keeper
   attestation and shipment logs.
+- `attestReserveRecord(merkleRoot, uri)`: Vault Keeper only. Anchors a
+  period's published reserve record (merkle root of signed camera-frame
+  hashes); event-only, changes no state.
 - `collateralizationBps()`: attested beads vs. outstanding supply, in
   basis points.
 

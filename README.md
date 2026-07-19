@@ -72,11 +72,12 @@ Built on OpenZeppelin ERC-20 v5.1.0, Solidity `0.8.24`.
 
 **Functions:** `claim()` · `surrender(amount)` · `redeem(amount, shippingRef)` ·
 `attestBeadCount(beads)` *[keeper]* · `acknowledgeRedemption(bearer, beads, trackingNumber)` *[keeper]* ·
+`attestReserveRecord(merkleRoot, uri)` *[keeper]* ·
 `setRedemptionDeadline(newDeadline)` *[keeper]* · `transferVaultKeeper(action, newKeeper, confirmKeeper)` *[keeper]* ·
 `unclaimedBeads()` · `redemptionOpen()` · `collateralizationBps()` · plus standard ERC-20.
 
 **Events:** `BeadClaimed` · `GenesisAllocated` · `BeadCountAttested` · `PhysicalBeadRedemptionRequested`
-· `BeadsSurrendered` · `RedemptionAcknowledged` · `RedemptionWindowSet` · `VaultKeeperTransferred`.
+· `BeadsSurrendered` · `RedemptionAcknowledged` · `ReserveRecordAttested` · `RedemptionWindowSet` · `VaultKeeperTransferred`.
 
 There is no `mint` in the surface. Fixed supply is confirmed by absence.
 
