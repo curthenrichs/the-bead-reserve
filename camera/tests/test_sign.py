@@ -50,3 +50,12 @@ def test_pub_file_written(key_path):
 def test_private_key_is_0600(key_path):
     generate_keypair(key_path)
     assert stat.S_IMODE(key_path.stat().st_mode) == 0o600
+
+
+def test_export_pubkey_recreates_missing_pub(tmp_path):
+    from beadz_camera.sign import export_pubkey
+    key_path = tmp_path / "keys" / "ed25519.key"
+    pub = generate_keypair(key_path)
+    key_path.with_suffix(".pub").unlink()            # simulate crash after key, before .pub
+    assert export_pubkey(key_path) == pub            # re-derived from the private key
+    assert key_path.with_suffix(".pub").read_text().strip() == pub

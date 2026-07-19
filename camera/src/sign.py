@@ -12,6 +12,14 @@ from nacl.exceptions import BadSignatureError
 from nacl.signing import SigningKey, VerifyKey
 
 
+def export_pubkey(key_path: Path) -> str:
+    """(Re)derive the public key from an existing private key and (re)write the
+    .pub sidecar. Idempotent — the recovery path when a .pub was lost."""
+    pub_hex = load_signing_key(key_path).verify_key.encode().hex()
+    key_path.with_suffix(".pub").write_text(pub_hex + "\n")
+    return pub_hex
+
+
 def generate_keypair(key_path: Path) -> str:
     if key_path.exists():
         raise FileExistsError(f"refusing to overwrite existing key: {key_path}")
@@ -20,9 +28,7 @@ def generate_keypair(key_path: Path) -> str:
     fd = os.open(key_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
     with os.fdopen(fd, "w") as f:
         f.write(key.encode().hex() + "\n")
-    pub_hex = key.verify_key.encode().hex()
-    key_path.with_suffix(".pub").write_text(pub_hex + "\n")
-    return pub_hex
+    return export_pubkey(key_path)
 
 
 def load_signing_key(key_path: Path) -> SigningKey:

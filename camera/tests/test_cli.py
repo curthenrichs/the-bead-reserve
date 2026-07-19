@@ -109,12 +109,14 @@ def test_config_error_exits_2_without_traceback(tmp_path, make_device_env, capsy
     assert "Traceback" not in err
 
 
-def test_keygen_rerun_exits_3(env_file, capsys):
+def test_keygen_rerun_reexports_pubkey_exit_0(env_file, tmp_path, capsys):
     assert cli.main(["--env", str(env_file), "keygen"]) == 0
-    assert cli.main(["--env", str(env_file), "keygen"]) == 3
-    err = capsys.readouterr().err
-    assert "already present" in err
-    assert "Traceback" not in err
+    pub = (tmp_path / "state/keys/ed25519.pub").read_text().strip()
+    (tmp_path / "state/keys/ed25519.pub").unlink()   # crash left key but no .pub
+    assert cli.main(["--env", str(env_file), "keygen"]) == 0   # idempotent recovery
+    assert (tmp_path / "state/keys/ed25519.pub").read_text().strip() == pub
+    assert pub in capsys.readouterr().out
+    assert "Traceback" not in capsys.readouterr().err
 
 
 def test_seed_rerun_exits_3_and_force_reseeds(env_file, tmp_path, capsys):

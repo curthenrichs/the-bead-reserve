@@ -7,7 +7,7 @@ of the signed material, so allocating it after signing is sound.
 push-drain (5-min timer):     the whole drain + status, under the lock.
 
 Exit codes: 0 success · 1 pipeline failure · 2 config error · 3 already
-initialized (benign rerun of keygen/seed-counter). Handled paths never print
+initialized (benign rerun of seed-counter). Handled paths never print
 a traceback; status.json records every pipeline failure."""
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ from .lock import state_lock
 from .process import ProcessError, crop_and_strip
 from .push import PushError, drain
 from .queue import CounterError, StateDir
-from .sign import generate_keypair, load_signing_key, sha256_file, sign_hash
+from .sign import export_pubkey, generate_keypair, load_signing_key, sha256_file, sign_hash
 from .status import update_status
 
 
@@ -50,9 +50,11 @@ def _ntp_synced() -> bool | None:
 def _cmd_keygen(cfg: Config) -> int:
     try:
         pub = generate_keypair(cfg.key_path)
-    except FileExistsError as exc:
-        raise AlreadyInitialized(f"key already present: {cfg.key_path}") from exc
-    print(f"public key (publish this): {pub}")
+        print(f"public key (publish this): {pub}")
+    except FileExistsError:
+        # idempotent recovery: re-derive + rewrite the .pub, reprint it, succeed
+        pub = export_pubkey(cfg.key_path)
+        print(f"key already present; public key (publish this): {pub}")
     return 0
 
 
