@@ -31,13 +31,13 @@ else
 fi
 
 LOG="broadcast/Deploy.s.sol/$CHAIN_ID/run-latest.json"
-before=$( [ -f "$LOG" ] && md5sum "$LOG" 2>/dev/null | awk '{print $1}' )
+before=$( [ -f "$LOG" ] && cksum "$LOG" 2>/dev/null )
 
 forge script "${args[@]}"
 FORGE_EXIT=$?
 
 if [ "$broadcast" -eq 1 ]; then
-    after=$( [ -f "$LOG" ] && md5sum "$LOG" 2>/dev/null | awk '{print $1}' )
+    after=$( [ -f "$LOG" ] && cksum "$LOG" 2>/dev/null )
     if [ -f "$LOG" ] && [ "$before" != "$after" ]; then
         addr=$(sed -n 's/.*"contractAddress": *"\(0x[0-9a-fA-F]\{40\}\)".*/\1/p' \
             "$LOG" | head -1)
