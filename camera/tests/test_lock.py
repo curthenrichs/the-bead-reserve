@@ -47,3 +47,10 @@ def test_posix_branch_imports():
     import fcntl  # noqa: F401  — the module chose the flock path on this platform
     from beadz_camera import lock
     assert lock.fcntl is fcntl
+
+
+@pytest.mark.skipif(os.name != "nt", reason="exercises the msvcrt branch")
+def test_acquire_raises_on_bad_fd_instead_of_spinning():
+    from beadz_camera.lock import _acquire
+    with pytest.raises(OSError):
+        _acquire(999999)  # invalid fd must raise, not retry forever

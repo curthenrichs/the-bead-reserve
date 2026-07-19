@@ -10,6 +10,7 @@ capture budget."""
 
 from __future__ import annotations
 
+import errno
 import os
 import time
 from contextlib import contextmanager
@@ -20,14 +21,24 @@ if os.name == "nt":
 
     fcntl = None
 
+    # Errnos msvcrt.locking raises on lock contention (empirically observed:
+    # EDEADLK/36 "Resource deadlock avoided" on this Windows/CPython build,
+    # after LK_LOCK's own ~10s internal retry budget expires; EACCES/13 is
+    # documented as the other value seen across Windows versions). Only
+    # these should be retried — anything else (e.g. EBADF on a bad fd) is a
+    # real error and must propagate instead of spinning forever.
+    _CONTENTION_ERRNOS = (errno.EACCES, errno.EDEADLK)
+
     def _acquire(fd: int) -> None:
-        # msvcrt's LK_LOCK gives up after ~10 s; retry until acquired
+        # msvcrt's LK_LOCK gives up after ~10 s; retry only on contention
         while True:
+            os.lseek(fd, 0, os.SEEK_SET)
             try:
-                os.lseek(fd, 0, os.SEEK_SET)
                 msvcrt.locking(fd, msvcrt.LK_LOCK, 1)
                 return
-            except OSError:
+            except OSError as exc:
+                if exc.errno not in _CONTENTION_ERRNOS:
+                    raise
                 time.sleep(0.1)
 
     def _release(fd: int) -> None:
