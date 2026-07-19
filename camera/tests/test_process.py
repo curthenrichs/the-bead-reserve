@@ -5,16 +5,9 @@ from beadz_camera.process import ProcessError, crop_and_strip
 
 
 @pytest.fixture()
-def raw_frame(tmp_path):
+def raw_frame(tmp_path, make_exif_jpeg):
     """A synthetic 'raw capture' carrying EXIF metadata."""
-    path = tmp_path / "raw.jpg"
-    img = Image.new("RGB", (640, 480), "orange")
-    exif = Image.Exif()
-    exif[271] = "FaultCam"          # Make
-    exif[272] = "TestBench 3000"    # Model
-    img.save(path, format="JPEG", exif=exif)
-    assert len(Image.open(path).getexif()) > 0  # fixture sanity
-    return path
+    return make_exif_jpeg(tmp_path / "raw.jpg")
 
 
 def test_crops_to_rect(raw_frame, tmp_path):

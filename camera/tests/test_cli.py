@@ -13,29 +13,15 @@ INGEST = "https://api.test/ingest"
 
 
 @pytest.fixture()
-def env_file(tmp_path):
-    state = tmp_path / "state"
-    env = tmp_path / "device.env"
-    env.write_text(
-        f"INGEST_URL={INGEST}\n"
-        "HMAC_SECRET=topsecret\n"
-        "CAMERA_DEVICE=/dev/video0\n"
-        "CROP_RECT=100,50,200,150\n"
-        f"STATE_DIR={state}\n"
-        f"ED25519_KEY_PATH={state / 'keys/ed25519.key'}\n"
-        "DRAIN_BATCH_MAX=20\n"
-    )
-    return env
+def env_file(make_device_env):
+    return make_device_env(CROP_RECT="100,50,200,150")
 
 
 @pytest.fixture()
-def fake_capture(tmp_path):
+def fake_capture(make_exif_jpeg):
     """Replace fswebcam with a synthetic 640x480 frame carrying EXIF."""
     def _fake(device, dest, timeout=30):
-        img = Image.new("RGB", (640, 480), "orange")
-        exif = Image.Exif()
-        exif[271] = "FaultCam"
-        img.save(dest, format="JPEG", exif=exif)
+        make_exif_jpeg(dest)
     with patch("beadz_camera.cli.capture_frame", side_effect=_fake):
         yield
 

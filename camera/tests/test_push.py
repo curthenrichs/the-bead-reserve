@@ -26,14 +26,11 @@ def cfg(tmp_path):
 
 
 @pytest.fixture()
-def state(cfg, tmp_path):
+def state(cfg, enqueue_frame):
     s = StateDir(cfg.state_dir)
     s.seed_counter(0)
     for c in (1, 2, 3):
-        src = tmp_path / f"tmp-{c}.jpg"
-        src.write_bytes(b"jpeg-%d" % c)
-        s.enqueue(c, src, {"counter": c, "ts": 1750000000 + c,
-                           "sha256": "ab" * 32, "sig": "cd" * 64, "croText": None})
+        enqueue_frame(s, c)
     return s
 
 

@@ -12,17 +12,6 @@ def state(tmp_path):
     return s
 
 
-def _meta(counter):
-    return {"counter": counter, "ts": 1750000000, "sha256": "ab" * 32,
-            "sig": "cd" * 64, "croText": None}
-
-
-def _enqueue_frame(state, tmp_path, counter):
-    src = tmp_path / f"tmp-{counter}.jpg"
-    src.write_bytes(b"jpegbytes-%d" % counter)
-    state.enqueue(counter, src, _meta(counter))
-
-
 def test_counter_increments_and_persists(state):
     assert state.next_counter() == 1
     assert state.next_counter() == 2
@@ -46,22 +35,22 @@ def test_seed_refuses_overwrite(state):
         state.seed_counter(5)
 
 
-def test_enqueue_and_pending_ordering(state, tmp_path):
+def test_enqueue_and_pending_ordering(state, enqueue_frame, frame_meta):
     for c in (3, 1, 2):
-        _enqueue_frame(state, tmp_path, c)
+        enqueue_frame(state, c)
     assert [f.counter for f in state.pending()] == [1, 2, 3]
-    assert state.pending()[0].meta == _meta(1)
+    assert state.pending()[0].meta == frame_meta(1)
 
 
-def test_pending_skips_json_without_jpg(state, tmp_path):
-    _enqueue_frame(state, tmp_path, 1)
+def test_pending_skips_json_without_jpg(state, enqueue_frame, frame_meta):
+    enqueue_frame(state, 1)
     orphan = state.root / "queue" / "2.json"
-    orphan.write_text(json.dumps(_meta(2)))
+    orphan.write_text(json.dumps(frame_meta(2)))
     assert [f.counter for f in state.pending()] == [1]
 
 
-def test_archive_moves_both_files(state, tmp_path):
-    _enqueue_frame(state, tmp_path, 1)
+def test_archive_moves_both_files(state, enqueue_frame):
+    enqueue_frame(state, 1)
     frame = state.pending()[0]
     state.archive(frame)
     assert state.pending() == []
@@ -69,8 +58,8 @@ def test_archive_moves_both_files(state, tmp_path):
     assert (state.root / "archive" / "1.json").exists()
 
 
-def test_pending_heals_crashed_archive(state, tmp_path):
-    _enqueue_frame(state, tmp_path, 1)
+def test_pending_heals_crashed_archive(state, enqueue_frame):
+    enqueue_frame(state, 1)
     # simulate a crash between archive()'s two moves: jpg archived, json left behind
     (state.root / "queue" / "1.jpg").rename(state.root / "archive" / "1.jpg")
     assert state.pending() == []                          # not pushable

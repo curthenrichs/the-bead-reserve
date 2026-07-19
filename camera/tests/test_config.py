@@ -5,26 +5,10 @@ import pytest
 from beadz_camera.config import Config, ConfigError
 
 
-def _write_env(tmp_path: Path, **overrides) -> Path:
-    values = {
-        "INGEST_URL": "https://api.test/ingest",
-        "HMAC_SECRET": "topsecret",
-        "CAMERA_DEVICE": "/dev/video0",
-        "CROP_RECT": "10,20,640,480",
-        "STATE_DIR": str(tmp_path / "state"),
-        "ED25519_KEY_PATH": str(tmp_path / "state/keys/ed25519.key"),
-        "DRAIN_BATCH_MAX": "20",
-    }
-    values.update(overrides)
-    env_file = tmp_path / "device.env"
-    env_file.write_text("".join(f"{k}={v}\n" for k, v in values.items()))
-    return env_file
-
-
-def test_loads_all_fields(tmp_path, monkeypatch):
+def test_loads_all_fields(tmp_path, monkeypatch, make_device_env):
     for k in ("INGEST_URL", "HMAC_SECRET", "CROP_RECT", "DRAIN_BATCH_MAX"):
         monkeypatch.delenv(k, raising=False)
-    cfg = Config.from_env(_write_env(tmp_path))
+    cfg = Config.from_env(make_device_env())
     assert cfg.ingest_url == "https://api.test/ingest"
     assert cfg.hmac_secret == "topsecret"
     assert cfg.crop_rect == (10, 20, 640, 480)
@@ -32,36 +16,32 @@ def test_loads_all_fields(tmp_path, monkeypatch):
     assert cfg.drain_batch_max == 20
 
 
-def test_drain_batch_max_defaults_to_20(tmp_path, monkeypatch):
+def test_drain_batch_max_defaults_to_20(monkeypatch, make_device_env):
     monkeypatch.delenv("DRAIN_BATCH_MAX", raising=False)
-    env = _write_env(tmp_path)
-    lines = [l for l in env.read_text().splitlines() if not l.startswith("DRAIN_BATCH_MAX")]
-    env.write_text("\n".join(lines) + "\n")
+    env = make_device_env(omit=("DRAIN_BATCH_MAX",))
     assert Config.from_env(env).drain_batch_max == 20
 
 
-def test_bad_crop_rect_raises(tmp_path, monkeypatch):
+def test_bad_crop_rect_raises(monkeypatch, make_device_env):
     monkeypatch.delenv("CROP_RECT", raising=False)
     with pytest.raises(ValueError, match="CROP_RECT"):
-        Config.from_env(_write_env(tmp_path, CROP_RECT="10,20,640"))
+        Config.from_env(make_device_env(CROP_RECT="10,20,640"))
 
 
-def test_missing_required_key_raises(tmp_path, monkeypatch):
+def test_missing_required_key_raises(monkeypatch, make_device_env):
     monkeypatch.delenv("HMAC_SECRET", raising=False)
-    env = _write_env(tmp_path)
-    lines = [l for l in env.read_text().splitlines() if not l.startswith("HMAC_SECRET")]
-    env.write_text("\n".join(lines) + "\n")
+    env = make_device_env(omit=("HMAC_SECRET",))
     with pytest.raises(ValueError, match="HMAC_SECRET"):
         Config.from_env(env)
 
 
-def test_errors_are_config_error(tmp_path, monkeypatch):
+def test_errors_are_config_error(monkeypatch, make_device_env):
     monkeypatch.delenv("CROP_RECT", raising=False)
     with pytest.raises(ConfigError):
-        Config.from_env(_write_env(tmp_path, CROP_RECT="1,2,3"))
+        Config.from_env(make_device_env(CROP_RECT="1,2,3"))
 
 
-def test_wrong_count_and_non_integer_same_error(tmp_path, monkeypatch):
+def test_wrong_count_and_non_integer_same_error(monkeypatch, make_device_env):
     monkeypatch.delenv("CROP_RECT", raising=False)
     with pytest.raises(ConfigError, match="four integers"):
-        Config.from_env(_write_env(tmp_path, CROP_RECT="1,2,3,x"))
+        Config.from_env(make_device_env(CROP_RECT="1,2,3,x"))
