@@ -114,6 +114,15 @@ suite and a Slither static-analysis gate; see "Verifying the contract" above to 
 Deployed contract addresses will be added here after the contract is deployed to Base and its source
 is verified on Basescan.
 
+### Canonicity
+
+**No BEADZ has been deployed to any chain.** When the canonical contract exists, its address will
+appear here and at [beadz.half-built-robots.com](https://beadz.half-built-robots.com) — nowhere
+else. Until then, any token wearing this name or ticker is not this project and holds no claim on
+the jar. One tell is definitive: the genuine BEADZ seeds no liquidity pool and never will, so any
+"BEADZ" you can buy is, by construction, a counterfeit bead reserve. The counterfeit is also worth
+nothing, but less honestly.
+
 ## Reserve facts
 
 - **Genesis supply:** 47,318 BEADZ, the hand-counted Genesis Count, error and all, declared canonical.
