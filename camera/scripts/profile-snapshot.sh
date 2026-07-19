@@ -48,7 +48,14 @@ while :; do
     q=$(dir_bytes "$STATE_DIR/queue")
     a=$(dir_bytes "$STATE_DIR/archive")
     f=$(dir_bytes "$SINK_DIR/frames")
-    fc=$(find "$SINK_DIR/frames" -maxdepth 1 -name '*.jpg' 2>/dev/null | wc -l | tr -d ' ')
+    # Guard the dir-exists case: find on a missing dir exits non-zero, which
+    # under `set -o pipefail` aborts the whole run (the startup race where the
+    # sink hasn't created frames/ yet). Mirror dir_bytes' guard.
+    if [ -d "$SINK_DIR/frames" ]; then
+        fc=$(find "$SINK_DIR/frames" -maxdepth 1 -name '*.jpg' 2>/dev/null | wc -l | tr -d ' ')
+    else
+        fc=0
+    fi
     ec=$(journalctl -u beadz-capture -u beadz-push -u beadz-sink -p err \
              --since "$last_since" --until "$this_since" --no-pager 2>/dev/null | grep -c . || true)
     last_since="$this_since"

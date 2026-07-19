@@ -88,7 +88,11 @@ EOF
 
     if [ "$profile" = "1" ]; then
         systemctl reset-failed beadz-profile.service 2>/dev/null || true
+        # Restart=on-failure: defense in depth against any transient that trips
+        # the profiler's `set -e` (e.g. a metric command failing during sink
+        # startup) so an unattended run self-heals rather than going dark.
         systemd-run --unit=beadz-profile --collect \
+            --property=Restart=on-failure --property=RestartSec=10 \
             "$CAMERA/scripts/profile-snapshot.sh" \
             --out "$sink_dir/profile.csv" --sink-dir "$sink_dir" --state-dir "$state_dir"
     fi
