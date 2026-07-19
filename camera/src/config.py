@@ -31,6 +31,7 @@ class Config:
     state_dir: Path
     key_path: Path
     drain_batch_max: int = 20
+    capture_resolution: tuple[int, int] | None = None
 
     @classmethod
     def from_env(cls, env_file: Path | None = None) -> "Config":
@@ -51,6 +52,16 @@ class Config:
             raise ConfigError("DRAIN_BATCH_MAX must be an integer") from exc
         if drain_batch_max < 1:
             raise ConfigError("DRAIN_BATCH_MAX must be >= 1")
+        capture_resolution = None
+        cap_res_raw = os.environ.get("CAPTURE_RESOLUTION")
+        if cap_res_raw:
+            try:
+                cw, ch = (int(p) for p in cap_res_raw.lower().split("x"))
+                if cw < 1 or ch < 1:
+                    raise ValueError("non-positive")
+            except ValueError as exc:
+                raise ConfigError("CAPTURE_RESOLUTION must be 'WxH' (e.g. 1280x720)") from exc
+            capture_resolution = (cw, ch)
         return cls(
             ingest_url=os.environ["INGEST_URL"],
             hmac_secret=os.environ["HMAC_SECRET"],
@@ -59,4 +70,5 @@ class Config:
             state_dir=Path(os.environ["STATE_DIR"]),
             key_path=Path(os.environ["ED25519_KEY_PATH"]),
             drain_batch_max=drain_batch_max,
+            capture_resolution=capture_resolution,
         )

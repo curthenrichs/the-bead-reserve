@@ -22,7 +22,7 @@ def env_file(make_device_env):
 @pytest.fixture()
 def fake_capture(make_exif_jpeg):
     """Replace fswebcam with a synthetic 640x480 frame carrying EXIF."""
-    def _fake(device, dest, timeout=30):
+    def _fake(device, dest, timeout=30, resolution=None):
         make_exif_jpeg(dest)
     with patch("beadz_camera.cli.capture_frame", side_effect=_fake):
         yield

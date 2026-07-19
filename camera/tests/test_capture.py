@@ -47,3 +47,24 @@ def test_missing_output_raises(tmp_path):
     ):
         with pytest.raises(CaptureError, match="no output"):
             capture_frame("/dev/video0", tmp_path / "frame.jpg")
+
+
+def test_resolution_adds_r_flag(tmp_path):
+    dest = tmp_path / "frame.jpg"
+    def fake_run(cmd, **kwargs):
+        assert "-r" in cmd and cmd[cmd.index("-r") + 1] == "1280x720"
+        assert cmd[-1] == str(dest)          # dest stays last (fswebcam positional)
+        dest.write_bytes(b"jpeg")
+        return subprocess.CompletedProcess(cmd, 0)
+    with patch("beadz_camera.capture.subprocess.run", side_effect=fake_run):
+        capture_frame("/dev/video0", dest, resolution=(1280, 720))
+
+
+def test_no_resolution_omits_r_flag(tmp_path):
+    dest = tmp_path / "frame.jpg"
+    def fake_run(cmd, **kwargs):
+        assert "-r" not in cmd
+        dest.write_bytes(b"jpeg")
+        return subprocess.CompletedProcess(cmd, 0)
+    with patch("beadz_camera.capture.subprocess.run", side_effect=fake_run):
+        capture_frame("/dev/video0", dest)

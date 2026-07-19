@@ -11,8 +11,12 @@ class CaptureError(RuntimeError):
     pass
 
 
-def capture_frame(device: str, dest: Path, timeout: int = 30) -> None:
-    cmd = ["fswebcam", "-d", device, "--no-banner", str(dest)]
+def capture_frame(device: str, dest: Path, timeout: int = 30,
+                  resolution: tuple[int, int] | None = None) -> None:
+    cmd = ["fswebcam", "-d", device, "--no-banner"]
+    if resolution is not None:
+        cmd += ["-r", f"{resolution[0]}x{resolution[1]}"]
+    cmd.append(str(dest))
     try:
         result = subprocess.run(cmd, capture_output=True, timeout=timeout)
     except subprocess.TimeoutExpired as exc:

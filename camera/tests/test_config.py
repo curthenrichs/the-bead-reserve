@@ -52,3 +52,21 @@ def test_non_positive_drain_batch_max_raises(bad, make_device_env, monkeypatch):
     monkeypatch.delenv("DRAIN_BATCH_MAX", raising=False)
     with pytest.raises(ConfigError, match="DRAIN_BATCH_MAX"):
         Config.from_env(make_device_env(DRAIN_BATCH_MAX=bad))
+
+
+def test_capture_resolution_unset_is_none(make_device_env, monkeypatch):
+    monkeypatch.delenv("CAPTURE_RESOLUTION", raising=False)
+    assert Config.from_env(make_device_env()).capture_resolution is None
+
+
+def test_capture_resolution_parsed(make_device_env, monkeypatch):
+    monkeypatch.delenv("CAPTURE_RESOLUTION", raising=False)
+    cfg = Config.from_env(make_device_env(CAPTURE_RESOLUTION="1280x720"))
+    assert cfg.capture_resolution == (1280, 720)
+
+
+@pytest.mark.parametrize("bad", ["1280", "1280x", "axb", "0x0", "1280x720x1"])
+def test_capture_resolution_malformed_raises(bad, make_device_env, monkeypatch):
+    monkeypatch.delenv("CAPTURE_RESOLUTION", raising=False)
+    with pytest.raises(ConfigError, match="CAPTURE_RESOLUTION"):
+        Config.from_env(make_device_env(CAPTURE_RESOLUTION=bad))
