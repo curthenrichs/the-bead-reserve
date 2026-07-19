@@ -86,3 +86,10 @@ def test_pending_reclaims_orphaned_jpg(state, enqueue_frame):
     assert [f.counter for f in result] == [1]     # orphan not surfaced
     assert not (state.root / "queue" / "7.jpg").exists()     # and reclaimed
     assert (state.root / "queue" / "1.jpg").exists()         # committed frame untouched
+
+
+def test_pending_leaves_non_frame_jpg_alone(state, enqueue_frame):
+    enqueue_frame(state, 1)
+    (state.root / "queue" / "snapshot.jpg").write_bytes(b"manual artifact")
+    state.pending()
+    assert (state.root / "queue" / "snapshot.jpg").exists()  # non-numeric stem untouched

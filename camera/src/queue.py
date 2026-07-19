@@ -79,6 +79,10 @@ class StateDir:
         # committed). enqueue and pending both run under the state lock, so a
         # queue jpg with no sibling json is always a dead-process artifact.
         for stray in self.queue_dir.glob("*.jpg"):
+            try:
+                int(stray.stem)
+            except ValueError:
+                continue  # not a frame file (manual artifact); leave it alone
             if not stray.with_suffix(".json").exists():
                 stray.unlink()
         frames = []
