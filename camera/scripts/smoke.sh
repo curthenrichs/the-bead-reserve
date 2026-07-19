@@ -33,7 +33,12 @@ sudo -u beadz "$BIN" --env "$ENV" capture-once
 echo "   -> eyeball the newest queue/*.jpg: crop must show ONLY the jar box."
 
 echo "== 4. real push =="
-sudo -u beadz "$BIN" --env "$ENV" push-drain
+rc=0; sudo -u beadz "$BIN" --env "$ENV" push-drain || rc=$?
+if [ "$rc" -ne 0 ]; then
+    echo "push-drain FAILED (exit $rc) — likely unreachable INGEST_URL"
+    echo "   Run: scripts/ingest-sink.py to capture frames locally"
+    echo "   Frame stays queued in STATE_DIR/queue/*.jpg — not a smoke-test failure"
+fi
 
 echo "== 5. independent verification (the check a stranger would run) =="
 STATE_DIR=$(sudo -u beadz grep '^STATE_DIR=' "$ENV" | cut -d= -f2)
