@@ -22,7 +22,13 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-dir_bytes() { if [ -d "$1" ]; then du -sb "$1" 2>/dev/null | cut -f1; else echo 0; fi; }
+dir_bytes() {
+    if [ -d "$1" ]; then
+        local b; b=$(du -sb "$1" 2>/dev/null | cut -f1); echo "${b:-0}"
+    else
+        echo 0
+    fi
+}
 
 if [ ! -f "$OUT" ]; then
     echo "ts_iso,sink_rss_kb,sink_cpu_pct,queue_bytes,archive_bytes,sink_frames_bytes,sink_frame_count,err_count" > "$OUT"
@@ -43,7 +49,7 @@ while :; do
     f=$(dir_bytes "$SINK_DIR/frames")
     fc=$(find "$SINK_DIR/frames" -maxdepth 1 -name '*.jpg' 2>/dev/null | wc -l | tr -d ' ')
     ec=$(journalctl -u beadz-capture -u beadz-push -u beadz-sink -p err \
-             --since "$last_ts" --no-pager 2>/dev/null | grep -c . || echo 0)
+             --since "$last_ts" --no-pager 2>/dev/null | grep -c . || true)
     last_ts="$ts"
     printf '%s,%s,%s,%s,%s,%s,%s,%s\n' \
         "$ts" "${rss:-0}" "${cpu:-0}" "$q" "$a" "$f" "$fc" "$ec" >> "$OUT"
