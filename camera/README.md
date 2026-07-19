@@ -60,6 +60,9 @@ Then set the Pi's `INGEST_URL` to `http://<this-machine's-LAN-IP>:8080/api/inges
 On Windows, the first run with `--bind 0.0.0.0` may trigger a Firewall
 prompt — allow it on private networks.
 
+Caution: the sink holds the shared HMAC secret and (by default) listens on
+all interfaces — run it only on a trusted LAN.
+
 ## Exit codes
 
 The CLI contract:

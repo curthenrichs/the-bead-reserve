@@ -133,6 +133,26 @@ def test_boolean_counter_is_400(sink, keypair):
     assert r.status_code == 400 and r.json()["error"] == "bad_request"
 
 
+def test_non_ascii_mac_is_401_not_500(sink, keypair):
+    import socket
+    body = _body(keypair)
+    req = (b"POST /api/ingest HTTP/1.1\r\nHost: x\r\n"
+           b"Content-Type: application/json\r\n"
+           b"X-Beadz-Mac: \xff\xfe\r\n"
+           + f"Content-Length: {len(body)}\r\n\r\n".encode() + body)
+    with socket.create_connection(("127.0.0.1", sink.port), timeout=5) as s:
+        s.sendall(req)
+        resp = s.recv(1024).decode("latin-1")
+    assert " 401 " in resp.splitlines()[0]
+
+
+def test_absurd_counter_is_400(sink, keypair):
+    payload = json.loads(_body(keypair))
+    payload["counter"] = 10**400
+    r = _post(sink, json.dumps(payload).encode())
+    assert r.status_code == 400 and r.json()["error"] == "bad_request"
+
+
 def test_last_seen_survives_restart(tmp_path, keypair):
     _, pub = keypair
     s1 = IngestSink(SECRET, pub, tmp_path / "sink", port=0)

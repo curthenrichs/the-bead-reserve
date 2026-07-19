@@ -70,7 +70,8 @@ class IngestSink:
     def handle_ingest(self, raw_body: bytes, mac_header: str | None) -> tuple[int, dict]:
         # 1. HMAC over the exact raw body, constant-time
         if not mac_header or not hmac.compare_digest(
-                mac_header, hmac_hex(self.secret, raw_body)):
+                mac_header.encode("latin-1", errors="replace"),
+                hmac_hex(self.secret, raw_body).encode()):
             return self._reject(401, "bad_mac", None)
         # 2. shape
         try:
@@ -78,6 +79,7 @@ class IngestSink:
             counter = payload["counter"]
             ts = payload["ts"]
             if (not isinstance(counter, int) or isinstance(counter, bool)
+                    or not (0 < counter < 2**63)
                     or not isinstance(ts, int) or isinstance(ts, bool)
                     or not isinstance(payload["sha256"], str)
                     or not isinstance(payload["sig"], str)

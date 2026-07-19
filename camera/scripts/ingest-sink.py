@@ -39,6 +39,8 @@ def main() -> int:
     if not secret:
         p.error("no HMAC_SECRET found (empty --secret / missing in --env file)")
     pubkey = args.pubkey or args.pubkey_file.read_text().strip()
+    if len(pubkey) != 64 or any(c not in "0123456789abcdef" for c in pubkey.lower()):
+        p.error("pubkey must be 64 hex chars (the ed25519.pub content)")
 
     sink = IngestSink(secret, pubkey, args.sink_dir, port=args.port, bind=args.bind)
     sink.start()
