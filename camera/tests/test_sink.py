@@ -167,3 +167,19 @@ def test_last_seen_survives_restart(tmp_path, keypair):
         assert _post(s2, _body(keypair, counter=3)).status_code == 409
     finally:
         s2.stop()
+
+
+def test_corrupt_last_seen_fails_loud(tmp_path, keypair):
+    from beadz_camera.sink import SinkStateError
+    _, pub = keypair
+    sink_dir = tmp_path / "sink"
+    sink_dir.mkdir()
+    (sink_dir / "last_seen").write_text("not-a-number")
+    with pytest.raises(SinkStateError):
+        IngestSink(SECRET, pub, sink_dir, port=0)
+
+
+def test_events_are_bounded(sink, keypair):
+    from collections import deque
+    assert isinstance(sink.events, deque)
+    assert sink.events.maxlen == 1000

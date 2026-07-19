@@ -14,6 +14,7 @@ import hmac
 import json
 import threading
 import time
+from collections import deque
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -23,6 +24,12 @@ from .sign import verify
 
 _META_KEYS = ("counter", "ts", "sha256", "sig", "croText")
 _TS_SKEW_WARN_S = 600
+_EVENTS_MAX = 1000
+
+
+class SinkStateError(RuntimeError):
+    """The sink's persisted last_seen is corrupt — refuse to guess (a reset
+    would silently reopen the replay hole the counter check exists to close)."""
 
 
 class IngestSink:
@@ -34,7 +41,7 @@ class IngestSink:
         self.frames_dir = self.sink_dir / "frames"
         self.frames_dir.mkdir(parents=True, exist_ok=True)
         self.bind = bind
-        self.events: list[dict] = []
+        self.events: deque = deque(maxlen=_EVENTS_MAX)
         self._counter_lock = threading.Lock()
         self._last_seen = self._load_last_seen()
         self._server = ThreadingHTTPServer((bind, port), _make_handler(self))
@@ -61,10 +68,16 @@ class IngestSink:
 
     # -- state ---------------------------------------------------------------
     def _load_last_seen(self) -> int:
+        path = self.sink_dir / "last_seen"
         try:
-            return int((self.sink_dir / "last_seen").read_text().strip())
-        except (FileNotFoundError, ValueError):
-            return 0
+            return int(path.read_text().strip())
+        except FileNotFoundError:
+            return 0  # legitimate first run
+        except ValueError as exc:
+            raise SinkStateError(
+                f"last_seen corrupt: {path} — refusing to reset replay protection "
+                "to 0. Fix or remove it explicitly."
+            ) from exc
 
     # -- the contract (spec §4 table; first failure wins) --------------------
     def handle_ingest(self, raw_body: bytes, mac_header: str | None) -> tuple[int, dict]:
