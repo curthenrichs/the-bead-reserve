@@ -3,13 +3,12 @@
 # the root .gitignore carries the same net — belt and suspenders)
 # ---------------------------------------------------------------------------
 # Environment / config — ALL env files ignored; only *.example templates tracked
-# (RPC URLs, API keys, and deployer keys live in env files — never in git)
 *.env
 *.env.*
 !*.env.example
 *.local
 
-# Private keys, mnemonics, wallets, keystores — no key material of any kind
+# Private keys, mnemonics, wallets, keystores
 *.pem
 *.key
 *.keystore
@@ -23,11 +22,9 @@ wallets/
 *mnemonic*
 *seed-phrase*
 *private-key*
-*privatekey*
 secrets/
 .secret
 .secrets
-.foundry/
 
 # Cloud / API credentials
 .aws/
@@ -50,41 +47,91 @@ service-account*.json
 *.dng
 
 # ---------------------------------------------------------------------------
-# Foundry
-# NOTE: lib/ is NOT ignored — forge-std and openzeppelin-contracts are
-# tracked as git submodules.
+# Camera pipeline state (prod lives under STATE_DIR=/var/lib/beadz-camera;
+# never allow a local state root to be committed)
 # ---------------------------------------------------------------------------
-cache/
-out/
-foundry.lock
-
-# Deployment broadcast logs: raw tx records (deployer address, RPC metadata).
-# Publish a deployment record deliberately in docs, never by default.
-broadcast/
-
-# Coverage
-lcov.info
-coverage/
+queue/
+archive/
+counter
+status.json
+*.sig
 
 # ---------------------------------------------------------------------------
-# Static analysis / fuzzing artifacts (Slither, Echidna, Medusa)
+# Python
 # ---------------------------------------------------------------------------
-crytic-export/
-slither.db.json
-slither-report*
-corpus/
-echidna-corpus/
-medusa-corpus/
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
 
-# ---------------------------------------------------------------------------
-# Defensive: Hardhat/Node-style output (this is a Foundry project; if any
-# JS tooling ever appears, its output stays out of git)
-# ---------------------------------------------------------------------------
-node_modules/
-artifacts/
-typechain/
-typechain-types/
-deployments/
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-wheel-metadata/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Type checkers / linters
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.python-version
+
+# Jupyter / IPython
+.ipynb_checkpoints
+profile_default/
+ipython_config.py
+
+# Cython debug symbols
+cython_debug/
 
 # Logs
 *.log

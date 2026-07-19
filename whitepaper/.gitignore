@@ -1,0 +1,65 @@
+# ---------------------------------------------------------------------------
+# Privacy boundary (duplicated in every subproject .gitignore on purpose;
+# the root .gitignore carries the same net — belt and suspenders)
+# ---------------------------------------------------------------------------
+# Environment / config — ALL env files ignored; only *.example templates tracked
+*.env
+*.env.*
+!*.env.example
+*.local
+
+# Private keys, mnemonics, wallets, keystores
+*.pem
+*.key
+*.keystore
+*.p12
+*.pfx
+key/
+keys/
+keystore/
+keystores/
+wallets/
+*mnemonic*
+*seed-phrase*
+*private-key*
+secrets/
+.secret
+.secrets
+
+# Cloud / API credentials
+.aws/
+credentials.json
+service-account*.json
+
+# Bead photos never touch git (EXIF = location leak) — all image formats banned
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.tif
+*.tiff
+*.webp
+*.heic
+*.heif
+*.avif
+*.raw
+*.dng
+
+# ---------------------------------------------------------------------------
+# Typst
+# ---------------------------------------------------------------------------
+# Build output (built PDF is an artifact, not a source)
+out/
+*.pdf
+
+# Local Typst package / cache dirs (if ever vendored beside the sources)
+.typst/
+.typst-cache/
+
+# Font archives pulled by fetch-fonts.sh (the .ttf files themselves are tracked)
+*.zip
+*.tar.gz
+
+# Logs
+*.log

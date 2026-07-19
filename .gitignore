@@ -5,6 +5,8 @@ docs/
 
 # ---------------------------------------------------------------------------
 # Secrets & sanitization (public repo — never commit these)
+# Each subproject .gitignore duplicates this privacy block on purpose:
+# belt and suspenders. Keep them in sync when editing here.
 # ---------------------------------------------------------------------------
 # Environment / config — ALL env files are ignored; only *.example templates are tracked
 *.env
@@ -18,18 +20,39 @@ docs/
 *.keystore
 *.p12
 *.pfx
+key/
+keys/
 keystore/
+keystores/
 wallets/
 *mnemonic*
 *seed-phrase*
+*private-key*
+*privatekey*
 secrets/
 .secret
 .secrets
+.foundry/
 
 # Cloud / API credentials
 .aws/
 credentials.json
 service-account*.json
+
+# Bead photos never touch git (EXIF = location leak) — all image formats banned
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.tif
+*.tiff
+*.webp
+*.heic
+*.heif
+*.avif
+*.raw
+*.dng
 
 # ---------------------------------------------------------------------------
 # Dependencies & build output (add/remove per chosen stack)
