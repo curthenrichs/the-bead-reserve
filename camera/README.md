@@ -1,6 +1,6 @@
 # Fault-Cam 01: capture-and-sign pipeline
 
-Subsystem C of the Bead Reserve: an hourly still of the reserve jar,
+Subsystem of the Bead Reserve: an hourly still of the reserve jar,
 EXIF-stripped, tightly cropped, SHA-256-hashed, Ed25519-signed, queued on
 disk, and pushed (with backfill) to the ingest backend. The signature is
 over the hash of the exact bytes served publicly, so anyone can download a
@@ -30,6 +30,12 @@ frame, re-hash it, and verify against the published public key.
 4. Run `bash camera/scripts/smoke.sh`. It keygens (prints the public key: publish
    it), seeds the counter, does one real capture+push, walks the
    independent hash verification, and installs the timers.
+
+   Smoke step 4 (the real push) needs a reachable `INGEST_URL`. Until the
+   production backend exists, point it at a locally-running
+   `scripts/ingest-sink.py` (see "Local integration sink" below) — otherwise
+   step 4 reports a push failure. That's not fatal: the frame stays safely
+   queued and drains on the next successful push.
 
 tmpfs note: the systemd units already get a private tmpfs-backed `/tmp`
 from `PrivateTmp=yes`; the host `tmp.mount` (enabled by `provision.sh`)
@@ -70,14 +76,16 @@ The CLI contract:
 - `0` → success; no errors; frame queued and signed
 - `1` → pipeline failure (recoverable); error recorded in `status.json`
 - `2` → config error (fix `device.env` and retry)
-- `3` → already initialized (benign rerun; e.g., keygen finds existing key)
+- `3` → already initialized (benign rerun of `seed-counter` against an
+  existing counter file; `keygen` is idempotent and returns `0` on rerun,
+  reprinting the public key instead)
 
 ## Counter recovery
 
 If the counter file (`STATE_DIR/counter`) is corrupt or lost, restore it with:
 
 ```bash
-sudo -u beadz beadz-camera --env /etc/beadz-camera/device.env seed-counter --force --value N
+sudo -u beadz /opt/beadz-camera/venv/bin/beadz-camera --env /etc/beadz-camera/device.env seed-counter --force --value N
 ```
 
 The backend rejects any counter value already seen (replay protection). `N` must
