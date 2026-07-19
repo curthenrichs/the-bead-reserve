@@ -10,6 +10,7 @@
 #   ops.sh attest <beads>                          keeper: log a recount
 #   ops.sh acknowledge <role> <beads> <tracking>   keeper: log a shipment
 #   ops.sh deadline <unix-timestamp>               keeper: extend/reopen window
+#   ops.sh record <merkle-root> <uri>              keeper: anchor a reserve record
 #   ops.sh rotate <to-role>                        keeper: hand role to <to-role>
 #
 # Keeper actions sign as $BEADZ_KEEPER_ROLE (default: keeper). After a rotate,
@@ -25,7 +26,7 @@ view() { cast call "$BEADZ_ADDRESS" "$@" --rpc-url "$BEADZ_RPC_URL"; }
 num()  { view "$@" | awk '{print $1}'; }
 wei()  { cast to-wei "$1" ether; }   # beads share ether's 18 decimals
 
-usage() { sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'; exit 1; }
+usage() { sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'; exit 1; }
 
 cmd="${1:-}"; [ $# -gt 0 ] && shift
 case "$cmd" in
@@ -57,6 +58,7 @@ attest)      send_as "$K_ROLE" "$BEADZ_ADDRESS" "attestBeadCount(uint256)" "${1:
 acknowledge) send_as "$K_ROLE" "$BEADZ_ADDRESS" "acknowledgeRedemption(address,uint256,string)" \
                  "$(addr_of "${1:?role}")" "${2:?beads}" "${3:?tracking}" ;;
 deadline)    send_as "$K_ROLE" "$BEADZ_ADDRESS" "setRedemptionDeadline(uint256)" "${1:?unix-timestamp}" ;;
+record)      send_as "$K_ROLE" "$BEADZ_ADDRESS" "attestReserveRecord(bytes32,string)" "${1:?merkle-root}" "${2:?uri}" ;;
 rotate)
     to_addr=$(addr_of "${1:?to-role}") || exit 1
     send_as "$K_ROLE" "$BEADZ_ADDRESS" "transferVaultKeeper(uint8,address,address)" 0 "$to_addr" "$to_addr" \

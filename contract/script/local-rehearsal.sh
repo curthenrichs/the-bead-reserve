@@ -98,6 +98,14 @@ send_as "$KEEPER" "attestBeadCount(uint256)" 47317
 check "keeper attestation recorded"           "47317"        "$(view 'attestedBeads()(uint256)')"
 check "still fully collateralized post-ship"  "10000"        "$(view 'collateralizationBps()(uint256)')"
 
+# keeper anchors a reserve record (event-only)
+if send_as "$KEEPER" "attestReserveRecord(bytes32,string)" \
+    0x6265616432303236000000000000000000000000000000000000000000000000 "rehearsal-record"; then
+    echo "ok   keeper anchors reserve record"; PASS=$((PASS + 1))
+else
+    echo "FAIL keeper anchors reserve record"; FAIL=$((FAIL + 1))
+fi
+
 echo
 if [ "$FAIL" -eq 0 ]; then
     echo "REHEARSAL PASSED ($PASS checks)"
