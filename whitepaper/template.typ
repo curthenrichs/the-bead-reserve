@@ -28,6 +28,9 @@
   inset: (x: 0pt, y: 7pt),
   align: (left, right),
   table.hline(stroke: 1pt + amber),
+  // Semantic header row: tagged as TH in the PDF so screen readers announce
+  // column context for each cell; styled as the standard mono eyebrow label.
+  table.header(repeat: false, plabel[Parameter], plabel[Value]),
   ..rows.map(((k, v)) => (
     text(fill: ink)[#k],
     text(font: mono, size: 9pt, fill: ink, hyphenate: false)[#v],
@@ -48,7 +51,7 @@
 )))
 
 #let whitepaper(title: "", title-lines: none, subtitle: "", office: "", series: "", draft: false, doc) = {
-  set document(title: title)
+  set document(title: title, author: "The Bead Reserve", description: subtitle)
   set page(
     paper: "a4",
     fill: paper,

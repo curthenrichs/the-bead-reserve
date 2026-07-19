@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
-# Build the BEADZ whitepaper PDF. Pass --watch for continuous rebuilds.
+# Build the BEADZ whitepaper PDF.
+#
+# Usage:
+#   ./build.sh             one-shot compile
+#   ./build.sh --watch     recompile on every source change
+#
+# Requires: Typst 0.15+ on PATH (https://github.com/typst/typst).
+# Fonts are bundled in ./fonts; no system font install needed.
+# Output: out/beadz-whitepaper.pdf — tagged PDF conforming to PDF/UA-1
+# (accessibility violations, e.g. missing alt text, fail the build).
+
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -11,4 +21,4 @@ fi
 mkdir -p out
 cmd="compile"
 [ "${1:-}" = "--watch" ] && cmd="watch"
-typst "$cmd" --font-path fonts whitepaper.typ out/beadz-whitepaper.pdf
+typst "$cmd" --pdf-standard ua-1 --font-path fonts whitepaper.typ out/beadz-whitepaper.pdf
