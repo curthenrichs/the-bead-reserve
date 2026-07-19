@@ -1,4 +1,5 @@
 import json
+from contextlib import contextmanager
 from unittest.mock import patch
 
 import pytest
@@ -6,6 +7,7 @@ import responses
 from PIL import Image
 
 from beadz_camera import cli
+from beadz_camera.lock import state_lock as real_state_lock
 from beadz_camera.queue import StateDir
 from beadz_camera.sign import sha256_file, verify
 
@@ -94,3 +96,69 @@ def test_drain_failure_exits_nonzero(env_file, tmp_path, fake_capture):
     status = json.loads((tmp_path / "state/status.json").read_text())
     assert status["last_push_ok"] is False
     assert status["queue_depth"] == 1
+
+
+def test_config_error_exits_2_without_traceback(tmp_path, make_device_env, capsys, monkeypatch):
+    # earlier load_dotenv(override=True) calls leave HMAC_SECRET in os.environ;
+    # clear it so the omitted key is genuinely missing
+    monkeypatch.delenv("HMAC_SECRET", raising=False)
+    env = make_device_env(omit=("HMAC_SECRET",))
+    assert cli.main(["--env", str(env), "capture-once"]) == 2
+    err = capsys.readouterr().err
+    assert "config error" in err
+    assert "Traceback" not in err
+
+
+def test_keygen_rerun_exits_3(env_file, capsys):
+    assert cli.main(["--env", str(env_file), "keygen"]) == 0
+    assert cli.main(["--env", str(env_file), "keygen"]) == 3
+    err = capsys.readouterr().err
+    assert "already present" in err
+    assert "Traceback" not in err
+
+
+def test_seed_rerun_exits_3_and_force_reseeds(env_file, tmp_path, capsys):
+    assert cli.main(["--env", str(env_file), "seed-counter"]) == 0
+    assert cli.main(["--env", str(env_file), "seed-counter"]) == 3
+    (tmp_path / "state" / "counter").write_text("garbage")
+    assert cli.main(["--env", str(env_file), "seed-counter", "--value", "41", "--force"]) == 0
+    assert (tmp_path / "state" / "counter").read_text().strip() == "41"
+
+
+def test_corrupt_key_exits_1_with_status(env_file, tmp_path, fake_capture):
+    _bootstrap(env_file)
+    (tmp_path / "state" / "keys" / "ed25519.key").write_text("not hex at all")
+    assert cli.main(["--env", str(env_file), "capture-once"]) == 1
+    status = json.loads((tmp_path / "state" / "status.json").read_text())
+    assert status["last_capture_ok"] is False
+
+
+def test_push_drain_oserror_exits_1_with_status(env_file, tmp_path, fake_capture, monkeypatch):
+    _bootstrap(env_file)
+    cli.main(["--env", str(env_file), "capture-once"])
+    monkeypatch.setattr(cli, "drain",
+                        lambda cfg, state: (_ for _ in ()).throw(OSError("disk full")))
+    assert cli.main(["--env", str(env_file), "push-drain"]) == 1
+    status = json.loads((tmp_path / "state" / "status.json").read_text())
+    assert status["last_push_ok"] is False
+    assert "disk full" in status["last_error"]
+
+
+@responses.activate
+def test_mutations_happen_under_lock(env_file, fake_capture, monkeypatch):
+    events = []
+
+    @contextmanager
+    def spy(state_dir):
+        events.append("enter")
+        with real_state_lock(state_dir):
+            yield
+        events.append("exit")
+
+    monkeypatch.setattr(cli, "state_lock", spy)
+    _bootstrap(env_file)                       # seed-counter: one enter/exit
+    cli.main(["--env", str(env_file), "capture-once"])
+    responses.add(responses.POST, INGEST, status=200, json={})
+    cli.main(["--env", str(env_file), "push-drain"])
+    # seed + capture + drain = three balanced acquisitions, none nested
+    assert events == ["enter", "exit"] * 3
