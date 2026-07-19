@@ -49,6 +49,8 @@ class Config:
             drain_batch_max = int(os.environ.get("DRAIN_BATCH_MAX") or 20)
         except ValueError as exc:
             raise ConfigError("DRAIN_BATCH_MAX must be an integer") from exc
+        if drain_batch_max < 1:
+            raise ConfigError("DRAIN_BATCH_MAX must be >= 1")
         return cls(
             ingest_url=os.environ["INGEST_URL"],
             hmac_secret=os.environ["HMAC_SECRET"],

@@ -45,3 +45,10 @@ def test_wrong_count_and_non_integer_same_error(monkeypatch, make_device_env):
     monkeypatch.delenv("CROP_RECT", raising=False)
     with pytest.raises(ConfigError, match="four integers"):
         Config.from_env(make_device_env(CROP_RECT="1,2,3,x"))
+
+
+@pytest.mark.parametrize("bad", ["0", "-1"])
+def test_non_positive_drain_batch_max_raises(bad, make_device_env, monkeypatch):
+    monkeypatch.delenv("DRAIN_BATCH_MAX", raising=False)
+    with pytest.raises(ConfigError, match="DRAIN_BATCH_MAX"):
+        Config.from_env(make_device_env(DRAIN_BATCH_MAX=bad))
