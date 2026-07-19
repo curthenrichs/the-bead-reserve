@@ -112,6 +112,27 @@ def test_wrong_path_404_and_get_405(sink, keypair):
     assert requests.get(f"http://127.0.0.1:{sink.port}/api/ingest", timeout=5).status_code == 405
 
 
+def test_non_string_sig_is_400_not_500(sink, keypair):
+    payload = json.loads(_body(keypair))
+    payload["sig"] = 12345
+    r = _post(sink, json.dumps(payload).encode())
+    assert r.status_code == 400 and r.json()["error"] == "bad_request"
+
+
+def test_non_numeric_ts_is_400_not_500(sink, keypair):
+    payload = json.loads(_body(keypair))
+    payload["ts"] = "not-a-number"
+    r = _post(sink, json.dumps(payload).encode())
+    assert r.status_code == 400 and r.json()["error"] == "bad_request"
+
+
+def test_boolean_counter_is_400(sink, keypair):
+    payload = json.loads(_body(keypair))
+    payload["counter"] = True
+    r = _post(sink, json.dumps(payload).encode())
+    assert r.status_code == 400 and r.json()["error"] == "bad_request"
+
+
 def test_last_seen_survives_restart(tmp_path, keypair):
     _, pub = keypair
     s1 = IngestSink(SECRET, pub, tmp_path / "sink", port=0)

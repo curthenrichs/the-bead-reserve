@@ -76,7 +76,13 @@ class IngestSink:
         try:
             payload = json.loads(raw_body)
             counter = payload["counter"]
-            if not isinstance(counter, int) or not all(k in payload for k in _META_KEYS):
+            ts = payload["ts"]
+            if (not isinstance(counter, int) or isinstance(counter, bool)
+                    or not isinstance(ts, int) or isinstance(ts, bool)
+                    or not isinstance(payload["sha256"], str)
+                    or not isinstance(payload["sig"], str)
+                    or not isinstance(payload["image_b64"], str)
+                    or not (payload["croText"] is None or isinstance(payload["croText"], str))):
                 raise ValueError("bad shape")
             image = base64.b64decode(payload["image_b64"], validate=True)
         except (ValueError, KeyError, TypeError):
@@ -86,7 +92,7 @@ class IngestSink:
         try:
             ok = (hashlib.sha256(image).hexdigest() == payload["sha256"]
                   and verify(self.pubkey_hex, payload["sha256"], payload["sig"]))
-        except ValueError:
+        except (ValueError, TypeError):
             ok = False
         if not ok:
             return self._reject(400, "bad_signature", counter)
@@ -95,7 +101,7 @@ class IngestSink:
             if counter <= self._last_seen:
                 return self._reject(409, "counter_seen", counter)
             # 5. ts skew: warn-marker only — backfill is legitimately old
-            age = int(time.time()) - int(payload["ts"])
+            age = int(time.time()) - ts
             reason = f"age={age}s" + (" skew-warn" if abs(age) > _TS_SKEW_WARN_S else "")
             (self.frames_dir / f"{counter}.jpg").write_bytes(image)
             meta = {k: payload[k] for k in _META_KEYS}
@@ -121,7 +127,10 @@ def _make_handler(sink: IngestSink):
         def do_POST(self):
             if self.path != "/api/ingest":
                 return self._respond(404, {"error": "not_found"})
-            length = int(self.headers.get("Content-Length") or 0)
+            try:
+                length = int(self.headers.get("Content-Length") or 0)
+            except ValueError:
+                return self._respond(400, {"error": "bad_request"})
             raw = self.rfile.read(length)
             try:
                 status, body = sink.handle_ingest(raw, self.headers.get("X-Beadz-Mac"))
