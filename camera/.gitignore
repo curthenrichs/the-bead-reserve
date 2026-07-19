@@ -135,3 +135,7 @@ cython_debug/
 
 # Logs
 *.log
+
+# pipeline state artifacts (only relevant if STATE_DIR points inside the repo)
+.lock
+*.tmp

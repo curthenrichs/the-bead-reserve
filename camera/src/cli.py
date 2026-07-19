@@ -152,7 +152,10 @@ def main(argv: list[str] | None = None) -> int:
         return 3
     except (CaptureError, ProcessError, CounterError, PushError,
             ValueError, OSError) as exc:
-        # backstop: no handled path ever prints a traceback
+        # backstop: no handled path ever prints a traceback. Reachable when an
+        # error escapes the commands' local handlers — e.g. a lock-acquire or
+        # status-write failure inside an error handler, or in seed-counter,
+        # which has no local try around its lock.
         print(f"{args.command} failed: {exc}", file=sys.stderr)
         return 1
 

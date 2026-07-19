@@ -50,7 +50,7 @@ The CLI contract:
 
 ## Counter recovery
 
-If the counter file (`STATE_DIR/counter.txt`) is corrupt or lost, restore it with:
+If the counter file (`STATE_DIR/counter`) is corrupt or lost, restore it with:
 
 ```bash
 sudo -u beadz beadz-camera --env /etc/beadz-camera/device.env seed-counter --force --value N
