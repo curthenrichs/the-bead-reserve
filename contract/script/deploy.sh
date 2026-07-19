@@ -30,9 +30,10 @@ if [ "${1:-}" = "--broadcast" ]; then
         "broadcast/Deploy.s.sol/$CHAIN_ID/run-latest.json" | head -1)
     [ -n "$addr" ] || die "could not read deployed address from broadcast log"
     if grep -q '^BEADZ_ADDRESS=' .env 2>/dev/null; then
-        sed -i.bak "s/^BEADZ_ADDRESS=.*/BEADZ_ADDRESS=$addr/" .env && rm -f .env.bak
+        sed -i.bak "s/^BEADZ_ADDRESS=.*/BEADZ_ADDRESS=$addr/" .env || die "failed to update BEADZ_ADDRESS in .env"
+        rm -f .env.bak
     else
-        echo "BEADZ_ADDRESS=$addr" >> .env
+        echo "BEADZ_ADDRESS=$addr" >> .env || die "failed to append BEADZ_ADDRESS to .env"
     fi
     echo "== deployed: $addr (recorded as BEADZ_ADDRESS in contract/.env)"
 fi
