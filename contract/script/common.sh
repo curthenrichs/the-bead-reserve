@@ -40,6 +40,7 @@ keystore_file() { echo "$HOME/.foundry/keystores/$(acct "$1")"; }
 
 # PW_OPTS: --password-file args when KEYSTORE_PASSWORD_FILE is set; empty
 # (interactive cast/forge password prompt) otherwise — the mainnet posture.
+# NOTE: empty-array expansion under set -u needs bash >= 4.4 (Git Bash 5.x ok; macOS system bash 3.2 is not supported).
 PW_OPTS=()
 [ -n "${KEYSTORE_PASSWORD_FILE:-}" ] && PW_OPTS=(--password-file "$KEYSTORE_PASSWORD_FILE")
 

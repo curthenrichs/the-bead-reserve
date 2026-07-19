@@ -27,8 +27,14 @@ num()  { view "$@" | awk '{print $1}'; }
 wei()  { cast to-wei "$1" ether; }   # beads share ether's 18 decimals
 bearer_addr() { # <role-or-0xaddress> — third parties are raw addresses, roles are local keystores
     case "$1" in
-        0x*) cast to-check-sum-address "$1" >/dev/null 2>&1 || die "invalid address: $1"
-             echo "$1" ;;
+        0x*)
+            local cs lower
+            cs=$(cast to-check-sum-address "$1" 2>/dev/null) || die "invalid address: $1"
+            lower=$(printf '%s' "$1" | tr 'A-F' 'a-f')
+            if [ "$1" != "$lower" ] && [ "$1" != "$cs" ]; then
+                die "address case does not match EIP-55 checksum: $1"
+            fi
+            echo "$1" ;;
         *)   addr_of "$1" || exit 1 ;;
     esac
 }

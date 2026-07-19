@@ -18,7 +18,9 @@
 set -uo pipefail
 . "$(dirname "$0")/common.sh"
 
-PF_KEEPER_ACCOUNT="${PF_KEEPER_ACCOUNT:-beadz-mainnet-keeper}"
+# Tracks BEADZ_ACCOUNT_keeper / BEADZ_ACCOUNT_PREFIX overrides from .env (see acct() in
+# common.sh) instead of hardcoding the mainnet keystore name.
+PF_KEEPER_ACCOUNT="${PF_KEEPER_ACCOUNT:-$(acct keeper)}"
 PW_ARGS=()
 [ -n "${PF_PASSWORD_FILE:-}" ] && PW_ARGS=(--password-file "$PF_PASSWORD_FILE")
 
@@ -83,7 +85,9 @@ phase_a() {
 phase_c() {
     echo "== PHASE C: wallet validation"
     require_env BEADZ_KEEPER BEADZ_TREASURY
-    require_rpc
+    # Read-only phase (keystore derivation + receipt reads; nothing broadcast):
+    # read the chain id without tripping the mainnet guard, like phase E.
+    BEADZ_ALLOW_MAINNET=1 require_rpc
     local k_ks k_mm t1 t2
     k_ks=$(cast wallet address --account "$PF_KEEPER_ACCOUNT" "${PW_ARGS[@]}") || die "cannot open keeper keystore"
     ask "keeper address AS SHOWN IN METAMASK (copy from the extension)"; k_mm="$REPLY"
@@ -111,7 +115,7 @@ phase_e() {
     confirm_phrase "I PERSONALLY RAN THE FULL SEPOLIA CEREMONY END TO END"
     confirm_phrase "I HAVE SIGNED OFF EVERY CONSTRUCTOR ARGUMENT AGAINST THE DRY RUN"
     if [ "$CHAIN_ID" = "8453" ]; then
-        if grep -q '^BEADZ_ALLOW_MAINNET=1' "$CONTRACT_DIR/.env" 2>/dev/null; then
+        if grep -q '^BEADZ_ALLOW_MAINNET=1$' "$CONTRACT_DIR/.env" 2>/dev/null; then
             echo "flag already present in .env: treating this as the SECOND pass"
         else
             # Probe: with the override forced ABSENT, the guard must refuse chain 8453.
@@ -125,7 +129,7 @@ phase_e() {
     gate "ETHERSCAN_API_KEY present" test -n "${ETHERSCAN_API_KEY:-}"
     confirm_phrase "NO POOL WILL BE SEEDED AND NONE ENDORSED"
     confirm_phrase "THE ANNOUNCEMENT EMBARGO HOLDS UNTIL THE LAUNCH DECISION"
-    if grep -q '^BEADZ_ALLOW_MAINNET=1' "$CONTRACT_DIR/.env" 2>/dev/null; then
+    if grep -q '^BEADZ_ALLOW_MAINNET=1$' "$CONTRACT_DIR/.env" 2>/dev/null; then
         ok "BEADZ_ALLOW_MAINNET=1 is set — phase E complete; proceed to deploy.sh"
     else
         echo
