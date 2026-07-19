@@ -73,8 +73,9 @@ for that campaign.
    ```bash
    sudo bash camera/launch.sh --mode loopback --profile
    ```
-   This installs and starts `beadz-sink.service` (the local ingest sink,
-   pointed at by `INGEST_URL=http://127.0.0.1:<port>/api/ingest`) alongside
+   This installs and starts `beadz-sink.service` (the local ingest sink) and
+   configures the pipeline's `INGEST_URL` to point at it (`http://127.0.0.1:<port>/api/ingest`),
+   alongside
    the usual `beadz-capture`/`beadz-push` timers, and — with `--profile` —
    launches a transient `beadz-profile` unit running
    `scripts/profile-snapshot.sh` in the background. Other flags:

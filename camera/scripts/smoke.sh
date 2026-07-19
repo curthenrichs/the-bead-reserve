@@ -51,7 +51,12 @@ echo "   (these two lines MUST match; verify the Ed25519 sig against the"
 echo "    published pubkey via the site's verification instructions)"
 
 echo "== 6. install timers =="
-sudo cp /opt/beadz-camera/camera/systemd/beadz-*.{service,timer} /etc/systemd/system/
+# capture + push units only — NOT beadz-sink.service (self-test sink, installed by launch.sh)
+sudo cp /opt/beadz-camera/camera/systemd/beadz-capture.service \
+        /opt/beadz-camera/camera/systemd/beadz-capture.timer \
+        /opt/beadz-camera/camera/systemd/beadz-push.service \
+        /opt/beadz-camera/camera/systemd/beadz-push.timer \
+        /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now beadz-capture.timer beadz-push.timer
 systemctl list-timers 'beadz-*'
