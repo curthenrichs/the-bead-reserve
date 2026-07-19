@@ -85,7 +85,9 @@ for that campaign.
    - `journalctl -u beadz-capture -u beadz-push -u beadz-sink -f`
    - the profiler's CSV at `<sink-dir>/profile.csv`, one row every 5 minutes
      by default, columns: `ts_iso, sink_rss_kb, sink_cpu_pct, queue_bytes,
-     archive_bytes, sink_frames_bytes, sink_frame_count, err_count`.
+     archive_bytes, sink_frames_bytes, sink_frame_count, err_count`. To confirm
+     the `err_count` column is live, log a test error on the Pi with `logger -p
+     err -t beadz-sink test` and verify the next sample increments `err_count`.
 6. Monday's LAN leg: start the sink on the dev machine, bound to all
    interfaces so the Pi can reach it —
    ```bash

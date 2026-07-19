@@ -35,9 +35,10 @@ if [ ! -f "$OUT" ]; then
 fi
 
 start_epoch=$(date +%s)
-last_ts=$(date -Is)
+last_since=$(date '+%Y-%m-%d %H:%M:%S')
 while :; do
     ts=$(date -Is)
+    this_since=$(date '+%Y-%m-%d %H:%M:%S')
     pid=$(systemctl show -p MainPID --value beadz-sink.service 2>/dev/null || echo 0)
     if [ "${pid:-0}" -gt 0 ] 2>/dev/null; then
         read -r rss cpu < <(ps -o rss=,pcpu= -p "$pid" 2>/dev/null || echo "0 0")
@@ -49,8 +50,8 @@ while :; do
     f=$(dir_bytes "$SINK_DIR/frames")
     fc=$(find "$SINK_DIR/frames" -maxdepth 1 -name '*.jpg' 2>/dev/null | wc -l | tr -d ' ')
     ec=$(journalctl -u beadz-capture -u beadz-push -u beadz-sink -p err \
-             --since "$last_ts" --no-pager 2>/dev/null | grep -c . || true)
-    last_ts="$ts"
+             --since "$last_since" --until "$this_since" --no-pager 2>/dev/null | grep -c . || true)
+    last_since="$this_since"
     printf '%s,%s,%s,%s,%s,%s,%s,%s\n' \
         "$ts" "${rss:-0}" "${cpu:-0}" "$q" "$a" "$f" "$fc" "$ec" >> "$OUT"
     if [ "$DURATION" -gt 0 ] && [ $(( $(date +%s) - start_epoch )) -ge "$DURATION" ]; then
