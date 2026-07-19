@@ -47,8 +47,8 @@ status)
     printf '%-10s %-44s %s\n' ROLE ADDRESS 'BALANCE (ETH)'
     for role in $BEADZ_WALLETS; do
         addr=$(addr_of "$role") || exit 1
-        printf '%-10s %-44s %s\n' "$role" "$addr" \
-            "$(cast balance "$addr" --rpc-url "$BEADZ_RPC_URL" --ether)"
+        bal=$(cast balance "$addr" --rpc-url "$BEADZ_RPC_URL" --ether) || die "cast balance failed for $role (RPC ok?)"
+        printf '%-10s %-44s %s\n' "$role" "$addr" "$bal"
     done
     ;;
 
