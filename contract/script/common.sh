@@ -31,11 +31,22 @@ require_rpc() {
     fi
 }
 
-acct() { echo "$BEADZ_ACCOUNT_PREFIX-$1"; }
+acct() {
+    local o="BEADZ_ACCOUNT_${1//[^A-Za-z0-9_]/_}"
+    if [ -n "${!o:-}" ]; then echo "${!o}"; return; fi
+    echo "$BEADZ_ACCOUNT_PREFIX-$1"
+}
 keystore_file() { echo "$HOME/.foundry/keystores/$(acct "$1")"; }
 
+# PW_OPTS: --password-file args when KEYSTORE_PASSWORD_FILE is set; empty
+# (interactive cast/forge password prompt) otherwise — the mainnet posture.
+PW_OPTS=()
+[ -n "${KEYSTORE_PASSWORD_FILE:-}" ] && PW_OPTS=(--password-file "$KEYSTORE_PASSWORD_FILE")
+
 addr_of() {
-    cast wallet address --account "$(acct "$1")" --password-file "$KEYSTORE_PASSWORD_FILE" 2>/dev/null \
+    # No 2>/dev/null: with no password file, cast prompts interactively on the
+    # controlling terminal and that prompt must not be swallowed.
+    cast wallet address --account "$(acct "$1")" "${PW_OPTS[@]}" \
         || die "cannot open keystore for role '$1' (run: wallets.sh create)"
 }
 
@@ -43,5 +54,5 @@ addr_of() {
 send_as() {
     local role="$1"; shift
     cast send "$@" --rpc-url "$BEADZ_RPC_URL" \
-        --account "$(acct "$role")" --password-file "$KEYSTORE_PASSWORD_FILE"
+        --account "$(acct "$role")" "${PW_OPTS[@]}"
 }

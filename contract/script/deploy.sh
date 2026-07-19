@@ -8,7 +8,7 @@
 #                          records the address as BEADZ_ADDRESS in contract/.env
 set -uo pipefail
 . "$(dirname "$0")/common.sh"
-require_env BEADZ_ACCOUNT_PREFIX KEYSTORE_PASSWORD_FILE BEADZ_KEEPER BEADZ_TREASURY BEADZ_AIRDROP_BEADS
+require_env BEADZ_ACCOUNT_PREFIX BEADZ_KEEPER BEADZ_TREASURY BEADZ_AIRDROP_BEADS
 require_rpc
 cd "$CONTRACT_DIR"
 
@@ -19,7 +19,7 @@ esac
 
 broadcast=0
 args=(script/Deploy.s.sol:DeployBeadz --rpc-url "$BEADZ_RPC_URL"
-      --account "$(acct deployer)" --password-file "$KEYSTORE_PASSWORD_FILE")
+      --account "$(acct deployer)" "${PW_OPTS[@]}")
 if [ "${1:-}" = "--broadcast" ]; then
     broadcast=1
     args+=(--broadcast)
