@@ -1,0 +1,33 @@
+# Line-ending policy: the deploy target (the Pi, contract tooling, CI) is Linux.
+# Normalize all text to LF in the repository AND force LF on checkout, so a
+# Windows checkout can never leak CRLF into an scp/rsync/tar deploy or break a
+# shell script's shebang. (A CRLF launch.sh/provision.sh is a real bring-up bug.)
+
+* text=auto eol=lf
+
+# Belt-and-suspenders for files executed or parsed on Linux — LF even if git's
+# content auto-detection ever wavers.
+*.sh       text eol=lf
+*.bash     text eol=lf
+*.py       text eol=lf
+*.service  text eol=lf
+*.timer    text eol=lf
+*.mount    text eol=lf
+*.sol      text eol=lf
+*.typ      text eol=lf
+*.toml     text eol=lf
+*.env.example text eol=lf
+
+# Binary assets — never normalize.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.pdf   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
+*.zip   binary
+*.gz    binary
