@@ -75,6 +75,12 @@ class StateDir:
         atomic_write_text(self.queue_dir / f"{counter}.json", json.dumps(meta))
 
     def pending(self) -> list[QueuedFrame]:
+        # Reclaim jpgs orphaned by a crashed enqueue (jpg written, json never
+        # committed). enqueue and pending both run under the state lock, so a
+        # queue jpg with no sibling json is always a dead-process artifact.
+        for stray in self.queue_dir.glob("*.jpg"):
+            if not stray.with_suffix(".json").exists():
+                stray.unlink()
         frames = []
         for json_path in self.queue_dir.glob("*.json"):
             try:

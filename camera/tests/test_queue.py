@@ -77,3 +77,12 @@ def test_corrupt_counter_message_names_working_recovery(state):
     (state.root / "counter").write_text("not-a-number")
     with pytest.raises(CounterError, match="--force"):
         state.next_counter()
+
+
+def test_pending_reclaims_orphaned_jpg(state, enqueue_frame):
+    enqueue_frame(state, 1)                       # a normal, committed frame
+    (state.root / "queue" / "7.jpg").write_bytes(b"orphan")  # crashed enqueue: no json
+    result = state.pending()
+    assert [f.counter for f in result] == [1]     # orphan not surfaced
+    assert not (state.root / "queue" / "7.jpg").exists()     # and reclaimed
+    assert (state.root / "queue" / "1.jpg").exists()         # committed frame untouched
