@@ -6,7 +6,7 @@ import requests
 import responses
 
 from beadz_camera.config import Config
-from beadz_camera.push import drain, hmac_hex
+from beadz_camera.push import PushError, drain, hmac_hex
 from beadz_camera.queue import StateDir
 
 INGEST = "https://api.test/ingest"
@@ -85,3 +85,28 @@ def test_network_exception_stops_drain(cfg, state):
     assert report["failed"] is True
     assert report["pushed"] == 0
     assert len(state.pending()) == 3
+
+
+@responses.activate
+def test_drain_scans_queue_once(cfg, state, monkeypatch):
+    responses.add(responses.POST, INGEST, status=200, json={})
+    calls = []
+    real_pending = type(state).pending
+
+    def spy(self):
+        calls.append(1)
+        return real_pending(self)
+
+    monkeypatch.setattr(type(state), "pending", spy)
+    drain(cfg, state)
+    assert len(calls) == 1
+
+
+def test_frame_file_error_raises_push_error(cfg, state, monkeypatch):
+    # snapshot FIRST, then delete the jpg — simulates local loss mid-drain
+    # (a fresh pending() would just skip the frame, so pin the snapshot)
+    snapshot = state.pending()
+    snapshot[0].jpg.unlink()
+    monkeypatch.setattr(type(state), "pending", lambda self: snapshot)
+    with pytest.raises(PushError, match="frame 1"):
+        drain(cfg, state)  # read_bytes -> FileNotFoundError -> PushError; no HTTP happens
