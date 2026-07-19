@@ -18,23 +18,23 @@ frame, re-hash it, and verify against the published public key.
 
 ## Pi bring-up (summary)
 
-1. Pi OS Lite 64-bit, `beadz` service user (in `video` group), `fswebcam`.
-2. Clone to `/opt/beadz-camera`; `python3 -m venv venv && venv/bin/pip
-   install -e ./camera`.
-3. Enable tmpfs `/tmp` (raw frames must not touch the SD card): `sudo cp
-   /usr/share/systemd/tmp.mount /etc/systemd/system/ && sudo systemctl
-   enable --now tmp.mount`. (The systemd path already gets a private
-   tmpfs-backed /tmp from PrivateTmp=yes; the host tmp.mount matters for
-   manual runs like smoke.sh. The unit enforces the check per-run via
-   `ExecCondition=findmnt -n -t tmpfs /tmp`; a failed condition skips the
-   capture and logs a journal line.)
-4. `sudo mkdir -p /etc/beadz-camera`, `sudo cp camera/device.env.example
-   /etc/beadz-camera/device.env`, fill in, `sudo chown beadz:beadz
-   /etc/beadz-camera/device.env`, `sudo chmod 0600
-   /etc/beadz-camera/device.env`.
-5. Run `bash camera/smoke.sh` — it keygens (prints the public key: publish
+1. Pi OS Lite 64-bit; `sudo apt-get install -y git`, then clone this repo to
+   `/opt/beadz-camera`.
+2. `sudo bash camera/provision.sh` — idempotent one-command setup: apt
+   packages (the script is the complete manifest), `beadz` service user
+   (`video` group), tmpfs `/tmp`, venv build, and seeds
+   `/etc/beadz-camera/device.env` (mode 0600; never overwrites an existing
+   one). Refuses to run on a non-apt machine.
+3. Fill in `/etc/beadz-camera/device.env`.
+4. Run `bash camera/smoke.sh` — it keygens (prints the public key: publish
    it), seeds the counter, does one real capture+push, walks the
    independent hash verification, and installs the timers.
+
+tmpfs note: the systemd units already get a private tmpfs-backed `/tmp`
+from `PrivateTmp=yes`; the host `tmp.mount` (enabled by `provision.sh`)
+matters for manual runs like `smoke.sh`. The capture unit enforces the
+check per-run via `ExecCondition=findmnt -n -t tmpfs /tmp`; a failed
+condition skips the capture and logs a journal line.
 
 The device holds no chain key, listens on no ports, and pushes outbound
 TLS only. Raw (uncropped) frames never touch the SD card.
