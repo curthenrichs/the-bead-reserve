@@ -15,11 +15,17 @@ if [ "$(findmnt -n -o FSTYPE /tmp)" != "tmpfs" ]; then
     exit 1
 fi
 
-echo "== 1. keygen (skip if key exists) =="
-sudo -u beadz "$BIN" --env "$ENV" keygen || echo "(key already present)"
+echo "== 1. keygen (idempotent) =="
+rc=0; sudo -u beadz "$BIN" --env "$ENV" keygen || rc=$?
+if [ "$rc" -ne 0 ] && [ "$rc" -ne 3 ]; then
+    echo "keygen FAILED (exit $rc) — fix before continuing"; exit "$rc"
+fi
 
-echo "== 2. seed counter (skip if seeded) =="
-sudo -u beadz "$BIN" --env "$ENV" seed-counter || echo "(already seeded)"
+echo "== 2. seed counter (idempotent) =="
+rc=0; sudo -u beadz "$BIN" --env "$ENV" seed-counter || rc=$?
+if [ "$rc" -ne 0 ] && [ "$rc" -ne 3 ]; then
+    echo "seed-counter FAILED (exit $rc) — fix before continuing"; exit "$rc"
+fi
 
 echo "== 3. real capture =="
 sudo -u beadz "$BIN" --env "$ENV" capture-once

@@ -25,7 +25,9 @@ frame, re-hash it, and verify against the published public key.
    /usr/share/systemd/tmp.mount /etc/systemd/system/ && sudo systemctl
    enable --now tmp.mount`. (The systemd path already gets a private
    tmpfs-backed /tmp from PrivateTmp=yes; the host tmp.mount matters for
-   manual runs like smoke.sh.)
+   manual runs like smoke.sh. The unit enforces the check per-run via
+   `ExecCondition=findmnt -n -t tmpfs /tmp`; a failed condition skips the
+   capture and logs a journal line.)
 4. `sudo mkdir -p /etc/beadz-camera`, `sudo cp camera/device.env.example
    /etc/beadz-camera/device.env`, fill in, `sudo chown beadz:beadz
    /etc/beadz-camera/device.env`, `sudo chmod 0600
@@ -36,3 +38,23 @@ frame, re-hash it, and verify against the published public key.
 
 The device holds no chain key, listens on no ports, and pushes outbound
 TLS only. Raw (uncropped) frames never touch the SD card.
+
+## Exit codes
+
+The CLI contract:
+
+- `0` → success; no errors; frame queued and signed
+- `1` → pipeline failure (recoverable); error recorded in `status.json`
+- `2` → config error (fix `device.env` and retry)
+- `3` → already initialized (benign rerun; e.g., keygen finds existing key)
+
+## Counter recovery
+
+If the counter file (`STATE_DIR/counter.txt`) is corrupt or lost, restore it with:
+
+```bash
+sudo -u beadz beadz-camera --env /etc/beadz-camera/device.env seed-counter --force --value N
+```
+
+The backend rejects any counter value already seen (replay protection). `N` must
+exceed the highest counter the backend has recorded so far.
