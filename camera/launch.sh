@@ -16,13 +16,21 @@ SINK_ENV=/etc/beadz-camera/sink.env
 UNIT_DIR=/etc/systemd/system
 
 # ---- helpers ---------------------------------------------------------------
-set_env_key() {  # KEY VALUE FILE — replace-or-append, idempotent
-    local key="$1" val="$2" file="$3"
-    if grep -q "^${key}=" "$file"; then
-        sed -i "s|^${key}=.*|${key}=${val}|" "$file"
-    else
-        printf '%s=%s\n' "$key" "$val" >> "$file"
-    fi
+set_env_key() {  # KEY VALUE FILE — replace-in-place-or-append, idempotent, value-literal
+    local key="$1" val="$2" file="$3" line found=0 tmp
+    tmp="$(mktemp)"
+    while IFS= read -r line || [ -n "$line" ]; do
+        if [ "$found" -eq 0 ] && [[ "$line" == "${key}="* ]]; then
+            printf '%s=%s\n' "$key" "$val" >> "$tmp"
+            found=1
+        else
+            printf '%s\n' "$line" >> "$tmp"
+        fi
+    done < "$file"
+    [ "$found" -eq 1 ] || printf '%s=%s\n' "$key" "$val" >> "$tmp"
+    # truncate-and-write in place (NOT mv) so the file keeps its 0600 beadz ownership
+    cat "$tmp" > "$file"
+    rm -f "$tmp"
 }
 
 get_env_key() {  # KEY FILE -> value on stdout (empty if absent)
@@ -130,6 +138,9 @@ main() {
 
     if [ "$stop" = "1" ]; then do_stop; return; fi
     require_provisioned
+    if [ "$profile" = "1" ] && [ "$mode" = "lan" ]; then
+        echo "WARN: --profile is ignored in --mode lan (profiler only runs in loopback mode)" >&2
+    fi
     case "$mode" in
         loopback) do_loopback "$port" "$sink_dir" "$resolution" "$profile" ;;
         lan)      do_lan "$ingest_url" "$resolution" ;;
