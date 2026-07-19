@@ -155,6 +155,18 @@ def test_push_drain_corrupt_queue_json_exits_1_with_status(env_file, tmp_path, f
     assert "last_error" in status
 
 
+def test_idle_push_drain_does_not_rewrite_status(env_file, tmp_path, monkeypatch):
+    assert cli.main(["--env", str(env_file), "seed-counter"]) == 0
+    assert cli.main(["--env", str(env_file), "push-drain"]) == 0      # first: writes
+    import beadz_camera.status as st
+    calls = []
+    real = st.atomic_write_text
+    monkeypatch.setattr(st, "atomic_write_text",
+                        lambda p, t: (calls.append(1), real(p, t))[1])
+    assert cli.main(["--env", str(env_file), "push-drain"]) == 0      # idle repeat
+    assert calls == []                                               # no status rewrite
+
+
 @responses.activate
 def test_mutations_happen_under_lock(env_file, fake_capture, monkeypatch):
     events = []

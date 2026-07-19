@@ -105,7 +105,8 @@ def _cmd_push_drain(cfg: Config) -> int:
     try:
         with state_lock(cfg.state_dir):
             report = drain(cfg, state)
-            update_status(cfg.state_dir, last_push_ok=not report["failed"],
+            update_status(cfg.state_dir, min_interval_s=3600,
+                          last_push_ok=not report["failed"],
                           queue_depth=report["remaining"],
                           last_push_report=report)
     except (CounterError, PushError, ValueError, OSError) as exc:
