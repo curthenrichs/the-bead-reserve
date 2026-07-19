@@ -15,6 +15,8 @@ import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
+from .fsio import atomic_write_text
+
 
 class CounterError(RuntimeError):
     pass
@@ -26,12 +28,6 @@ class QueuedFrame:
     jpg: Path
     json_path: Path
     meta: dict
-
-
-def _atomic_write_text(path: Path, text: str) -> None:
-    tmp = path.with_name(path.name + ".tmp")
-    tmp.write_text(text)
-    os.replace(tmp, path)
 
 
 class StateDir:
@@ -49,7 +45,7 @@ class StateDir:
     def seed_counter(self, value: int = 0) -> None:
         if self._counter_file.exists():
             raise FileExistsError(f"counter already seeded: {self._counter_file}")
-        _atomic_write_text(self._counter_file, f"{value}\n")
+        atomic_write_text(self._counter_file, f"{value}\n")
 
     def next_counter(self) -> int:
         try:
@@ -64,7 +60,7 @@ class StateDir:
                 f"counter file corrupt: {self._counter_file} — refusing to guess"
             ) from exc
         value = current + 1
-        _atomic_write_text(self._counter_file, f"{value}\n")
+        atomic_write_text(self._counter_file, f"{value}\n")
         return value
 
     def enqueue(self, counter: int, jpg_src: Path, meta: dict) -> None:
@@ -73,7 +69,7 @@ class StateDir:
         tmp_jpg = jpg_dest.with_name(jpg_dest.name + ".tmp")
         shutil.move(str(jpg_src), tmp_jpg)
         os.replace(tmp_jpg, jpg_dest)
-        _atomic_write_text(self.queue_dir / f"{counter}.json", json.dumps(meta))
+        atomic_write_text(self.queue_dir / f"{counter}.json", json.dumps(meta))
 
     def pending(self) -> list[QueuedFrame]:
         frames = []

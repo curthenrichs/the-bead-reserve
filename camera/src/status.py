@@ -4,9 +4,10 @@ endpoint — the future LAN dashboard renders it; the pipeline only writes."""
 from __future__ import annotations
 
 import json
-import os
 import time
 from pathlib import Path
+
+from .fsio import atomic_write_text
 
 
 def update_status(state_root: Path, **fields) -> None:
@@ -19,8 +20,4 @@ def update_status(state_root: Path, **fields) -> None:
         current = {}
     current.update(fields)
     current["updated_ts"] = int(time.time())
-    # PID-unique tmp: capture-once and push-drain are separate processes that
-    # can update status.json concurrently (both timers fire at the top of the hour)
-    tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
-    tmp.write_text(json.dumps(current, indent=2))
-    os.replace(tmp, path)
+    atomic_write_text(path, json.dumps(current, indent=2))
