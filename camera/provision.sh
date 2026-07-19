@@ -65,7 +65,11 @@ if [ -z "$STATE_DIR" ]; then
     echo "FAIL: STATE_DIR not set in $ENV_FILE" >&2
     exit 1
 fi
-install -d -o beadz -g beadz -m 0700 "$STATE_DIR"
+# 0755, not 0700: smoke.sh's independent verification step globs
+# $STATE_DIR/archive/*.json as the unprivileged invoking user. The
+# Ed25519 private key stays protected at file level (0600, O_CREAT|O_EXCL);
+# the archived frames are public signed data by design.
+install -d -o beadz -g beadz -m 0755 "$STATE_DIR"
 
 echo "== provision complete. Next: =="
 echo "   1. edit $ENV_FILE"
