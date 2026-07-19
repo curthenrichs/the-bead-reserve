@@ -42,8 +42,8 @@ class StateDir:
     def _counter_file(self) -> Path:
         return self.root / "counter"
 
-    def seed_counter(self, value: int = 0) -> None:
-        if self._counter_file.exists():
+    def seed_counter(self, value: int = 0, force: bool = False) -> None:
+        if self._counter_file.exists() and not force:
             raise FileExistsError(f"counter already seeded: {self._counter_file}")
         atomic_write_text(self._counter_file, f"{value}\n")
 
@@ -57,7 +57,10 @@ class StateDir:
             ) from exc
         except ValueError as exc:
             raise CounterError(
-                f"counter file corrupt: {self._counter_file} — refusing to guess"
+                f"counter file corrupt: {self._counter_file} — refusing to guess. "
+                "Recover with `beadz-camera seed-counter --force --value N` where N "
+                "is GREATER than the highest counter the backend has seen (a reused "
+                "counter is rejected as a replay)."
             ) from exc
         value = current + 1
         atomic_write_text(self._counter_file, f"{value}\n")

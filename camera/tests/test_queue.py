@@ -76,3 +76,15 @@ def test_pending_heals_crashed_archive(state, tmp_path):
     assert state.pending() == []                          # not pushable
     assert (state.root / "archive" / "1.json").exists()   # heal completed the move
     assert not (state.root / "queue" / "1.json").exists()
+
+
+def test_seed_force_recovers_corrupt_counter(state):
+    (state.root / "counter").write_text("not-a-number")
+    state.seed_counter(41, force=True)
+    assert state.next_counter() == 42
+
+
+def test_corrupt_counter_message_names_working_recovery(state):
+    (state.root / "counter").write_text("not-a-number")
+    with pytest.raises(CounterError, match="--force"):
+        state.next_counter()
