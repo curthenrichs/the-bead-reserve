@@ -219,6 +219,8 @@ on-chain powers are deliberately confined to:
 
 - logging bead recounts (`attestBeadCount`);
 - acknowledging shipments (`acknowledgeRedemption`);
+- anchoring the published reserve record's Merkle root on chain
+  (`attestReserveRecord`), an event-only act that touches no balances;
 - extending or reopening the redemption window
   (`setRedemptionDeadline`), a power that can only ever widen access,
   never remove it; and
