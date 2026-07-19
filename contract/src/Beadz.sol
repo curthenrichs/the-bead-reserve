@@ -70,7 +70,8 @@ contract Beadz is ERC20 {
 
     /// @notice Holder of the discretionary genesis allocation, carved from the fixed supply for
     ///         hand-distribution (gifts/airdrops). Recommended: a cold wallet, not the deployer.
-    address public treasury;
+    ///         Immutable: set once at genesis, no code path reassigns it.
+    address public immutable treasury;
 
     /// @notice Most recent physically attested bead count (the webcam recount).
     uint256 public attestedBeads;
