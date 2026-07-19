@@ -39,6 +39,7 @@ status)
     echo "  redemption open:     $(view 'redemptionOpen()(bool)')"
     echo "  deadline (unix):     $(num 'redemptionDeadline()(uint256)')"
     echo "  vault keeper:        $(view 'vaultKeeper()(address)')"
+    echo "  keeper role in use:  $K_ROLE ($(addr_of "$K_ROLE"))"
     printf '  %-10s %-44s %-12s %-26s %s\n' ROLE ADDRESS ETH 'BEADZ (wei)' CLAIMED
     for role in $BEADZ_WALLETS; do
         addr=$(addr_of "$role") || exit 1

@@ -34,6 +34,7 @@ create)
         key=$(printf '%s' "$json" | sed -n 's/.*"private_key": *"\(0x[0-9a-fA-F]*\)".*/\1/p')
         addr=$(printf '%s' "$json" | sed -n 's/.*"address": *"\(0x[0-9a-fA-F]*\)".*/\1/p')
         [ -n "$key" ] && [ -n "$addr" ] || die "could not parse cast wallet new output"
+        # testnet only: key+password are argv-visible during import; mainnet keys are created interactively, never via this script
         cast wallet import "$name" --private-key "$key" \
             --unsafe-password "$(cat "$KEYSTORE_PASSWORD_FILE")" >/dev/null \
             || die "keystore import failed for $name"

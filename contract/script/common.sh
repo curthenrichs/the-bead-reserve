@@ -26,6 +26,9 @@ require_rpc() {
     require_env BEADZ_RPC_URL
     cast chain-id --rpc-url "$BEADZ_RPC_URL" >/dev/null 2>&1 || die "RPC unreachable: $BEADZ_RPC_URL"
     CHAIN_ID=$(cast chain-id --rpc-url "$BEADZ_RPC_URL")
+    if [ "$CHAIN_ID" = "8453" ] && [ "${BEADZ_ALLOW_MAINNET:-0}" != "1" ]; then
+        die "chain 8453 is Base MAINNET — refusing. Set BEADZ_ALLOW_MAINNET=1 only with explicit sign-off."
+    fi
 }
 
 acct() { echo "$BEADZ_ACCOUNT_PREFIX-$1"; }

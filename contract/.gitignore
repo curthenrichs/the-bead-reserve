@@ -15,6 +15,7 @@
 *.keystore
 *.p12
 *.pfx
+*.pw
 key/
 keys/
 keystore/
