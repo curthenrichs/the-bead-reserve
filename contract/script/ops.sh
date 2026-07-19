@@ -8,7 +8,7 @@
 #   ops.sh surrender <role> <beads>                return beads to the pile
 #   ops.sh redeem <role> <beads> <shipping-ref>    burn for physical shipment
 #   ops.sh attest <beads>                          keeper: log a recount
-#   ops.sh acknowledge <role> <beads> <tracking>   keeper: log a shipment
+#   ops.sh acknowledge <role-or-address> <beads> <tracking>   keeper: log a shipment
 #   ops.sh deadline <unix-timestamp>               keeper: extend/reopen window
 #   ops.sh record <merkle-root> <uri>              keeper: anchor a reserve record
 #   ops.sh rotate <to-role>                        keeper: hand role to <to-role>
@@ -25,6 +25,13 @@ K_ROLE="${BEADZ_KEEPER_ROLE:-keeper}"
 view() { cast call "$BEADZ_ADDRESS" "$@" --rpc-url "$BEADZ_RPC_URL"; }
 num()  { view "$@" | awk '{print $1}'; }
 wei()  { cast to-wei "$1" ether; }   # beads share ether's 18 decimals
+bearer_addr() { # <role-or-0xaddress> — third parties are raw addresses, roles are local keystores
+    case "$1" in
+        0x*) cast to-check-sum-address "$1" >/dev/null 2>&1 || die "invalid address: $1"
+             echo "$1" ;;
+        *)   addr_of "$1" || exit 1 ;;
+    esac
+}
 
 usage() { sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'; exit 1; }
 
@@ -56,7 +63,7 @@ surrender)   send_as "${1:?role}" "$BEADZ_ADDRESS" "surrender(uint256)" "$(wei "
 redeem)      send_as "${1:?role}" "$BEADZ_ADDRESS" "redeem(uint256,string)" "$(wei "${2:?beads}")" "${3:?shipping-ref}" ;;
 attest)      send_as "$K_ROLE" "$BEADZ_ADDRESS" "attestBeadCount(uint256)" "${1:?beads}" ;;
 acknowledge) send_as "$K_ROLE" "$BEADZ_ADDRESS" "acknowledgeRedemption(address,uint256,string)" \
-                 "$(addr_of "${1:?role}")" "${2:?beads}" "${3:?tracking}" ;;
+                 "$(bearer_addr "${1:?role-or-address}")" "${2:?beads}" "${3:?tracking}" ;;
 deadline)    send_as "$K_ROLE" "$BEADZ_ADDRESS" "setRedemptionDeadline(uint256)" "${1:?unix-timestamp}" ;;
 record)      send_as "$K_ROLE" "$BEADZ_ADDRESS" "attestReserveRecord(bytes32,string)" "${1:?merkle-root}" "${2:?uri}" ;;
 rotate)

@@ -47,7 +47,7 @@ addr_of() {
     # No 2>/dev/null: with no password file, cast prompts interactively on the
     # controlling terminal and that prompt must not be swallowed.
     cast wallet address --account "$(acct "$1")" "${PW_OPTS[@]}" \
-        || die "cannot open keystore for role '$1' (run: wallets.sh create)"
+        || die "cannot open keystore '$(acct "$1")' (create or import it first; testnet rosters: wallets.sh create)"
 }
 
 # send_as <role> <cast-send-args...> — a transaction signed by the role's keystore.
