@@ -14,7 +14,7 @@ frame, re-hash it, and verify against the published public key.
 - `tests/`: pytest suite; runs anywhere (`pip install -e .[dev] && pytest`)
 - `device.env.example`: device config template. Copy it to `device.env` and
   never commit the real one.
-- `smoke.sh`: on-Pi bring-up checklist
+- `scripts/`: bring-up smoke test + local ingest sink
 
 ## Pi bring-up (summary)
 
@@ -27,7 +27,7 @@ frame, re-hash it, and verify against the published public key.
    (mode 0600; an existing file is never overwritten). It refuses to run on
    a non-apt machine.
 3. Fill in `/etc/beadz-camera/device.env`.
-4. Run `bash camera/smoke.sh`. It keygens (prints the public key: publish
+4. Run `bash camera/scripts/smoke.sh`. It keygens (prints the public key: publish
    it), seeds the counter, does one real capture+push, walks the
    independent hash verification, and installs the timers.
 
@@ -40,6 +40,25 @@ condition skips the capture and logs a journal line.
 The device holds no chain key and listens on no ports; its only network
 traffic is the outbound TLS push. Raw (uncropped) frames never touch the
 SD card.
+
+## Local integration sink
+
+`scripts/ingest-sink.py` is a contract-reference implementation of the
+ingest backend: the real backend (not yet built) has to match its
+behavior. Point a Pi's `INGEST_URL` at it to watch an actual push land,
+frame and all, without standing up the real backend first. It reuses the
+device's own HMAC and Ed25519 primitives, so it verifies pushes exactly
+the way the eventual backend will.
+
+```bash
+python scripts/ingest-sink.py --port 8080 --bind 0.0.0.0 \
+    --env /path/to/device.env --pubkey-file /path/to/ed25519.pub
+```
+
+Then set the Pi's `INGEST_URL` to `http://<this-machine's-LAN-IP>:8080/api/ingest`.
+
+On Windows, the first run with `--bind 0.0.0.0` may trigger a Firewall
+prompt — allow it on private networks.
 
 ## Exit codes
 

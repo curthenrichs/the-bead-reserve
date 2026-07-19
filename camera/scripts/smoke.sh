@@ -3,6 +3,7 @@
 # Prereqs: fswebcam installed; python3; sha256sum; repo at /opt/beadz-camera;
 #          venv built; tmpfs /tmp enabled (see README); /etc/beadz-camera/device.env
 #          filled in; beadz user exists.
+
 set -euo pipefail
 
 ENV=/etc/beadz-camera/device.env

@@ -73,4 +73,4 @@ install -d -o beadz -g beadz -m 0755 "$STATE_DIR"
 
 echo "== provision complete. Next: =="
 echo "   1. edit $ENV_FILE"
-echo "   2. bash $REPO/camera/smoke.sh"
+echo "   2. bash $REPO/camera/scripts/smoke.sh"
