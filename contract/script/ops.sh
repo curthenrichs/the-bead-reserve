@@ -18,6 +18,7 @@ set -uo pipefail
 . "$(dirname "$0")/common.sh"
 require_env BEADZ_ADDRESS BEADZ_ACCOUNT_PREFIX BEADZ_WALLETS KEYSTORE_PASSWORD_FILE
 require_rpc
+[ "$(cast code "$BEADZ_ADDRESS" --rpc-url "$BEADZ_RPC_URL")" != "0x" ] || die "no contract code at BEADZ_ADDRESS (stale address? redeploy?)"
 K_ROLE="${BEADZ_KEEPER_ROLE:-keeper}"
 
 view() { cast call "$BEADZ_ADDRESS" "$@" --rpc-url "$BEADZ_RPC_URL"; }
@@ -56,8 +57,9 @@ acknowledge) send_as "$K_ROLE" "$BEADZ_ADDRESS" "acknowledgeRedemption(address,u
                  "$(addr_of "${1:?role}")" "${2:?beads}" "${3:?tracking}" ;;
 deadline)    send_as "$K_ROLE" "$BEADZ_ADDRESS" "setRedemptionDeadline(uint256)" "${1:?unix-timestamp}" ;;
 rotate)
-    to_addr=$(addr_of "${1:?to-role}")
-    send_as "$K_ROLE" "$BEADZ_ADDRESS" "transferVaultKeeper(uint8,address,address)" 0 "$to_addr" "$to_addr"
+    to_addr=$(addr_of "${1:?to-role}") || exit 1
+    send_as "$K_ROLE" "$BEADZ_ADDRESS" "transferVaultKeeper(uint8,address,address)" 0 "$to_addr" "$to_addr" \
+        || die "rotate failed"
     echo "rotated to '$1' — keeper actions now need: BEADZ_KEEPER_ROLE=$1 ops.sh <cmd>"
     ;;
 

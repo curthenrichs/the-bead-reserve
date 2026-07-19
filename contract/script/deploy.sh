@@ -12,9 +12,16 @@ require_env BEADZ_ACCOUNT_PREFIX KEYSTORE_PASSWORD_FILE BEADZ_KEEPER BEADZ_TREAS
 require_rpc
 cd "$CONTRACT_DIR"
 
+case "${1:-}" in
+    ""|--broadcast) ;;
+    *) die "usage: deploy.sh [--broadcast]" ;;
+esac
+
+broadcast=0
 args=(script/Deploy.s.sol:DeployBeadz --rpc-url "$BEADZ_RPC_URL"
       --account "$(acct deployer)" --password-file "$KEYSTORE_PASSWORD_FILE")
 if [ "${1:-}" = "--broadcast" ]; then
+    broadcast=1
     args+=(--broadcast)
     if [ -n "${ETHERSCAN_API_KEY:-}" ] && [ "$CHAIN_ID" != "31337" ]; then
         args+=(--verify --etherscan-api-key "$ETHERSCAN_API_KEY")
@@ -23,17 +30,30 @@ else
     echo "== DRY RUN: simulation only (rerun with --broadcast to deploy for real)"
 fi
 
-forge script "${args[@]}" || die "forge script failed"
+LOG="broadcast/Deploy.s.sol/$CHAIN_ID/run-latest.json"
+before=$( [ -f "$LOG" ] && md5sum "$LOG" 2>/dev/null | awk '{print $1}' )
 
-if [ "${1:-}" = "--broadcast" ]; then
-    addr=$(sed -n 's/.*"contractAddress": *"\(0x[0-9a-fA-F]\{40\}\)".*/\1/p' \
-        "broadcast/Deploy.s.sol/$CHAIN_ID/run-latest.json" | head -1)
-    [ -n "$addr" ] || die "could not read deployed address from broadcast log"
-    if grep -q '^BEADZ_ADDRESS=' .env 2>/dev/null; then
-        sed -i.bak "s/^BEADZ_ADDRESS=.*/BEADZ_ADDRESS=$addr/" .env || die "failed to update BEADZ_ADDRESS in .env"
-        rm -f .env.bak
-    else
-        echo "BEADZ_ADDRESS=$addr" >> .env || die "failed to append BEADZ_ADDRESS to .env"
+forge script "${args[@]}"
+FORGE_EXIT=$?
+
+if [ "$broadcast" -eq 1 ]; then
+    after=$( [ -f "$LOG" ] && md5sum "$LOG" 2>/dev/null | awk '{print $1}' )
+    if [ -f "$LOG" ] && [ "$before" != "$after" ]; then
+        addr=$(sed -n 's/.*"contractAddress": *"\(0x[0-9a-fA-F]\{40\}\)".*/\1/p' \
+            "$LOG" | head -1)
+        [ -n "$addr" ] || die "could not read deployed address from broadcast log"
+        if grep -q '^BEADZ_ADDRESS=' .env 2>/dev/null; then
+            sed -i.bak "s/^BEADZ_ADDRESS=.*/BEADZ_ADDRESS=$addr/" .env || die "failed to update BEADZ_ADDRESS in .env"
+            rm -f .env.bak
+        else
+            echo "BEADZ_ADDRESS=$addr" >> .env || die "failed to append BEADZ_ADDRESS to .env"
+        fi
+        if [ "$FORGE_EXIT" -eq 0 ]; then
+            echo "== deployed: $addr (recorded as BEADZ_ADDRESS in contract/.env)"
+        else
+            echo "== forge exited nonzero (verification may have failed) — address $addr recorded; see skill troubleshooting"
+        fi
     fi
-    echo "== deployed: $addr (recorded as BEADZ_ADDRESS in contract/.env)"
 fi
+
+exit "$FORGE_EXIT"

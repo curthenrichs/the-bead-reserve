@@ -21,7 +21,7 @@ create)
     if [ ! -f "$KEYSTORE_PASSWORD_FILE" ]; then
         mkdir -p "$(dirname "$KEYSTORE_PASSWORD_FILE")"
         (umask 177; od -An -N24 -tx1 /dev/urandom | tr -d ' \n' > "$KEYSTORE_PASSWORD_FILE")
-        echo "generated $KEYSTORE_PASSWORD_FILE (mode 600)"
+        echo "generated $KEYSTORE_PASSWORD_FILE (mode $(stat -c %a "$KEYSTORE_PASSWORD_FILE" 2>/dev/null || echo 'unknown'); umask 177 requested — verify on your platform)"
         echo ">>> BACK UP its contents in your password manager now. <<<"
     fi
     for role in $BEADZ_WALLETS; do
