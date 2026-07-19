@@ -67,12 +67,12 @@ Built on OpenZeppelin ERC-20 v5.1.0, Solidity `0.8.24`.
 
 **Constructor:** `constructor(address keeper, address treasury_, uint256 airdropBeads)`
 
-**Constants:** `GENESIS_BEADS = 47_318` · `CLAIM_AMOUNT = 1e18` · `MIN_REDEMPTION = 100e18` ·
+**Constants:** `GENESIS_BEADS = 47_318` · `CLAIM_AMOUNT = 1e18` · `MIN_REDEMPTION = 1e18` ·
 `MAX_EXTENSION = 366 days`
 
 **Functions:** `claim()` · `surrender(amount)` · `redeem(amount, shippingRef)` ·
 `attestBeadCount(beads)` *[keeper]* · `acknowledgeRedemption(bearer, beads, trackingNumber)` *[keeper]* ·
-`setRedemptionDeadline(newDeadline)` *[keeper]* · `transferVaultKeeper(newKeeper)` *[keeper]* ·
+`setRedemptionDeadline(newDeadline)` *[keeper]* · `transferVaultKeeper(action, newKeeper, confirmKeeper)` *[keeper]* ·
 `unclaimedBeads()` · `redemptionOpen()` · `collateralizationBps()` · plus standard ERC-20.
 
 **Events:** `BeadClaimed` · `GenesisAllocated` · `BeadCountAttested` · `PhysicalBeadRedemptionRequested`
@@ -100,6 +100,8 @@ cd contract
 forge build
 forge test              # unit + fuzz/invariant
 slither . --config-file slither.config.json   # static analysis
+bash script/run-slither.sh                    # same, but bootstraps slither + solc 0.8.24 first
+bash script/local-rehearsal.sh                # deploy + full lifecycle on a disposable Anvil chain
 ```
 
 The claim and proof-of-reserves front-end is hosted at
