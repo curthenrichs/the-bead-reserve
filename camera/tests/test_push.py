@@ -107,3 +107,13 @@ def test_frame_file_error_raises_push_error(cfg, state, monkeypatch):
     monkeypatch.setattr(type(state), "pending", lambda self: snapshot)
     with pytest.raises(PushError, match="frame 1"):
         drain(cfg, state)  # read_bytes -> FileNotFoundError -> PushError; no HTTP happens
+
+
+@responses.activate
+def test_archive_oserror_becomes_push_error(cfg, state, monkeypatch):
+    responses.add(responses.POST, INGEST, status=200, json={})
+    def _boom(frame):
+        raise OSError("disk full")
+    monkeypatch.setattr(state, "archive", _boom)   # push succeeds, archive fails
+    with pytest.raises(PushError, match="frame 1"):
+        drain(cfg, state)

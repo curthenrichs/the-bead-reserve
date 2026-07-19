@@ -108,7 +108,7 @@ def _cmd_push_drain(cfg: Config) -> int:
             update_status(cfg.state_dir, last_push_ok=not report["failed"],
                           queue_depth=report["remaining"],
                           last_push_report=report)
-    except (CounterError, PushError, OSError) as exc:
+    except (CounterError, PushError, ValueError, OSError) as exc:
         with state_lock(cfg.state_dir):
             update_status(cfg.state_dir, last_push_ok=False, last_error=str(exc))
         print(f"push-drain failed: {exc}", file=sys.stderr)

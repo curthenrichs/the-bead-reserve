@@ -144,6 +144,17 @@ def test_push_drain_oserror_exits_1_with_status(env_file, tmp_path, fake_capture
     assert "disk full" in status["last_error"]
 
 
+def test_push_drain_corrupt_queue_json_exits_1_with_status(env_file, tmp_path, fake_capture):
+    _bootstrap(env_file)
+    cli.main(["--env", str(env_file), "capture-once"])
+    # corrupt the committed frame's metadata (disk corruption / manual edit)
+    (tmp_path / "state" / "queue" / "1.json").write_text("garbage{")
+    assert cli.main(["--env", str(env_file), "push-drain"]) == 1
+    status = json.loads((tmp_path / "state" / "status.json").read_text())
+    assert status["last_push_ok"] is False
+    assert "last_error" in status
+
+
 @responses.activate
 def test_mutations_happen_under_lock(env_file, fake_capture, monkeypatch):
     events = []

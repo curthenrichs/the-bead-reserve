@@ -65,12 +65,12 @@ def drain(cfg: Config, state: StateDir) -> dict:
         for frame in snapshot[: cfg.drain_batch_max]:
             try:
                 outcome = push_frame(cfg, frame, session)
+                if outcome is PushOutcome.FAIL:
+                    report["failed"] = True
+                    break
+                state.archive(frame)
             except OSError as exc:
                 raise PushError(f"frame {frame.counter}: {exc}") from exc
-            if outcome is PushOutcome.FAIL:
-                report["failed"] = True
-                break
-            state.archive(frame)
             archived += 1
             key = "pushed" if outcome is PushOutcome.OK else "counter_seen"
             report[key] += 1
