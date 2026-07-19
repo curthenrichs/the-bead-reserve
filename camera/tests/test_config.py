@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from beadz_camera.config import Config
+from beadz_camera.config import Config, ConfigError
 
 
 def _write_env(tmp_path: Path, **overrides) -> Path:
@@ -53,3 +53,15 @@ def test_missing_required_key_raises(tmp_path, monkeypatch):
     env.write_text("\n".join(lines) + "\n")
     with pytest.raises(ValueError, match="HMAC_SECRET"):
         Config.from_env(env)
+
+
+def test_errors_are_config_error(tmp_path, monkeypatch):
+    monkeypatch.delenv("CROP_RECT", raising=False)
+    with pytest.raises(ConfigError):
+        Config.from_env(_write_env(tmp_path, CROP_RECT="1,2,3"))
+
+
+def test_wrong_count_and_non_integer_same_error(tmp_path, monkeypatch):
+    monkeypatch.delenv("CROP_RECT", raising=False)
+    with pytest.raises(ConfigError, match="four integers"):
+        Config.from_env(_write_env(tmp_path, CROP_RECT="1,2,3,x"))

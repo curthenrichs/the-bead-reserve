@@ -18,6 +18,10 @@ _REQUIRED = (
 )
 
 
+class ConfigError(ValueError):
+    """A device.env problem the operator must fix (bad or missing key)."""
+
+
 @dataclass(frozen=True)
 class Config:
     ingest_url: str
@@ -36,18 +40,15 @@ class Config:
             load_dotenv(env_file, override=True)
         missing = [k for k in _REQUIRED if not os.environ.get(k)]
         if missing:
-            raise ValueError(f"missing required config: {', '.join(missing)}")
-        parts = os.environ["CROP_RECT"].split(",")
-        if len(parts) != 4:
-            raise ValueError("CROP_RECT must be 'x,y,w,h' (four integers)")
+            raise ConfigError(f"missing required config: {', '.join(missing)}")
         try:
-            x, y, w, h = (int(p) for p in parts)
+            x, y, w, h = (int(p) for p in os.environ["CROP_RECT"].split(","))
         except ValueError as exc:
-            raise ValueError("CROP_RECT must be 'x,y,w,h' (four integers)") from exc
+            raise ConfigError("CROP_RECT must be 'x,y,w,h' (four integers)") from exc
         try:
             drain_batch_max = int(os.environ.get("DRAIN_BATCH_MAX") or 20)
         except ValueError as exc:
-            raise ValueError("DRAIN_BATCH_MAX must be an integer") from exc
+            raise ConfigError("DRAIN_BATCH_MAX must be an integer") from exc
         return cls(
             ingest_url=os.environ["INGEST_URL"],
             hmac_secret=os.environ["HMAC_SECRET"],
