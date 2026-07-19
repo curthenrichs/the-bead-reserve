@@ -25,6 +25,14 @@ def crop_and_strip(
     try:
         with Image.open(src) as img:
             img.load()
+            iw, ih = img.size
+            if x < 0 or y < 0 or x + w > iw or y + h > ih:
+                # ProcessError is a RuntimeError, so the except below (OSError/
+                # UnidentifiedImageError) does not swallow it — it propagates.
+                raise ProcessError(
+                    f"crop {crop_rect} exceeds frame {iw}x{ih}: check CROP_RECT "
+                    "against the camera's actual resolution"
+                )
             cropped = img.convert("RGB").crop((x, y, x + w, y + h))
     except (OSError, UnidentifiedImageError) as exc:
         raise ProcessError(f"cannot process frame {src}: {exc}") from exc

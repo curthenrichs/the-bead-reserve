@@ -11,7 +11,7 @@ def test_loads_all_fields(tmp_path, monkeypatch, make_device_env):
     cfg = Config.from_env(make_device_env())
     assert cfg.ingest_url == "https://api.test/ingest"
     assert cfg.hmac_secret == "topsecret"
-    assert cfg.crop_rect == (10, 20, 640, 480)
+    assert cfg.crop_rect == (10, 20, 300, 200)
     assert cfg.state_dir == Path(str(tmp_path / "state"))
     assert cfg.drain_batch_max == 20
 

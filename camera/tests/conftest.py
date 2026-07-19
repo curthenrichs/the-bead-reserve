@@ -17,7 +17,7 @@ def make_device_env(tmp_path):
             "INGEST_URL": "https://api.test/ingest",
             "HMAC_SECRET": "topsecret",
             "CAMERA_DEVICE": "/dev/video0",
-            "CROP_RECT": "10,20,640,480",
+            "CROP_RECT": "10,20,300,200",
             "STATE_DIR": str(state),
             "ED25519_KEY_PATH": str(state / "keys/ed25519.key"),
             "DRAIN_BATCH_MAX": "20",
