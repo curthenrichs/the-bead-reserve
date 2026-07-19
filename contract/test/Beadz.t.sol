@@ -297,4 +297,33 @@ contract BeadzTest is Test {
         vm.expectRevert("BEADZ: caller is not the Vault Keeper");
         beadz.acknowledgeRedemption(bob, 5, "trk");
     }
+
+    event ReserveRecordAttested(bytes32 indexed merkleRoot, string uri, uint256 timestamp);
+
+    // --- attestReserveRecord ---
+
+    function test_attestReserveRecord_emitsEvent() public {
+        bytes32 root = keccak256("annual-report-2026");
+        vm.expectEmit(true, false, false, true);
+        emit ReserveRecordAttested(root, "ipfs://beadz-annual-2026", block.timestamp);
+        vm.prank(keeper);
+        beadz.attestReserveRecord(root, "ipfs://beadz-annual-2026");
+    }
+
+    function test_attestReserveRecord_onlyKeeper() public {
+        vm.prank(alice);
+        vm.expectRevert("BEADZ: caller is not the Vault Keeper");
+        beadz.attestReserveRecord(bytes32(0), "x");
+    }
+
+    function test_attestReserveRecord_changesNoState() public {
+        uint256 supplyBefore = beadz.totalSupply();
+        uint256 attestedBefore = beadz.attestedBeads();
+        uint256 deadlineBefore = beadz.redemptionDeadline();
+        vm.prank(keeper);
+        beadz.attestReserveRecord(keccak256("r"), "u");
+        assertEq(beadz.totalSupply(), supplyBefore);
+        assertEq(beadz.attestedBeads(), attestedBefore);
+        assertEq(beadz.redemptionDeadline(), deadlineBefore);
+    }
 }

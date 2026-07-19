@@ -92,6 +92,7 @@ contract Beadz is ERC20 {
     event RedemptionAcknowledged(address indexed bearer, uint256 beads, string trackingNumber);
     event RedemptionWindowSet(uint256 previousDeadline, uint256 newDeadline, bool reopened);
     event VaultKeeperTransferred(address indexed previousKeeper, address indexed newKeeper);
+    event ReserveRecordAttested(bytes32 indexed merkleRoot, string uri, uint256 timestamp);
 
     modifier onlyKeeper() {
         require(msg.sender == vaultKeeper, "BEADZ: caller is not the Vault Keeper");
@@ -209,6 +210,14 @@ contract Beadz is ERC20 {
         onlyKeeper
     {
         emit RedemptionAcknowledged(bearer, beads, trackingNumber);
+    }
+
+    /// @notice Anchor a period's published reserve record on chain: `merkleRoot` commits to the
+    ///         period's Ed25519-signed camera frame hashes and `uri` points at the published
+    ///         record (frame list + proofs). Event-only; changes no state. Intended cadence:
+    ///         the annual report.
+    function attestReserveRecord(bytes32 merkleRoot, string calldata uri) external onlyKeeper {
+        emit ReserveRecordAttested(merkleRoot, uri, block.timestamp);
     }
 
     /**
