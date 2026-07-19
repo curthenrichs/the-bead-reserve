@@ -46,7 +46,7 @@ status)
     require_rpc
     printf '%-10s %-44s %s\n' ROLE ADDRESS 'BALANCE (ETH)'
     for role in $BEADZ_WALLETS; do
-        addr=$(addr_of "$role")
+        addr=$(addr_of "$role") || exit 1
         printf '%-10s %-44s %s\n' "$role" "$addr" \
             "$(cast balance "$addr" --rpc-url "$BEADZ_RPC_URL" --ether)"
     done
@@ -57,7 +57,7 @@ disperse)
     amount="${1:-0.02ether}"
     for role in $BEADZ_WALLETS; do
         [ "$role" = deployer ] && continue
-        addr=$(addr_of "$role")
+        addr=$(addr_of "$role") || exit 1
         echo "== $amount -> $role ($addr)"
         send_as deployer "$addr" --value "$amount" >/dev/null \
             || die "disperse to $role failed (is deployer funded?)"
