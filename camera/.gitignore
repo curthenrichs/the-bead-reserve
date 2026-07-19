@@ -79,6 +79,7 @@ sdist/
 var/
 wheels/
 share/python-wheels/
+*.egg-info
 *.egg-info/
 .installed.cfg
 *.egg
@@ -105,6 +106,7 @@ coverage.xml
 *.cover
 *.py,cover
 .hypothesis/
+.pytest_cache
 .pytest_cache/
 cover/
 
