@@ -1,0 +1,20 @@
+[Unit]
+Description=Beadz ingest sink (SELF-TEST / contract oracle — NOT production ingest)
+# Production ingest is the Cloudflare Worker (subsystem B). This runs a local
+# reference sink on the Pi for the loopback self-test. Parameters come from
+# /etc/beadz-camera/sink.env, written by launch.sh. Installed by launch.sh only,
+# never by provision.sh or smoke.sh.
+After=network-online.target
+
+[Service]
+Type=simple
+User=beadz
+Group=beadz
+EnvironmentFile=/etc/beadz-camera/sink.env
+ExecStart=/opt/beadz-camera/venv/bin/python /opt/beadz-camera/camera/scripts/ingest-sink.py --bind 127.0.0.1 --port ${SINK_PORT} --env /etc/beadz-camera/device.env --pubkey-file ${SINK_PUBKEY} --sink-dir ${SINK_DIR}
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target
