@@ -40,6 +40,9 @@ describe("POST /api/ingest contract", () => {
     expect(await res.json()).toEqual({ ok: true, counter: 1 });
     const obj = await env.FRAMES.get("frames/1.jpg");
     expect(obj).not.toBeNull();
+    const storedBytes = new Uint8Array(await obj!.arrayBuffer());
+    const expectedBytes = Uint8Array.from(atob(IMAGE_B64), (c) => c.charCodeAt(0));
+    expect(storedBytes).toEqual(expectedBytes);
     const meta = JSON.parse((await env.META.get("latest"))!);
     expect(meta.counter).toBe(1);
     expect(meta).not.toHaveProperty("image_b64");
@@ -59,6 +62,8 @@ describe("POST /api/ingest contract", () => {
   });
   it("absent protocol accepted (defaults to 1)", async () => {
     expect((await ingest(bodyStr({ counter: 3 }))).status).toBe(200);
+    const meta = JSON.parse((await env.META.get("latest"))!);
+    expect(meta.protocolVersion).toBe("1");
   });
   it("not JSON -> 400 bad_request", async () => {
     expect((await ingest("not json{")).status).toBe(400);
@@ -95,5 +100,17 @@ describe("POST /api/ingest contract", () => {
     const meta = JSON.parse((await env.META.get("latest"))!);
     expect(meta.clientVersion).toBe("beadz-camera/0.1.0");
     expect(meta.protocolVersion).toBe("1");
+  });
+  it("ts far outside the skew window is warn-only, never rejects", async () => {
+    const staleTs = Math.floor(Date.now() / 1000) - 86400; // 24h in the past, well past +-600s
+    const res = await ingest(bodyStr({ counter: 200, ts: staleTs }));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ ok: true, counter: 200 });
+  });
+  it("non-null croText round-trips into stored metadata", async () => {
+    const CRO = "the reserve remains sealed";
+    await ingest(bodyStr({ counter: 201, croText: CRO }));
+    const meta = JSON.parse((await env.META.get("latest"))!);
+    expect(meta.croText).toBe(CRO);
   });
 });
