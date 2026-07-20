@@ -1,14 +1,23 @@
 """beadz-cro-bench CLI.
 
-Exit codes: 0 all calls OK - 1 any call failed - 2 setup failure
-(invalid variant, missing model files, server never healthy). Setup
-failures print one actionable line, never a traceback."""
+run: spawn llama-server (or target --server-url), sweep images x
+variants (3 grammar-constrained slots + 1 flavor call each), render the
+audit template, stream results.jsonl + transcript.md. A failed call is
+recorded and the sweep continues. Exit codes: 0 all calls OK - 1 any
+call failed - 2 setup failure (one actionable line, no traceback)."""
 
 from __future__ import annotations
 
 import argparse
 import sys
+import time
 from pathlib import Path
+
+from . import calls, server
+from .results import RunWriter
+from .variant import FLAVOR_ID, Variant, VariantError, load_variant, render
+
+IMAGE_EXTS = {".jpg", ".jpeg", ".png"}
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -36,10 +45,101 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _resolve_variant(arg: str) -> Path:
+    p = Path(arg)
+    if p.is_dir():
+        return p
+    named = Path("variants") / arg
+    if named.is_dir():
+        return named
+    raise VariantError(f"variant not found: {arg!r} (no dir at {p} or {named})")
+
+
+def _find_images(images_dir: Path) -> list[Path]:
+    if not images_dir.is_dir():
+        raise VariantError(f"images dir not found: {images_dir}")
+    images = sorted(p for p in images_dir.iterdir()
+                    if p.suffix.lower() in IMAGE_EXTS)
+    if not images:
+        raise VariantError(f"no images (*.jpg, *.png) in {images_dir}")
+    return images
+
+
+def _calls_for(v: Variant):
+    for slot in v.slots:
+        yield slot.id, slot.prompt, slot.grammar, v.slot_sampling
+    yield FLAVOR_ID, v.flavor_prompt, None, v.flavor_sampling
+
+
+def _cmd_run(args: argparse.Namespace) -> int:
+    variants = [load_variant(_resolve_variant(a)) for a in args.variant]
+    images = _find_images(args.images)
+    run_name = args.run_name or time.strftime("%Y%m%d-%H%M%S")
+    out_dir = Path("out") / run_name
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    proc = None
+    if args.server_url:
+        base_url, model_load_s = args.server_url.rstrip("/"), None
+        server.wait_healthy(base_url, timeout=10)
+    else:
+        proc, base_url, model_load_s = server.start_server(
+            args.server_bin, args.model, args.mmproj, args.port,
+            log_path=out_dir / "llama-server.log")
+
+    writer = RunWriter(out_dir)
+    ok = failed = 0
+    try:
+        writer.run_start(
+            variants=[v.name for v in variants],
+            images=[p.name for p in images],
+            model=str(args.model), mmproj=str(args.mmproj),
+            model_load_s=model_load_s, platform=sys.platform,
+            server_url=args.server_url, timeout_s=args.timeout)
+        for image in images:
+            image_b64 = calls.encode_image(image)
+            for v in variants:
+                answers: dict[str, str] = {}
+                timings: dict[str, int] = {}
+                error = None
+                for cid, prompt, grammar, sampling in _calls_for(v):
+                    try:
+                        text, wall_ms = calls.audit_call(
+                            base_url, v.persona, prompt, image_b64, sampling,
+                            grammar=grammar, timeout=args.timeout)
+                    except calls.CallError as exc:
+                        failed += 1
+                        error = f"{cid}: {exc}" if error is None else error
+                        writer.call(v.name, image.name, cid, prompt,
+                                    error=str(exc))
+                        continue
+                    ok += 1
+                    answers[cid] = text
+                    timings[cid] = wall_ms
+                    writer.call(v.name, image.name, cid, prompt,
+                                response=text, wall_ms=wall_ms)
+                audit_text = render(v, answers) if error is None else None
+                writer.audit(v.name, image.name, answers, timings,
+                             audit_text, error=error)
+    finally:
+        peak = server.peak_rss_kb(proc.pid) if proc else None
+        if proc:
+            server.stop_server(proc)
+        writer.run_end(ok, failed, peak)
+    print(f"run written to {out_dir} ({ok} calls ok, {failed} failed)")
+    return 1 if failed else 0
+
+
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    print(f"{args.command}: not implemented yet", file=sys.stderr)
-    return 2
+    try:
+        if args.command == "run":
+            return _cmd_run(args)
+        from . import fetch  # imported lazily; lands in Task 7
+        return fetch.cmd_fetch(args.quant)
+    except (VariantError, server.ServerError, OSError) as exc:
+        print(f"setup error: {exc}", file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":
