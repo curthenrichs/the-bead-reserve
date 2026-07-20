@@ -13,7 +13,7 @@ import sys
 import time
 from pathlib import Path
 
-from . import calls, server
+from . import calls, fetch, server
 from .results import RunWriter
 from .variant import FLAVOR_ID, Variant, VariantError, load_variant, render
 
@@ -41,7 +41,7 @@ def build_parser() -> argparse.ArgumentParser:
                      help="per-call timeout in seconds (Pi-scale default)")
 
     fetch_p = sub.add_parser("fetch-models", help="download + sha256-verify pinned GGUFs")
-    fetch_p.add_argument("--quant", default="Q8_0")
+    fetch_p.add_argument("--quant", default="Q8_0", choices=sorted(fetch.MODELS))
     return parser
 
 
@@ -135,9 +135,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.command == "run":
             return _cmd_run(args)
-        from . import fetch  # imported lazily; lands in Task 7
         return fetch.cmd_fetch(args.quant)
-    except (VariantError, server.ServerError, OSError) as exc:
+    except (VariantError, server.ServerError, fetch.FetchError, OSError) as exc:
         print(f"setup error: {exc}", file=sys.stderr)
         return 2
 
