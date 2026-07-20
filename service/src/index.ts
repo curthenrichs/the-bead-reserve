@@ -23,7 +23,8 @@ export default {
     // Ingest and serve branches are wired in by Tasks S3 and S4.
     if (url.pathname === "/api/ingest") {
       if (method !== "POST") return json({ error: "method_not_allowed" }, 405, env);
-      return json({ error: "not_implemented" }, 501, env);
+      const { handleIngest } = await import("./ingest");
+      return handleIngest(request, env);
     }
     return json({ error: "not_found" }, 404, env);
   },
