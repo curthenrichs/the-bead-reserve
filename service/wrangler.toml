@@ -1,0 +1,21 @@
+name = "beadz-ingest"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Ed25519 public key (published by design — not a secret). Placeholder until
+# a device key exists; the conformance run (S6) uses the key it generates.
+[vars]
+ED25519_PUBKEY = "0000000000000000000000000000000000000000000000000000000000000000"
+FRESH_MAX_S = "5400"     # 90 min
+STALE_MAX_S = "21600"    # 6 h
+SUPPORTED_PROTOCOLS = "1"
+API_VERSION = "0.1.0"
+
+[[r2_buckets]]
+binding = "FRAMES"
+bucket_name = "beadz-frames"
+
+[[kv_namespaces]]
+binding = "META"
+id = "PLACEHOLDER_FILLED_AT_DEPLOY"

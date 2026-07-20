@@ -1,0 +1,3 @@
+# Copy to .dev.vars (gitignored) for `wrangler dev`. Must match the camera's
+# device.env HMAC_SECRET. Never commit the real value.
+HMAC_SECRET=
