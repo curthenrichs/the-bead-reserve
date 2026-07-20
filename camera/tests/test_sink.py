@@ -183,3 +183,34 @@ def test_events_are_bounded(sink, keypair):
     from collections import deque
     assert isinstance(sink.events, deque)
     assert sink.events.maxlen == 1000
+
+
+def test_supported_protocol_header_accepts(sink, keypair):
+    body = _body(keypair, counter=1)
+    r = requests.post(
+        f"http://127.0.0.1:{sink.port}/api/ingest", data=body,
+        headers={"X-Beadz-Mac": hmac_hex(SECRET, body), "X-Beadz-Protocol": "1"},
+        timeout=5)
+    assert r.status_code == 200
+
+
+def test_unsupported_protocol_is_400(sink, keypair):
+    body = _body(keypair, counter=1)
+    r = requests.post(
+        f"http://127.0.0.1:{sink.port}/api/ingest", data=body,
+        headers={"X-Beadz-Mac": hmac_hex(SECRET, body), "X-Beadz-Protocol": "99"},
+        timeout=5)
+    assert r.status_code == 400 and r.json()["error"] == "unsupported_protocol"
+
+
+def test_absent_protocol_still_accepts(sink, keypair):
+    assert _post(sink, _body(keypair, counter=1)).status_code == 200
+
+
+def test_unsupported_protocol_checked_after_mac(sink, keypair):
+    body = _body(keypair, counter=1)
+    r = requests.post(
+        f"http://127.0.0.1:{sink.port}/api/ingest", data=body,
+        headers={"X-Beadz-Mac": "0" * 64, "X-Beadz-Protocol": "99"},
+        timeout=5)
+    assert r.status_code == 401 and r.json()["error"] == "bad_mac"

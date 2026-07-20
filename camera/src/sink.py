@@ -25,6 +25,7 @@ from .sign import verify
 _META_KEYS = ("counter", "ts", "sha256", "sig", "croText")
 _TS_SKEW_WARN_S = 600
 _EVENTS_MAX = 1000
+_SUPPORTED_PROTOCOLS = frozenset({"1"})
 
 
 class SinkStateError(RuntimeError):
@@ -80,12 +81,16 @@ class IngestSink:
             ) from exc
 
     # -- the contract (spec §4 table; first failure wins) --------------------
-    def handle_ingest(self, raw_body: bytes, mac_header: str | None) -> tuple[int, dict]:
+    def handle_ingest(self, raw_body: bytes, mac_header: str | None,
+                      protocol_header: str | None = None) -> tuple[int, dict]:
         # 1. HMAC over the exact raw body, constant-time
         if not mac_header or not hmac.compare_digest(
                 mac_header.encode("latin-1", errors="replace"),
                 hmac_hex(self.secret, raw_body).encode()):
             return self._reject(401, "bad_mac", None)
+        # 1b. protocol gate — absent means "1"; present-but-unknown is a client error
+        if protocol_header is not None and protocol_header not in _SUPPORTED_PROTOCOLS:
+            return self._reject(400, "unsupported_protocol", None)
         # 2. shape
         try:
             payload = json.loads(raw_body)
@@ -148,7 +153,11 @@ def _make_handler(sink: IngestSink):
                 return self._respond(400, {"error": "bad_request"})
             raw = self.rfile.read(length)
             try:
-                status, body = sink.handle_ingest(raw, self.headers.get("X-Beadz-Mac"))
+                status, body = sink.handle_ingest(
+                    raw,
+                    self.headers.get("X-Beadz-Mac"),
+                    self.headers.get("X-Beadz-Protocol"),
+                )
             except Exception as exc:  # storage failure etc.; device treats as FAIL
                 print(f"SINK ERROR: {exc}", flush=True)
                 status, body = 500, {"error": "internal"}
