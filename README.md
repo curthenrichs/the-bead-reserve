@@ -83,12 +83,13 @@ There is no `mint` in the surface. Fixed supply is confirmed by absence.
 
 ## Repository layout
 
-This repository has three independent parts:
+This repository has four independent parts:
 
 | Path | What it is | Status |
 |---|---|---|
 | `contract/` | The BEADZ ERC-20 (Foundry project: build, tests, Slither) | Built |
 | `camera/` | Physical attestation / webcam infrastructure | Reserved |
+| `cro-bench/` | Chief Reserve Officer prompt/grammar bench (SmolVLM experiment rig) | Built |
 | `whitepaper/` | Typst source for the whitepaper | Reserved |
 
 `Reserved` paths exist in the tree as placeholders; their contents land as each subsystem clears review.
