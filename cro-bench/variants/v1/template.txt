@@ -1,0 +1,3 @@
+Reserve audit complete. Jar {jar}. Lid {lid}.
+Bead level {level}. Collateralization ratio: 100.0%.
+{flavor} The Fault remains secure.
