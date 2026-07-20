@@ -17,6 +17,14 @@ import requests
 from .config import Config
 from .queue import QueuedFrame, StateDir
 
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    _CLIENT = f"beadz-camera/{version('beadz-camera')}"
+except PackageNotFoundError:            # running from a source tree without install
+    _CLIENT = "beadz-camera/0.0.0+src"
+_PROTOCOL = "1"
+
 _TIMEOUT_S = 10
 
 
@@ -45,6 +53,8 @@ def push_frame(cfg: Config, frame: QueuedFrame, session: requests.Session) -> Pu
             headers={
                 "Content-Type": "application/json",
                 "X-Beadz-Mac": hmac_hex(cfg.hmac_secret, body),
+                "X-Beadz-Client": _CLIENT,
+                "X-Beadz-Protocol": _PROTOCOL,
             },
             timeout=_TIMEOUT_S,
         )

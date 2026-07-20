@@ -117,3 +117,20 @@ def test_archive_oserror_becomes_push_error(cfg, state, monkeypatch):
     monkeypatch.setattr(state, "archive", _boom)   # push succeeds, archive fails
     with pytest.raises(PushError, match="frame 1"):
         drain(cfg, state)
+
+
+def test_push_sends_version_headers(cfg, state):
+    seen = {}
+
+    @responses.activate
+    def run():
+        def check(request):
+            seen["client"] = request.headers.get("X-Beadz-Client")
+            seen["protocol"] = request.headers.get("X-Beadz-Protocol")
+            return (200, {}, "{}")
+        responses.add_callback(responses.POST, INGEST, callback=check)
+        drain(cfg, state)
+
+    run()
+    assert seen["protocol"] == "1"
+    assert seen["client"] == "beadz-camera/0.1.0"
