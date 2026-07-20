@@ -69,7 +69,7 @@ def test_run_all_ok_exit_0(bench_dir, fake_server, monkeypatch):
     seen = []
 
     def fake_call(base_url, persona, prompt, image_b64, sampling,
-                  grammar=None, timeout=600.0):
+                  grammar=None, timeout=600.0, mime="image/jpeg"):
         cid = {"Is a jar present in the frame? Answer present or absent.": "jar",
                "Is the lid seated or ajar?": "lid",
                "Is the jar overfull, nominal, low, or depleted?": "level"}.get(prompt, "flavor")
@@ -95,7 +95,7 @@ def test_run_all_ok_exit_0(bench_dir, fake_server, monkeypatch):
 
 def test_run_call_failure_exit_1(bench_dir, fake_server, monkeypatch):
     def fake_call(base_url, persona, prompt, image_b64, sampling,
-                  grammar=None, timeout=600.0):
+                  grammar=None, timeout=600.0, mime="image/jpeg"):
         if grammar is None:  # fail every flavor call
             raise CallError("HTTP 500: boom")
         return "nominal", 5
@@ -122,6 +122,40 @@ def test_run_no_images_exit_2(bench_dir, fake_server, capsys):
     rc = cli.main(["run", "--variant", "v1", "--run-name", "t"])
     assert rc == 2
     assert "no images" in capsys.readouterr().err
+
+
+def test_run_image_read_failure_exit_1(bench_dir, fake_server, monkeypatch):
+    """A mid-run per-image encode failure (e.g. a corrupt file) is a failed
+    unit, not a setup error: exit 1, sweep continues to the next image."""
+    def fake_encode(path):
+        if path.name == "a.jpg":
+            raise OSError("cannot identify image file")
+        return "aGk="
+
+    def fake_call(base_url, persona, prompt, image_b64, sampling,
+                  grammar=None, timeout=600.0, mime="image/jpeg"):
+        cid = {"Is a jar present in the frame? Answer present or absent.": "jar",
+               "Is the lid seated or ajar?": "lid",
+               "Is the jar overfull, nominal, low, or depleted?": "level"}.get(prompt, "flavor")
+        return _answers(cid), 5
+
+    monkeypatch.setattr(calls, "encode_image", fake_encode)
+    monkeypatch.setattr(calls, "audit_call", fake_call)
+    rc = cli.main(["run", "--variant", "v1", "--run-name", "t"])
+    assert rc == 1
+    lines = [json.loads(l) for l in
+             Path("out/t/results.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert lines[-1]["type"] == "run_end"
+    assert lines[-1]["failed_calls"] == 1
+    assert lines[-1]["ok_calls"] == 4  # b.jpg's 3 slots + flavor; a.jpg skipped entirely
+    audits = [l for l in lines if l["type"] == "audit"]
+    assert len(audits) == 2
+    good = next(a for a in audits if a["image"] == "b.jpg")
+    assert good["error"] is None
+    assert good["text"].startswith("Reserve audit complete.")
+    bad = next(a for a in audits if a["image"] == "a.jpg")
+    assert bad["text"] is None
+    assert "cannot read image" in bad["error"]
 
 
 def test_run_server_url_skips_spawn(bench_dir, monkeypatch):

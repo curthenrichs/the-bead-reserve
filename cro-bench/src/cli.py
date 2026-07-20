@@ -79,17 +79,18 @@ def _cmd_run(args: argparse.Namespace) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     proc = None
-    if args.server_url:
-        base_url, model_load_s = args.server_url.rstrip("/"), None
-        server.wait_healthy(base_url, timeout=10)
-    else:
-        proc, base_url, model_load_s = server.start_server(
-            args.server_bin, args.model, args.mmproj, args.port,
-            log_path=out_dir / "llama-server.log")
-
-    writer = RunWriter(out_dir)
+    writer = None
     ok = failed = 0
     try:
+        if args.server_url:
+            base_url, model_load_s = args.server_url.rstrip("/"), None
+            server.wait_healthy(base_url, timeout=10)
+        else:
+            proc, base_url, model_load_s = server.start_server(
+                args.server_bin, args.model, args.mmproj, args.port,
+                log_path=out_dir / "llama-server.log")
+
+        writer = RunWriter(out_dir)
         writer.run_start(
             variants=[v.name for v in variants],
             images=[p.name for p in images],
@@ -97,7 +98,17 @@ def _cmd_run(args: argparse.Namespace) -> int:
             model_load_s=model_load_s, platform=sys.platform,
             server_url=args.server_url, timeout_s=args.timeout)
         for image in images:
-            image_b64 = calls.encode_image(image)
+            try:
+                image_b64 = calls.encode_image(image)
+            except OSError as exc:
+                failed += 1
+                err = f"cannot read image: {exc}"
+                writer.call(variants[0].name, image.name, "image", "",
+                            error=err)
+                writer.audit(variants[0].name, image.name, {}, {},
+                             None, error=err)
+                continue
+            mime = "image/png" if image.suffix.lower() == ".png" else "image/jpeg"
             for v in variants:
                 answers: dict[str, str] = {}
                 timings: dict[str, int] = {}
@@ -106,7 +117,7 @@ def _cmd_run(args: argparse.Namespace) -> int:
                     try:
                         text, wall_ms = calls.audit_call(
                             base_url, v.persona, prompt, image_b64, sampling,
-                            grammar=grammar, timeout=args.timeout)
+                            grammar=grammar, timeout=args.timeout, mime=mime)
                     except calls.CallError as exc:
                         failed += 1
                         error = f"{cid}: {exc}" if error is None else error
@@ -125,7 +136,8 @@ def _cmd_run(args: argparse.Namespace) -> int:
         peak = server.peak_rss_kb(proc.pid) if proc else None
         if proc:
             server.stop_server(proc)
-        writer.run_end(ok, failed, peak)
+        if writer is not None:
+            writer.run_end(ok, failed, peak)
     print(f"run written to {out_dir} ({ok} calls ok, {failed} failed)")
     return 1 if failed else 0
 

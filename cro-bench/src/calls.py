@@ -24,14 +24,14 @@ def encode_image(path: Path) -> str:
 
 def audit_call(base_url: str, persona: str, prompt: str, image_b64: str,
                sampling: dict, grammar: str | None = None,
-               timeout: float = 600.0) -> tuple[str, int]:
+               timeout: float = 600.0, mime: str = "image/jpeg") -> tuple[str, int]:
     body = {
         "messages": [
             {"role": "system", "content": persona},
             {"role": "user", "content": [
                 {"type": "text", "text": prompt},
                 {"type": "image_url",
-                 "image_url": {"url": f"data:image/jpeg;base64,{image_b64}"}},
+                 "image_url": {"url": f"data:{mime};base64,{image_b64}"}},
             ]},
         ],
         "temperature": sampling.get("temperature", 0.0),

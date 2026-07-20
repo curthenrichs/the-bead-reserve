@@ -71,6 +71,15 @@ def test_connection_error_raises():
         audit_call(URL, "p", "q", "aGk=", SAMPLING)
 
 
+@responses.activate
+def test_mime_param_sets_data_uri_type():
+    responses.add(responses.POST, EP, json=_ok_body())
+    audit_call(URL, "p", "q", "aGk=", SAMPLING, mime="image/png")
+    body = json.loads(responses.calls[0].request.body)
+    assert body["messages"][1]["content"][1]["image_url"]["url"] == \
+        "data:image/png;base64,aGk="
+
+
 def test_encode_image(tmp_path):
     p = tmp_path / "a.jpg"
     p.write_bytes(b"hi")

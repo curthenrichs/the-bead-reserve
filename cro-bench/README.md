@@ -46,7 +46,9 @@ beadz-cro-bench run --variant v1
 Run from this directory (`cro-bench/`). Each run writes
 `out/<run-name>/results.jsonl` (machine: `run_start`, per-call records,
 `run_end` with peak RSS), `transcript.md` (human: rendered audits — the drift
-judgment happens here), and `llama-server.log`.
+judgment happens here), and `llama-server.log`. `llama-server.log` is written
+only when the bench spawns the server itself — not in warm `--server-url`
+mode, since no server process is spawned there.
 
 Compare prompt experiments by copying `variants/v1` to `variants/v2`, editing,
 and passing `--variant v1 --variant v2` in one run.
