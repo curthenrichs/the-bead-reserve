@@ -1,6 +1,7 @@
 name = "beadz-ingest"
 main = "src/index.ts"
 compatibility_date = "2024-12-01"
+# Required by @cloudflare/vitest-pool-workers to boot the test harness; also applies to the deployed Worker.
 compatibility_flags = ["nodejs_compat"]
 
 # Ed25519 public key (published by design — not a secret). Placeholder until

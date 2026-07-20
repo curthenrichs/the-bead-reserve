@@ -17,7 +17,7 @@ export function json(body: unknown, status: number, env: Env, extra?: HeadersIni
 }
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     const { method } = request;
     // Ingest and serve branches are wired in by Tasks S3 and S4.
