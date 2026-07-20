@@ -26,6 +26,16 @@ export default {
       const { handleIngest } = await import("./ingest");
       return handleIngest(request, env);
     }
+    if (url.pathname === "/api/reserve") {
+      if (method !== "GET") return json({ error: "method_not_allowed" }, 405, env);
+      const { handleReserve } = await import("./reserve");
+      return handleReserve(request, env);
+    }
+    if (url.pathname === "/api/frame/latest") {
+      if (method !== "GET") return json({ error: "method_not_allowed" }, 405, env);
+      const { handleFrameLatest } = await import("./reserve");
+      return handleFrameLatest(request, env);
+    }
     return json({ error: "not_found" }, 404, env);
   },
 } satisfies ExportedHandler<Env>;
