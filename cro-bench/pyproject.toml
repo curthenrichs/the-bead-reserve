@@ -1,0 +1,20 @@
+[project]
+name = "beadz-cro-bench"
+version = "0.1.0"
+description = "Chief Reserve Officer prompt/grammar bench (SmolVLM experiment rig)"
+requires-python = ">=3.11"
+dependencies = ["requests>=2.31"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "responses>=0.25"]
+
+[project.scripts]
+beadz-cro-bench = "beadz_cro_bench.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"beadz_cro_bench" = "src"}
+packages = ["beadz_cro_bench"]
