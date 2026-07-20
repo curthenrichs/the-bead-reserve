@@ -76,7 +76,8 @@ def _cmd_capture_once(cfg: Config) -> int:
         with tempfile.TemporaryDirectory() as tmp:
             raw = Path(tmp) / "raw.jpg"
             final = Path(tmp) / "final.jpg"
-            capture_frame(cfg.camera_device, raw, resolution=cfg.capture_resolution)
+            capture_frame(cfg.camera_device, raw, resolution=cfg.capture_resolution,
+                          controls=cfg.camera_controls, skip=cfg.capture_skip)
             crop_and_strip(raw, final, cfg.crop_rect)
             digest = sha256_file(final)
             sig = sign_hash(load_signing_key(cfg.key_path), digest)

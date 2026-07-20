@@ -29,7 +29,7 @@ def rig(tmp_path, make_device_env, make_exif_jpeg, monkeypatch):
     env = make_device_env(INGEST_URL=sink.url)
     assert cli.main(["--env", str(env), "seed-counter"]) == 0
 
-    def _fake(device, dest, timeout=30, resolution=None):
+    def _fake(device, dest, timeout=30, resolution=None, controls=None, skip=0):
         make_exif_jpeg(dest)
 
     monkeypatch.setattr(cli, "capture_frame", _fake)

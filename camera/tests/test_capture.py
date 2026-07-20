@@ -68,3 +68,51 @@ def test_no_resolution_omits_r_flag(tmp_path):
         return subprocess.CompletedProcess(cmd, 0)
     with patch("beadz_camera.capture.subprocess.run", side_effect=fake_run):
         capture_frame("/dev/video0", dest)
+
+
+def test_controls_applied_before_capture(tmp_path):
+    dest = tmp_path / "f.jpg"
+    calls = []
+    def fake_run(cmd, **kwargs):
+        calls.append(cmd)
+        if cmd[0] == "fswebcam":
+            dest.write_bytes(b"jpeg")
+        return subprocess.CompletedProcess(cmd, 0)
+    with patch("beadz_camera.capture.subprocess.run", side_effect=fake_run):
+        capture_frame("/dev/video0", dest,
+                      controls=(("white_balance_automatic", "0"),
+                                ("white_balance_temperature", "5000")),
+                      skip=20)
+    assert calls[0][0] == "v4l2-ctl" and "-d" in calls[0]
+    assert "--set-ctrl" in calls[0]
+    assert "white_balance_automatic=0" in calls[0]
+    assert "white_balance_temperature=5000" in calls[0]
+    assert calls[1][0] == "fswebcam"
+    assert calls[1][calls[1].index("-S") + 1] == "20"
+    assert calls[1][-1] == str(dest)          # dest stays last
+
+
+def test_control_failure_raises_and_skips_fswebcam(tmp_path):
+    dest = tmp_path / "f.jpg"
+    calls = []
+    def fake_run(cmd, **kwargs):
+        calls.append(cmd)
+        if cmd[0] == "v4l2-ctl":
+            return subprocess.CompletedProcess(cmd, 1, stderr=b"unknown control")
+        dest.write_bytes(b"jpeg")
+        return subprocess.CompletedProcess(cmd, 0)
+    with patch("beadz_camera.capture.subprocess.run", side_effect=fake_run):
+        with pytest.raises(CaptureError, match="CAMERA_CONTROLS"):
+            capture_frame("/dev/video0", dest, controls=(("bad", "1"),))
+    assert [c[0] for c in calls] == ["v4l2-ctl"]   # fswebcam never ran
+
+
+def test_no_controls_no_skip_is_unchanged(tmp_path):
+    dest = tmp_path / "f.jpg"
+    def fake_run(cmd, **kwargs):
+        assert cmd[0] == "fswebcam"     # no v4l2-ctl call
+        assert "-S" not in cmd
+        dest.write_bytes(b"jpeg")
+        return subprocess.CompletedProcess(cmd, 0)
+    with patch("beadz_camera.capture.subprocess.run", side_effect=fake_run):
+        capture_frame("/dev/video0", dest)
