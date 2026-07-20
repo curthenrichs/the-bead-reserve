@@ -32,6 +32,8 @@ class Config:
     key_path: Path
     drain_batch_max: int = 20
     capture_resolution: tuple[int, int] | None = None
+    camera_controls: tuple[tuple[str, str], ...] | None = None
+    capture_skip: int = 0
 
     @classmethod
     def from_env(cls, env_file: Path | None = None) -> "Config":
@@ -62,6 +64,24 @@ class Config:
             except ValueError as exc:
                 raise ConfigError("CAPTURE_RESOLUTION must be 'WxH' (e.g. 1280x720)") from exc
             capture_resolution = (cw, ch)
+        camera_controls = None
+        cc_raw = os.environ.get("CAMERA_CONTROLS")
+        if cc_raw:
+            pairs = []
+            for item in cc_raw.split(","):
+                name, sep, value = item.partition("=")   # split on FIRST '='
+                name, value = name.strip(), value.strip()
+                if not sep or not name or not value:
+                    raise ConfigError(
+                        "CAMERA_CONTROLS must be 'name=value,name=value'")
+                pairs.append((name, value))
+            camera_controls = tuple(pairs)
+        try:
+            capture_skip = int(os.environ.get("CAPTURE_SKIP") or 0)
+        except ValueError as exc:
+            raise ConfigError("CAPTURE_SKIP must be a non-negative integer") from exc
+        if capture_skip < 0:
+            raise ConfigError("CAPTURE_SKIP must be a non-negative integer")
         return cls(
             ingest_url=os.environ["INGEST_URL"],
             hmac_secret=os.environ["HMAC_SECRET"],
@@ -71,4 +91,6 @@ class Config:
             key_path=Path(os.environ["ED25519_KEY_PATH"]),
             drain_batch_max=drain_batch_max,
             capture_resolution=capture_resolution,
+            camera_controls=camera_controls,
+            capture_skip=capture_skip,
         )

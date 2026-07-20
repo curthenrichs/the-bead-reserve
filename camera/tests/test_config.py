@@ -70,3 +70,46 @@ def test_capture_resolution_malformed_raises(bad, make_device_env, monkeypatch):
     monkeypatch.delenv("CAPTURE_RESOLUTION", raising=False)
     with pytest.raises(ConfigError, match="CAPTURE_RESOLUTION"):
         Config.from_env(make_device_env(CAPTURE_RESOLUTION=bad))
+
+
+def test_camera_controls_unset_is_none(make_device_env, monkeypatch):
+    monkeypatch.delenv("CAMERA_CONTROLS", raising=False)
+    assert Config.from_env(make_device_env()).camera_controls is None
+
+
+def test_camera_controls_parsed(make_device_env, monkeypatch):
+    monkeypatch.delenv("CAMERA_CONTROLS", raising=False)
+    cfg = Config.from_env(make_device_env(
+        CAMERA_CONTROLS="white_balance_automatic=0,white_balance_temperature=5000"))
+    assert cfg.camera_controls == (
+        ("white_balance_automatic", "0"), ("white_balance_temperature", "5000"))
+
+
+def test_camera_controls_value_may_contain_equals(make_device_env, monkeypatch):
+    monkeypatch.delenv("CAMERA_CONTROLS", raising=False)
+    cfg = Config.from_env(make_device_env(CAMERA_CONTROLS="a=b=c"))
+    assert cfg.camera_controls == (("a", "b=c"),)   # split on first '=' only
+
+
+@pytest.mark.parametrize("bad", ["foo", "=1", "a=", "a=1,bad"])
+def test_camera_controls_malformed_raises(bad, make_device_env, monkeypatch):
+    monkeypatch.delenv("CAMERA_CONTROLS", raising=False)
+    with pytest.raises(ConfigError, match="CAMERA_CONTROLS"):
+        Config.from_env(make_device_env(CAMERA_CONTROLS=bad))
+
+
+def test_capture_skip_unset_is_zero(make_device_env, monkeypatch):
+    monkeypatch.delenv("CAPTURE_SKIP", raising=False)
+    assert Config.from_env(make_device_env()).capture_skip == 0
+
+
+def test_capture_skip_parsed(make_device_env, monkeypatch):
+    monkeypatch.delenv("CAPTURE_SKIP", raising=False)
+    assert Config.from_env(make_device_env(CAPTURE_SKIP="20")).capture_skip == 20
+
+
+@pytest.mark.parametrize("bad", ["-1", "x", "1.5"])
+def test_capture_skip_malformed_raises(bad, make_device_env, monkeypatch):
+    monkeypatch.delenv("CAPTURE_SKIP", raising=False)
+    with pytest.raises(ConfigError, match="CAPTURE_SKIP"):
+        Config.from_env(make_device_env(CAPTURE_SKIP=bad))
