@@ -29,7 +29,7 @@ fi
 
 echo "== 1. apt packages =="
 apt-get update
-apt-get install -y git fswebcam python3 python3-venv
+apt-get install -y git fswebcam v4l-utils python3 python3-venv
 
 echo "== 2. beadz service user (video group) =="
 if ! id beadz >/dev/null 2>&1; then
