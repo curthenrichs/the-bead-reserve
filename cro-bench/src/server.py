@@ -55,7 +55,11 @@ def start_server(server_bin: str, model: Path, mmproj: Path, port: int,
     url = f"http://127.0.0.1:{port}"
     try:
         load_s = wait_healthy(url, load_timeout, proc)
-    except ServerError:
+    except BaseException:
+        # Broad on purpose: wait_healthy blocks in sleep()/requests.get(), so a
+        # Ctrl-C (KeyboardInterrupt, a BaseException) during model load must
+        # still reach here and reap the child — the caller only binds proc on
+        # a successful return, so this is the last chance before it orphans.
         proc.kill()
         proc.wait()
         raise

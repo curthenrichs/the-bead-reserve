@@ -2,10 +2,12 @@
 stub, VmHWM parsing from text, spawn errors from a bogus binary."""
 
 import http.server
+import subprocess
 import threading
 
 import pytest
 
+from beadz_cro_bench import server as server_mod
 from beadz_cro_bench.server import (ServerError, parse_vmhwm, peak_rss_kb,
                                     start_server, wait_healthy)
 
@@ -62,3 +64,44 @@ def test_parse_vmhwm_absent():
 
 def test_peak_rss_kb_bad_pid_is_none():
     assert peak_rss_kb(2 ** 22 + 12345) is None
+
+
+class _FakeProc:
+    """Stands in for subprocess.Popen: never actually spawns anything,
+    just records whether teardown reached it."""
+
+    def __init__(self):
+        self.pid = 99999
+        self.returncode = None
+        self.killed = False
+        self.waited = False
+
+    def poll(self):
+        return None
+
+    def kill(self):
+        self.killed = True
+
+    def wait(self, timeout=None):
+        self.waited = True
+
+
+def test_start_server_kills_proc_on_interrupt_during_load(monkeypatch, tmp_path):
+    model = tmp_path / "m.gguf"
+    mmproj = tmp_path / "mm.gguf"
+    model.write_bytes(b"x")
+    mmproj.write_bytes(b"x")
+
+    fake_proc = _FakeProc()
+    monkeypatch.setattr(subprocess, "Popen", lambda *a, **kw: fake_proc)
+
+    def _raise_kbi(*a, **kw):
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(server_mod, "wait_healthy", _raise_kbi)
+
+    with pytest.raises(KeyboardInterrupt):
+        start_server("llama-server", model, mmproj, 8091)
+
+    assert fake_proc.killed
+    assert fake_proc.waited
