@@ -110,6 +110,23 @@ ingest — production is the Cloudflare Worker (subsystem B), not yet built.
 `beadz-sink.service` itself is installed only by `launch.sh`; `provision.sh`
 and `smoke.sh` never touch it.
 
+## Optional: the Chief Reserve Officer (CRO)
+
+The CRO is a small vision-language model (SmolVLM-500M) that adds a deadpan,
+in-character `croText` "audit" to each frame. It is **strictly optional and
+advisory** — off by default, never part of the signed material, and it can
+never break capture/sign/push. Enable it only if you want the flavor text.
+
+1. `bash camera/provision-cro.sh` (run as the operator, not root). Builds
+   `llama-server` from source (~40 min on a 3B+) and fetches the verified
+   SmolVLM Q8 model. It prints the `CRO_*` paths to set.
+2. Put those paths in `/etc/beadz-camera/device.env` and set `CRO_IMPL=smolvlm`.
+   Ensure the `beadz` service user can read the binary + model files.
+3. The next hourly capture spawns inference (~2.5–3 min, within the hourly
+   budget) and writes `croText`. Watch `status.json`'s `last_cro` — a `false`
+   there never fails the capture (it stays advisory). To turn it back off, set
+   `CRO_IMPL=null`.
+
 ## Local integration sink
 
 `scripts/ingest-sink.py` is a contract-reference implementation of the
