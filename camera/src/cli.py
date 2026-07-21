@@ -89,6 +89,9 @@ def _cmd_capture_once(cfg: Config) -> int:
                 cro_ms = int((time.monotonic() - _t0) * 1000)
                 cro_ok = cro_text is not None
                 cro_reason = None if cro_ok else "no croText (see journal)"
+            extra = {}
+            if cfg.cro_impl != "null":
+                extra["last_cro"] = {"ok": cro_ok, "reason": cro_reason, "ms": cro_ms}
             with state_lock(cfg.state_dir):
                 counter = state.next_counter()
                 state.enqueue(counter, final, {
@@ -100,8 +103,7 @@ def _cmd_capture_once(cfg: Config) -> int:
                 })
                 update_status(cfg.state_dir, last_capture_ok=True, last_error=None,
                               last_counter=counter, queue_depth=len(state.pending()),
-                              ntp_synced=_ntp_synced(),
-                              last_cro={"ok": cro_ok, "reason": cro_reason, "ms": cro_ms})
+                              ntp_synced=_ntp_synced(), **extra)
     except (CaptureError, ProcessError, CounterError, ValueError, OSError) as exc:
         with state_lock(cfg.state_dir):
             update_status(cfg.state_dir, last_capture_ok=False, last_error=str(exc),

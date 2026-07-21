@@ -234,6 +234,50 @@ def test_capture_once_records_cro_and_shares_ts(tmp_path, monkeypatch):
     assert status["last_capture_ok"] is True
 
 
+def test_capture_once_cro_failure_is_non_fatal(tmp_path, monkeypatch):
+    # An enabled CRO that fails (returns None) must not fail capture-once:
+    # status.last_capture_ok stays True, only last_cro.ok flips to False.
+    from beadz_camera import cli as M
+    monkeypatch.setattr(M, "capture_frame", lambda *a, **k: None)
+
+    def _fake_crop(src, dest, rect):
+        Path(dest).write_bytes(b"stub-final-jpeg")
+    monkeypatch.setattr(M, "crop_and_strip", _fake_crop)
+    monkeypatch.setattr(M, "sha256_file", lambda p: "d" * 64)
+    monkeypatch.setattr(M, "load_signing_key", lambda p: object())
+    monkeypatch.setattr(M, "sign_hash", lambda k, d: "sig")
+    monkeypatch.setattr(M, "_ntp_synced", lambda: True)
+
+    class FakeCRO:
+        def audit(self, image_path, capture_ts):
+            return None
+
+    monkeypatch.setattr(M, "get_cro", lambda cfg: FakeCRO())
+
+    cfg = _make_cfg(tmp_path)   # cro_impl='smolvlm' + valid CRO paths + a real state_dir
+    _seed_counter(cfg)
+    rc = M._cmd_capture_once(cfg)
+    assert rc == 0
+    meta = _read_enqueued_meta(cfg)
+    assert meta["croText"] is None
+    status = json.loads((Path(cfg.state_dir) / "status.json").read_text())
+    assert status["last_capture_ok"] is True
+    assert status["last_cro"]["ok"] is False
+    assert isinstance(status["last_cro"]["ms"], int)
+
+
+def test_capture_once_null_mode_omits_last_cro(env_file, tmp_path, fake_capture):
+    # CRO off (cro_impl='null', the default NullCRO): status.json must not
+    # gain a last_cro key at all -- byte-for-byte the pre-CRO shape.
+    _bootstrap(env_file)
+    assert cli.main(["--env", str(env_file), "capture-once"]) == 0
+
+    meta = _read_enqueued_meta(Config.from_env(env_file))
+    assert meta["croText"] is None
+    status = json.loads((tmp_path / "state" / "status.json").read_text())
+    assert "last_cro" not in status
+
+
 @responses.activate
 def test_mutations_happen_under_lock(env_file, fake_capture, monkeypatch):
     events = []

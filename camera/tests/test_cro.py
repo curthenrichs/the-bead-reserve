@@ -44,7 +44,7 @@ def test_smolvlm_server_failure_returns_none(tmp_path, monkeypatch):
     assert C.SmolVLMCRO(_cfg()).audit(img, capture_ts=0) is None
 
 
-def test_smolvlm_flavor_none_still_renders(tmp_path, monkeypatch):
+def test_smolvlm_flavor_none_returns_none(tmp_path, monkeypatch):
     img = tmp_path / "f.jpg"; img.write_bytes(b"jpeg")
     killed = []
     monkeypatch.setattr(C.llama_server, "start_server",
