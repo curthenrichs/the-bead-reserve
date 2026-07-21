@@ -1,8 +1,15 @@
 ---
 import Base from "../layouts/Base.astro";
+import Masthead from "../components/Masthead.astro";
+import Ledger from "../components/Ledger.astro";
+import Seal from "../components/Seal.astro";
+import Disclaimers from "../components/Disclaimers.astro";
 import Hello from "../islands/Hello.tsx";
 ---
-<Base title="The Bead Reserve">
-  <h1>The Bead Reserve</h1>
+<Base title="The Bead Reserve — Claim Office">
+  <Masthead />
+  <Ledger />
+  <div style="display:flex;justify-content:center;margin:20px 0"><Seal /></div>
   <Hello client:load />
+  <Disclaimers />
 </Base>

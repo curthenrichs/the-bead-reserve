@@ -1,0 +1,18 @@
+---
+import { STATS } from "../config";
+---
+<section aria-label="Reserve figures"
+  style="display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--hairline);margin:30px 0">
+  <div style="padding:16px 14px;border-right:1px solid var(--hairline)">
+    <div class="eyebrow" style="color:var(--text-soft)">Physical Reserve</div>
+    <div class="mono" style="font-size:clamp(19px,4.6vw,26px);font-weight:600;margin-top:7px">{STATS.reserve}</div>
+  </div>
+  <div style="padding:16px 14px;border-right:1px solid var(--hairline)">
+    <div class="eyebrow" style="color:var(--text-soft)">Outstanding BEADZ</div>
+    <div class="mono" style="font-size:clamp(19px,4.6vw,26px);font-weight:600;margin-top:7px">{STATS.outstanding}</div>
+  </div>
+  <div style="padding:16px 14px">
+    <div class="eyebrow" style="color:var(--text-soft)">Collateralization</div>
+    <div class="mono" style="font-size:clamp(19px,4.6vw,26px);font-weight:600;margin-top:7px;color:var(--amber)">{STATS.collateralization}</div>
+  </div>
+</section>
