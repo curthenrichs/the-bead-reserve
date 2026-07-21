@@ -113,3 +113,54 @@ def test_capture_skip_malformed_raises(bad, make_device_env, monkeypatch):
     monkeypatch.delenv("CAPTURE_SKIP", raising=False)
     with pytest.raises(ConfigError, match="CAPTURE_SKIP"):
         Config.from_env(make_device_env(CAPTURE_SKIP=bad))
+
+
+def test_cro_defaults_to_null(make_device_env, monkeypatch):
+    for k in ("CRO_IMPL", "CRO_SERVER_BIN", "CRO_MODEL_PATH", "CRO_MMPROJ_PATH",
+              "CRO_CTX_SIZE", "CRO_BEST_OF", "CRO_MOOD_HOLD_HOURS", "CRO_TIMEOUT_S"):
+        monkeypatch.delenv(k, raising=False)
+    cfg = Config.from_env(make_device_env())
+    assert cfg.cro_impl == "null"
+    assert cfg.cro_model_path is None
+    assert cfg.cro_ctx_size == 2048 and cfg.cro_best_of == 3
+    assert cfg.cro_mood_hold_hours == 3 and cfg.cro_timeout_s == 180
+
+
+def test_cro_smolvlm_requires_paths(make_device_env, monkeypatch):
+    for k in ("CRO_IMPL", "CRO_SERVER_BIN", "CRO_MODEL_PATH", "CRO_MMPROJ_PATH",
+              "CRO_CTX_SIZE", "CRO_BEST_OF", "CRO_MOOD_HOLD_HOURS", "CRO_TIMEOUT_S"):
+        monkeypatch.delenv(k, raising=False)
+    with pytest.raises(ConfigError, match="CRO_SERVER_BIN"):
+        Config.from_env(make_device_env(CRO_IMPL="smolvlm"))
+
+
+def test_cro_smolvlm_full(make_device_env, monkeypatch):
+    for k in ("CRO_IMPL", "CRO_SERVER_BIN", "CRO_MODEL_PATH", "CRO_MMPROJ_PATH",
+              "CRO_CTX_SIZE", "CRO_BEST_OF", "CRO_MOOD_HOLD_HOURS", "CRO_TIMEOUT_S"):
+        monkeypatch.delenv(k, raising=False)
+    cfg = Config.from_env(make_device_env(
+        CRO_IMPL="smolvlm", CRO_SERVER_BIN="/opt/llama-server",
+        CRO_MODEL_PATH="/opt/m.gguf", CRO_MMPROJ_PATH="/opt/mm.gguf",
+        CRO_CTX_SIZE="1536", CRO_BEST_OF="2", CRO_MOOD_HOLD_HOURS="4",
+        CRO_TIMEOUT_S="120"))
+    assert cfg.cro_impl == "smolvlm"
+    assert cfg.cro_server_bin.as_posix() == "/opt/llama-server"
+    assert cfg.cro_ctx_size == 1536 and cfg.cro_best_of == 2
+
+
+def test_cro_unknown_impl(make_device_env, monkeypatch):
+    for k in ("CRO_IMPL", "CRO_SERVER_BIN", "CRO_MODEL_PATH", "CRO_MMPROJ_PATH",
+              "CRO_CTX_SIZE", "CRO_BEST_OF", "CRO_MOOD_HOLD_HOURS", "CRO_TIMEOUT_S"):
+        monkeypatch.delenv(k, raising=False)
+    with pytest.raises(ConfigError, match="CRO_IMPL"):
+        Config.from_env(make_device_env(CRO_IMPL="gpt5"))
+
+
+def test_cro_bad_numeric(make_device_env, monkeypatch):
+    for k in ("CRO_IMPL", "CRO_SERVER_BIN", "CRO_MODEL_PATH", "CRO_MMPROJ_PATH",
+              "CRO_CTX_SIZE", "CRO_BEST_OF", "CRO_MOOD_HOLD_HOURS", "CRO_TIMEOUT_S"):
+        monkeypatch.delenv(k, raising=False)
+    with pytest.raises(ConfigError, match="CRO_BEST_OF"):
+        Config.from_env(make_device_env(
+            CRO_IMPL="smolvlm", CRO_SERVER_BIN="/o/s",
+            CRO_MODEL_PATH="/o/m", CRO_MMPROJ_PATH="/o/mm", CRO_BEST_OF="0"))

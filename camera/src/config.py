@@ -34,6 +34,14 @@ class Config:
     capture_resolution: tuple[int, int] | None = None
     camera_controls: tuple[tuple[str, str], ...] | None = None
     capture_skip: int = 0
+    cro_impl: str = "null"
+    cro_server_bin: Path | None = None
+    cro_model_path: Path | None = None
+    cro_mmproj_path: Path | None = None
+    cro_ctx_size: int = 2048
+    cro_best_of: int = 3
+    cro_mood_hold_hours: int = 3
+    cro_timeout_s: int = 180
 
     @classmethod
     def from_env(cls, env_file: Path | None = None) -> "Config":
@@ -82,6 +90,31 @@ class Config:
             raise ConfigError("CAPTURE_SKIP must be a non-negative integer") from exc
         if capture_skip < 0:
             raise ConfigError("CAPTURE_SKIP must be a non-negative integer")
+        cro_impl = (os.environ.get("CRO_IMPL") or "null").strip().lower()
+        if cro_impl not in ("null", "smolvlm"):
+            raise ConfigError("CRO_IMPL must be 'null' or 'smolvlm'")
+
+        def _cro_int(key: str, default: int) -> int:
+            try:
+                val = int(os.environ.get(key) or default)
+            except ValueError as exc:
+                raise ConfigError(f"{key} must be an integer") from exc
+            if val < 1:
+                raise ConfigError(f"{key} must be >= 1")
+            return val
+
+        cro_ctx_size = _cro_int("CRO_CTX_SIZE", 2048)
+        cro_best_of = _cro_int("CRO_BEST_OF", 3)
+        cro_mood_hold_hours = _cro_int("CRO_MOOD_HOLD_HOURS", 3)
+        cro_timeout_s = _cro_int("CRO_TIMEOUT_S", 180)
+        cro_server_bin = cro_model_path = cro_mmproj_path = None
+        if cro_impl == "smolvlm":
+            for key in ("CRO_SERVER_BIN", "CRO_MODEL_PATH", "CRO_MMPROJ_PATH"):
+                if not os.environ.get(key):
+                    raise ConfigError(f"{key} is required when CRO_IMPL=smolvlm")
+            cro_server_bin = Path(os.environ["CRO_SERVER_BIN"])
+            cro_model_path = Path(os.environ["CRO_MODEL_PATH"])
+            cro_mmproj_path = Path(os.environ["CRO_MMPROJ_PATH"])
         return cls(
             ingest_url=os.environ["INGEST_URL"],
             hmac_secret=os.environ["HMAC_SECRET"],
@@ -93,4 +126,12 @@ class Config:
             capture_resolution=capture_resolution,
             camera_controls=camera_controls,
             capture_skip=capture_skip,
+            cro_impl=cro_impl,
+            cro_server_bin=cro_server_bin,
+            cro_model_path=cro_model_path,
+            cro_mmproj_path=cro_mmproj_path,
+            cro_ctx_size=cro_ctx_size,
+            cro_best_of=cro_best_of,
+            cro_mood_hold_hours=cro_mood_hold_hours,
+            cro_timeout_s=cro_timeout_s,
         )
