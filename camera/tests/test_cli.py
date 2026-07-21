@@ -1,5 +1,6 @@
 import json
 from contextlib import contextmanager
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -7,11 +8,39 @@ import responses
 from PIL import Image
 
 from beadz_camera import cli
+from beadz_camera.config import Config
 from beadz_camera.lock import state_lock as real_state_lock
 from beadz_camera.queue import StateDir
 from beadz_camera.sign import sha256_file, verify
 
 INGEST = "https://api.test/ingest"
+
+
+def _make_cfg(tmp_path):
+    """A Config with cro_impl='smolvlm' + valid CRO paths + a real state_dir,
+    built directly (not via device.env) since only Config's fields matter here."""
+    state_dir = tmp_path / "state"
+    return Config(
+        ingest_url=INGEST,
+        hmac_secret="topsecret",
+        camera_device="/dev/video0",
+        crop_rect=(10, 20, 300, 200),
+        state_dir=state_dir,
+        key_path=state_dir / "keys/ed25519.key",
+        cro_impl="smolvlm",
+        cro_server_bin=Path("/dummy/server"),
+        cro_model_path=Path("/dummy/model.gguf"),
+        cro_mmproj_path=Path("/dummy/mmproj.gguf"),
+    )
+
+
+def _seed_counter(cfg):
+    assert cli._cmd_seed_counter(cfg, 0, False) == 0
+
+
+def _read_enqueued_meta(cfg):
+    frames = StateDir(cfg.state_dir).pending()
+    return frames[0].meta
 
 
 @pytest.fixture()
@@ -167,6 +196,42 @@ def test_idle_push_drain_does_not_rewrite_status(env_file, tmp_path, monkeypatch
                         lambda p, t: (calls.append(1), real(p, t))[1])
     assert cli.main(["--env", str(env_file), "push-drain"]) == 0      # idle repeat
     assert calls == []                                               # no status rewrite
+
+
+def test_capture_once_records_cro_and_shares_ts(tmp_path, monkeypatch):
+    # Stub the whole pipeline up to the CRO so we can assert croText + ts + last_cro.
+    from beadz_camera import cli as M
+    monkeypatch.setattr(M, "capture_frame", lambda *a, **k: None)
+
+    def _fake_crop(src, dest, rect):
+        # crop_and_strip normally writes `dest`; state.enqueue() moves it into
+        # the queue, so the stub must leave a real file behind.
+        Path(dest).write_bytes(b"stub-final-jpeg")
+    monkeypatch.setattr(M, "crop_and_strip", _fake_crop)
+    monkeypatch.setattr(M, "sha256_file", lambda p: "d" * 64)
+    monkeypatch.setattr(M, "load_signing_key", lambda p: object())
+    monkeypatch.setattr(M, "sign_hash", lambda k, d: "sig")
+    monkeypatch.setattr(M, "_ntp_synced", lambda: True)
+
+    seen = {}
+
+    class FakeCRO:
+        def audit(self, image_path, capture_ts):
+            seen["cro_ts"] = capture_ts
+            return "AUDIT TEXT"
+
+    monkeypatch.setattr(M, "get_cro", lambda cfg: FakeCRO())
+
+    cfg = _make_cfg(tmp_path)   # a Config with cro_impl='smolvlm' + valid CRO paths + a real state_dir; seed the counter first
+    _seed_counter(cfg)
+    rc = M._cmd_capture_once(cfg)
+    assert rc == 0
+    meta = _read_enqueued_meta(cfg)      # the <counter>.json in the queue
+    assert meta["croText"] == "AUDIT TEXT"
+    assert meta["ts"] == seen["cro_ts"]  # the SAME ts seeded the mood and the payload
+    status = json.loads((Path(cfg.state_dir) / "status.json").read_text())
+    assert status["last_cro"]["ok"] is True
+    assert status["last_capture_ok"] is True
 
 
 @responses.activate

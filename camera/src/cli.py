@@ -81,19 +81,27 @@ def _cmd_capture_once(cfg: Config) -> int:
             crop_and_strip(raw, final, cfg.crop_rect)
             digest = sha256_file(final)
             sig = sign_hash(load_signing_key(cfg.key_path), digest)
-            cro_text = get_cro().audit(final)
+            capture_ts = int(time.time())
+            cro_ok, cro_ms, cro_reason, cro_text = True, None, None, None
+            _t0 = time.monotonic()
+            cro_text = get_cro(cfg).audit(final, capture_ts)
+            if cfg.cro_impl != "null":
+                cro_ms = int((time.monotonic() - _t0) * 1000)
+                cro_ok = cro_text is not None
+                cro_reason = None if cro_ok else "no croText (see journal)"
             with state_lock(cfg.state_dir):
                 counter = state.next_counter()
                 state.enqueue(counter, final, {
                     "counter": counter,
-                    "ts": int(time.time()),
+                    "ts": capture_ts,
                     "sha256": digest,
                     "sig": sig,
                     "croText": cro_text,
                 })
                 update_status(cfg.state_dir, last_capture_ok=True, last_error=None,
                               last_counter=counter, queue_depth=len(state.pending()),
-                              ntp_synced=_ntp_synced())
+                              ntp_synced=_ntp_synced(),
+                              last_cro={"ok": cro_ok, "reason": cro_reason, "ms": cro_ms})
     except (CaptureError, ProcessError, CounterError, ValueError, OSError) as exc:
         with state_lock(cfg.state_dir):
             update_status(cfg.state_dir, last_capture_ok=False, last_error=str(exc),
