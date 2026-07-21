@@ -1,0 +1,40 @@
+@import "@fontsource/roboto-serif/400.css";
+@import "@fontsource/roboto-serif/600.css";
+@import "@fontsource/roboto-mono/400.css";
+@import "@fontsource/roboto-mono/600.css";
+
+:root {
+  --bg: #1b140c;
+  --text: #faf7f1;
+  --text-soft: #baab92;
+  --amber: #ffaa3c;
+  --amber-dark: #a8650f;
+  --hairline: #3b2e1e;
+  --serif: "Roboto Serif", Georgia, serif;
+  --mono: "Roboto Mono", ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--serif);
+  line-height: 1.55;
+}
+
+.mono { font-family: var(--mono); }
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--amber);
+  font-weight: 600;
+}
+a { color: var(--amber); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
