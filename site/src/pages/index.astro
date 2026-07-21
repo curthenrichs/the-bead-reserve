@@ -5,6 +5,7 @@ import Ledger from "../components/Ledger.astro";
 import Seal from "../components/Seal.astro";
 import Disclaimers from "../components/Disclaimers.astro";
 import CameraMonitor from "../islands/CameraMonitor.tsx";
+import ClaimPanel from "../islands/ClaimPanel.tsx";
 import Subscribe from "../islands/Subscribe.tsx";
 ---
 <Base title="The Bead Reserve — Claim Office">
@@ -12,6 +13,7 @@ import Subscribe from "../islands/Subscribe.tsx";
   <Ledger />
   <div style="display:flex;justify-content:center;margin:20px 0"><Seal /></div>
   <CameraMonitor client:load />
+  <ClaimPanel client:load />
   <Subscribe client:load />
   <Disclaimers />
 </Base>
