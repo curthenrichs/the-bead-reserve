@@ -103,10 +103,11 @@ class Config:
                 raise ConfigError(f"{key} must be >= 1")
             return val
 
-        cro_ctx_size = _cro_int("CRO_CTX_SIZE", 2048)
-        cro_best_of = _cro_int("CRO_BEST_OF", 3)
-        cro_mood_hold_hours = _cro_int("CRO_MOOD_HOLD_HOURS", 3)
-        cro_timeout_s = _cro_int("CRO_TIMEOUT_S", 180)
+        # Initialize CRO numerics to their defaults; only validate when cro_impl == "smolvlm"
+        cro_ctx_size = 2048
+        cro_best_of = 3
+        cro_mood_hold_hours = 3
+        cro_timeout_s = 180
         cro_server_bin = cro_model_path = cro_mmproj_path = None
         if cro_impl == "smolvlm":
             for key in ("CRO_SERVER_BIN", "CRO_MODEL_PATH", "CRO_MMPROJ_PATH"):
@@ -115,6 +116,11 @@ class Config:
             cro_server_bin = Path(os.environ["CRO_SERVER_BIN"])
             cro_model_path = Path(os.environ["CRO_MODEL_PATH"])
             cro_mmproj_path = Path(os.environ["CRO_MMPROJ_PATH"])
+            # Validate numeric keys only when smolvlm is enabled
+            cro_ctx_size = _cro_int("CRO_CTX_SIZE", 2048)
+            cro_best_of = _cro_int("CRO_BEST_OF", 3)
+            cro_mood_hold_hours = _cro_int("CRO_MOOD_HOLD_HOURS", 3)
+            cro_timeout_s = _cro_int("CRO_TIMEOUT_S", 180)
         return cls(
             ingest_url=os.environ["INGEST_URL"],
             hmac_secret=os.environ["HMAC_SECRET"],

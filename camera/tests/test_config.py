@@ -164,3 +164,17 @@ def test_cro_bad_numeric(make_device_env, monkeypatch):
         Config.from_env(make_device_env(
             CRO_IMPL="smolvlm", CRO_SERVER_BIN="/o/s",
             CRO_MODEL_PATH="/o/m", CRO_MMPROJ_PATH="/o/mm", CRO_BEST_OF="0"))
+
+
+def test_cro_null_ignores_numeric_keys(make_device_env, monkeypatch):
+    """When CRO_IMPL=null, malformed CRO_* numerics are ignored; defaults apply."""
+    for k in ("CRO_IMPL", "CRO_SERVER_BIN", "CRO_MODEL_PATH", "CRO_MMPROJ_PATH",
+              "CRO_CTX_SIZE", "CRO_BEST_OF", "CRO_MOOD_HOLD_HOURS", "CRO_TIMEOUT_S"):
+        monkeypatch.delenv(k, raising=False)
+    cfg = Config.from_env(make_device_env(
+        CRO_IMPL="null", CRO_BEST_OF="0", CRO_TIMEOUT_S="abc"))
+    assert cfg.cro_impl == "null"
+    assert cfg.cro_best_of == 3      # default, not 0
+    assert cfg.cro_timeout_s == 180  # default, not malformed "abc"
+    assert cfg.cro_ctx_size == 2048  # default
+    assert cfg.cro_mood_hold_hours == 3  # default
