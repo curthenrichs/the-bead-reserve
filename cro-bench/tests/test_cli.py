@@ -65,6 +65,84 @@ def _answers(cid):
             "flavor": "The beads persist."}[cid]
 
 
+def test_flavor_call_uses_flavor_persona(bench_dir, fake_server, monkeypatch):
+    # Give v1 a distinct flavor persona; slots must still get the base persona.
+    (bench_dir / "variants" / "v1" / "flavor_persona.txt").write_text(
+        "You are an unhinged auditor.", encoding="utf-8")
+    persona_by_call = {}
+
+    def fake_call(base_url, persona, prompt, image_b64, sampling,
+                  grammar=None, timeout=600.0, mime="image/jpeg"):
+        cid = {"Is a jar present in the frame? Answer present or absent.": "jar",
+               "Is the lid seated or ajar?": "lid",
+               "Is the jar overfull, nominal, low, or depleted?": "level"}.get(prompt, "flavor")
+        persona_by_call[cid] = persona
+        return _answers(cid), 5
+
+    monkeypatch.setattr(calls, "audit_call", fake_call)
+    rc = cli.main(["run", "--variant", "v1", "--run-name", "t"])
+    assert rc == 0
+    assert persona_by_call["flavor"] == "You are an unhinged auditor."
+    assert "Chief Reserve Officer" in persona_by_call["jar"]      # neutral persona
+    assert persona_by_call["jar"] != persona_by_call["flavor"]
+
+
+def _set_best_of(bench_dir, n):
+    import json as _json
+    sj = bench_dir / "variants" / "v1" / "slots.json"
+    spec = _json.loads(sj.read_text(encoding="utf-8"))
+    spec["flavor_best_of"] = n
+    sj.write_text(_json.dumps(spec), encoding="utf-8")
+
+
+def test_best_of_keeps_first_clean_flavor(bench_dir, fake_server, monkeypatch):
+    _set_best_of(bench_dir, 3)
+    flavor_attempts = []
+    # First flavor attempt per image is junk ("5."), second is clean.
+    seq = iter(["5.", "The beads keep their counsel."] * 2)  # 2 images
+
+    def fake_call(base_url, persona, prompt, image_b64, sampling,
+                  grammar=None, timeout=600.0, mime="image/jpeg"):
+        if grammar is not None:                       # a slot
+            return "present", 5
+        nxt = next(seq)                               # flavor
+        flavor_attempts.append(nxt)
+        return nxt, 7
+
+    monkeypatch.setattr(calls, "audit_call", fake_call)
+    rc = cli.main(["run", "--variant", "v1", "--run-name", "t"])
+    assert rc == 0
+    # 2 junk + 2 clean attempts consumed (stopped at the clean one, not all 3)
+    assert flavor_attempts == ["5.", "The beads keep their counsel.",
+                               "5.", "The beads keep their counsel."]
+    lines = [json.loads(l) for l in
+             Path("out/t/results.jsonl").read_text(encoding="utf-8").splitlines()]
+    audits = [l for l in lines if l["type"] == "audit"]
+    assert all("The beads keep their counsel." in a["text"] for a in audits)
+    # flavor wall time is summed across the two attempts (7 + 7)
+    flav_calls = [l for l in lines if l["type"] == "call" and l["call"] == "flavor"]
+    assert all(c["wall_ms"] == 14 for c in flav_calls)
+
+
+def test_best_of_all_junk_falls_back_to_first(bench_dir, fake_server, monkeypatch):
+    _set_best_of(bench_dir, 3)
+
+    def fake_call(base_url, persona, prompt, image_b64, sampling,
+                  grammar=None, timeout=600.0, mime="image/jpeg"):
+        if grammar is not None:
+            return "present", 5
+        return "7.", 7                                # every flavor attempt is junk
+
+    monkeypatch.setattr(calls, "audit_call", fake_call)
+    rc = cli.main(["run", "--variant", "v1", "--run-name", "t"])
+    assert rc == 0                                    # junk is still a completed call
+    lines = [json.loads(l) for l in
+             Path("out/t/results.jsonl").read_text(encoding="utf-8").splitlines()]
+    flav = [l for l in lines if l["type"] == "call" and l["call"] == "flavor"]
+    assert all(c["response"] == "7." for c in flav)   # first (only) candidate kept
+    assert all(c["wall_ms"] == 21 for c in flav)      # 3 attempts x 7
+
+
 def test_run_all_ok_exit_0(bench_dir, fake_server, monkeypatch):
     seen = []
 

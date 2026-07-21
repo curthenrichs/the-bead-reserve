@@ -80,6 +80,23 @@ def test_mime_param_sets_data_uri_type():
         "data:image/png;base64,aGk="
 
 
+@responses.activate
+def test_extra_sampling_keys_forwarded():
+    # A hot flavor variant sets top_p/min_p/repeat_penalty on top of
+    # temperature — every knob must reach the endpoint verbatim.
+    responses.add(responses.POST, EP, json=_ok_body("unhinged"))
+    audit_call(URL, "p", "Remark.", "aGk=",
+               {"temperature": 1.4, "top_p": 0.98, "min_p": 0.03,
+                "repeat_penalty": 1.15, "n_predict": 80})
+    body = json.loads(responses.calls[0].request.body)
+    assert body["temperature"] == 1.4
+    assert body["top_p"] == 0.98
+    assert body["min_p"] == 0.03
+    assert body["repeat_penalty"] == 1.15
+    assert body["max_tokens"] == 80          # n_predict renamed
+    assert "n_predict" not in body           # ...and not passed raw
+
+
 def test_encode_image(tmp_path):
     p = tmp_path / "a.jpg"
     p.write_bytes(b"hi")

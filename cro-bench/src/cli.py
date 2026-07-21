@@ -13,7 +13,7 @@ import sys
 import time
 from pathlib import Path
 
-from . import calls, fetch, server
+from . import calls, fetch, flavor, server
 from .results import RunWriter
 from .variant import FLAVOR_ID, Variant, VariantError, load_variant, render
 
@@ -66,9 +66,37 @@ def _find_images(images_dir: Path) -> list[Path]:
 
 
 def _calls_for(v: Variant):
+    # Slots use the neutral persona (honest jar/lid/level); the flavor call
+    # uses flavor_persona (its own character, or the same persona if unset).
     for slot in v.slots:
-        yield slot.id, slot.prompt, slot.grammar, v.slot_sampling
-    yield FLAVOR_ID, v.flavor_prompt, None, v.flavor_sampling
+        yield slot.id, slot.prompt, slot.grammar, v.slot_sampling, v.persona
+    yield FLAVOR_ID, v.flavor_prompt, None, v.flavor_sampling, v.flavor_persona
+
+
+def _best_of_flavor(base_url, v, prompt, image_b64, persona, timeout, mime):
+    """Up to v.flavor_best_of flavor attempts; return (chosen, total_wall_ms,
+    last_exc). Stops at the first candidate clearing flavor.is_junk; if none
+    clear it, returns the first candidate (the hourly stream tolerates an
+    occasional dull line — production suppresses, the bench still shows it).
+    chosen is None only when every attempt errored."""
+    candidates: list[str] = []
+    total_wall = 0
+    last_exc = None
+    for _ in range(v.flavor_best_of):
+        try:
+            text, wall_ms = calls.audit_call(
+                base_url, persona, prompt, image_b64, v.flavor_sampling,
+                grammar=None, timeout=timeout, mime=mime)
+        except calls.CallError as exc:
+            last_exc = exc
+            continue
+        total_wall += wall_ms
+        candidates.append(text)
+        if not flavor.is_junk(text, persona):
+            return text, total_wall, None
+    if candidates:
+        return candidates[0], total_wall, None
+    return None, total_wall, last_exc
 
 
 def _cmd_run(args: argparse.Namespace) -> int:
@@ -113,10 +141,26 @@ def _cmd_run(args: argparse.Namespace) -> int:
                 answers: dict[str, str] = {}
                 timings: dict[str, int] = {}
                 error = None
-                for cid, prompt, grammar, sampling in _calls_for(v):
+                for cid, prompt, grammar, sampling, persona in _calls_for(v):
+                    if cid == FLAVOR_ID and v.flavor_best_of > 1:
+                        text, wall_ms, exc = _best_of_flavor(
+                            base_url, v, prompt, image_b64, persona,
+                            args.timeout, mime)
+                        if text is None:
+                            failed += 1
+                            error = f"{cid}: {exc}" if error is None else error
+                            writer.call(v.name, image.name, cid, prompt,
+                                        error=str(exc))
+                            continue
+                        ok += 1
+                        answers[cid] = text
+                        timings[cid] = wall_ms
+                        writer.call(v.name, image.name, cid, prompt,
+                                    response=text, wall_ms=wall_ms)
+                        continue
                     try:
                         text, wall_ms = calls.audit_call(
-                            base_url, v.persona, prompt, image_b64, sampling,
+                            base_url, persona, prompt, image_b64, sampling,
                             grammar=grammar, timeout=args.timeout, mime=mime)
                     except calls.CallError as exc:
                         failed += 1

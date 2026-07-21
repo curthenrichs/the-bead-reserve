@@ -2,8 +2,10 @@
 
 Grammar-constrained slots send GBNF text in llama-server's `grammar`
 extension field; the flavor call omits it. The image rides inline as a
-base64 data URI. Variant sampling uses llama.cpp's n_predict name; the
-OpenAI-compatible endpoint calls it max_tokens — mapped here."""
+base64 data URI. Every key in a variant's sampling dict is forwarded to
+the endpoint verbatim — so a variant can turn up the heat with top_p,
+top_k, min_p, or repeat_penalty, not just temperature. The one rename:
+llama.cpp's `n_predict` is the OpenAI-compatible endpoint's `max_tokens`."""
 
 from __future__ import annotations
 
@@ -34,9 +36,13 @@ def audit_call(base_url: str, persona: str, prompt: str, image_b64: str,
                  "image_url": {"url": f"data:{mime};base64,{image_b64}"}},
             ]},
         ],
-        "temperature": sampling.get("temperature", 0.0),
-        "max_tokens": sampling.get("n_predict", 32),
     }
+    # Forward every sampling knob verbatim; n_predict is the endpoint's
+    # max_tokens. Defaults apply only when the variant is silent.
+    for key, value in sampling.items():
+        body["max_tokens" if key == "n_predict" else key] = value
+    body.setdefault("temperature", 0.0)
+    body.setdefault("max_tokens", 32)
     if grammar is not None:
         body["grammar"] = grammar
     t0 = time.monotonic()

@@ -1,0 +1,15 @@
+{
+  "_comment": "Canonical CRO mood rotation ('same guy, shifting moods'). One persona (variants/v5-flustered/flavor_persona.txt); the mood modulates intensity via a one-line cue appended to the flavor task plus its sampling. Held hold_hours per phase, seeded deterministically from the capture timestamp. Validated on real Pi frames 2026-07-20; the production CRO (docs/superpowers/specs/2026-07-20-cro-pi-integration-design.md) bakes these in.",
+  "hold_hours": 3,
+  "best_of": 3,
+  "moods": [
+    {"label": "composed",   "cue": "Today you feel almost calm about it.",
+     "sampling": {"temperature": 0.85, "top_p": 0.90, "n_predict": 60}},
+    {"label": "flustered",  "cue": "Today you feel flustered and a little out of your depth.",
+     "sampling": {"temperature": 1.05, "top_p": 0.95, "repeat_penalty": 1.1, "n_predict": 75}},
+    {"label": "rattled",    "cue": "Today the responsibility is really starting to get to you.",
+     "sampling": {"temperature": 1.30, "top_p": 0.97, "min_p": 0.03, "repeat_penalty": 1.1, "n_predict": 85}},
+    {"label": "unraveling", "cue": "Today you are coming apart a little.",
+     "sampling": {"temperature": 1.50, "top_p": 0.98, "min_p": 0.05, "repeat_penalty": 1.15, "n_predict": 90}}
+  ]
+}

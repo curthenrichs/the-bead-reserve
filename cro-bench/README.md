@@ -68,6 +68,24 @@ Warm-mode runs record `model_load_s: null` — they are prompt experiments,
 not timing measurements. Production will **not** have a resident server: on a
 1 GB Pi the hourly job spawns inference and tears it down.
 
+## Settled CRO (what production bakes in)
+
+Two committed artifacts are the canonical result of these experiments, lifted by
+the production CRO (`docs/superpowers/specs/2026-07-20-cro-pi-integration-design.md`):
+
+- **`variants/v5-flustered/`** — the persona (an incompetent, over-their-head
+  Chief Reserve Officer), slot prompts, GBNF grammars, and the audit template.
+  `flavor_best_of: 3` and a distinct `flavor_persona.txt` (the character on the
+  flavor call; the neutral slot persona keeps jar/lid/level honest).
+- **`moods.json`** — the "same guy, shifting moods" rotation: one persona, four
+  intensity moods (composed → flustered → rattled → unraveling), each a one-line
+  cue + sampling, held `hold_hours` per phase and seeded deterministically from
+  the capture timestamp.
+
+`python mood_rotation.py --server-bin <llama-server>` demonstrates the rotation
+over the sample frames (simulated hours). `v1` is kept as the plain deadpan
+baseline for comparison.
+
 ## Honest Pi numbers
 
 The page cache makes a second model load look fast, and over an hour on a

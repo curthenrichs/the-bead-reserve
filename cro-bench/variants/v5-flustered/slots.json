@@ -1,0 +1,10 @@
+{
+  "slots": [
+    {"id": "jar",   "prompt": "Is a jar present in the frame? Answer present or absent.", "grammar": "slots/jar.gbnf"},
+    {"id": "lid",   "prompt": "Is the lid seated or ajar?",                               "grammar": "slots/lid.gbnf"},
+    {"id": "level", "prompt": "Is the jar overfull, nominal, low, or depleted?",          "grammar": "slots/level.gbnf"}
+  ],
+  "slot_sampling":   {"temperature": 0.0, "n_predict": 8},
+  "flavor_sampling": {"temperature": 1.05, "top_p": 0.95, "repeat_penalty": 1.1, "n_predict": 75},
+  "flavor_best_of": 3
+}

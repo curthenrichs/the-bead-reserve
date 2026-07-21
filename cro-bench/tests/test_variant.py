@@ -27,6 +27,27 @@ def test_shipped_v1_loads():
     assert "{flavor}" in v.template
 
 
+def test_flavor_persona_defaults_to_persona():
+    v = load_variant(V1)                     # v1 has no flavor_persona.txt
+    assert v.flavor_persona == v.persona
+
+
+def test_flavor_persona_override(tmp_path):
+    d = _copy_v1(tmp_path)
+    (d / "flavor_persona.txt").write_text("You are an unhinged auditor.",
+                                          encoding="utf-8")
+    v = load_variant(d)
+    assert v.flavor_persona == "You are an unhinged auditor."
+    assert v.persona != v.flavor_persona     # slots keep the neutral persona
+
+
+def test_empty_flavor_persona_rejected(tmp_path):
+    d = _copy_v1(tmp_path)
+    (d / "flavor_persona.txt").write_text("  \n", encoding="utf-8")
+    with pytest.raises(VariantError, match="flavor_persona.txt"):
+        load_variant(d)
+
+
 def test_missing_variant_dir(tmp_path):
     with pytest.raises(VariantError, match="not found"):
         load_variant(tmp_path / "nope")
