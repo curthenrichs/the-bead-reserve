@@ -11,7 +11,19 @@ const pdfDst = resolve(here, "../public/whitepaper.pdf");
 
 try {
   if (platform === "win32") {
-    execFileSync("pwsh", ["-File", resolve(wpDir, "build.ps1")], { stdio: "inherit" });
+    const psArgs = ["-File", resolve(wpDir, "build.ps1")];
+    let ran = false;
+    for (const exe of ["pwsh", "powershell.exe"]) {
+      try {
+        execFileSync(exe, psArgs, { stdio: "inherit" });
+        ran = true;
+        break;
+      } catch (err) {
+        if (err.code === "ENOENT") continue; // this shell isn't installed; try the next
+        throw err;                            // real build failure — propagate
+      }
+    }
+    if (!ran) throw new Error("neither pwsh nor powershell.exe found on PATH");
   } else {
     execFileSync("bash", [resolve(wpDir, "build.sh")], { stdio: "inherit" });
   }
