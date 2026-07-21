@@ -4,12 +4,12 @@ import Masthead from "../components/Masthead.astro";
 import Ledger from "../components/Ledger.astro";
 import Seal from "../components/Seal.astro";
 import Disclaimers from "../components/Disclaimers.astro";
-import Hello from "../islands/Hello.tsx";
+import CameraMonitor from "../islands/CameraMonitor.tsx";
 ---
 <Base title="The Bead Reserve — Claim Office">
   <Masthead />
   <Ledger />
   <div style="display:flex;justify-content:center;margin:20px 0"><Seal /></div>
-  <Hello client:load />
+  <CameraMonitor client:load />
   <Disclaimers />
 </Base>
