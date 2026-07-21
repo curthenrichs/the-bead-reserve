@@ -14,7 +14,7 @@ export default function ClaimPanel() {
         fontSize: 10, color: "var(--text-soft)", textTransform: "uppercase", letterSpacing: ".08em" }}>
         <span>Genesis distribution</span><span>0 / {total} claimed</span>
       </div>
-      <div style={{ height: 9, background: "#241a10", border: "1px solid var(--hairline)", margin: "6px 0" }}>
+      <div style={{ height: 9, background: "var(--track-bg)", border: "1px solid var(--hairline)", margin: "6px 0" }}>
         <div style={{ height: "100%", width: "0%", background: "var(--amber-dark)" }} />
       </div>
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16, alignItems: "center" }}>
