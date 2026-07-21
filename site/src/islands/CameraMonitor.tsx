@@ -50,12 +50,12 @@ export default function CameraMonitor({ pollMs = 60_000 }: { pollMs?: number }) 
     ? null
     : `${r.status === "fresh" ? COPY.fresh : COPY.stale}${r.croText ? ` · ${r.croText}` : ""}`;
   return (
-    <div style={{ border: "1px solid var(--hairline)", background: "#0e1a14", margin: "24px 0" }}>
+    <div style={{ border: "1px solid var(--hairline)", background: "var(--monitor-bg)", margin: "24px 0" }}>
       <div className="mono" style={{ display: "flex", justifyContent: "space-between",
         fontSize: 9, letterSpacing: ".12em", textTransform: "uppercase",
         padding: "6px 9px", color: "var(--text-soft)", borderBottom: "1px solid var(--hairline)" }}>
         <span>Reserve Monitoring — Cam 01</span>
-        <span style={{ color: r.status === "fresh" ? "#e3564a" : "var(--text-soft)" }}>
+        <span style={{ color: r.status === "fresh" ? "var(--live)" : "var(--text-soft)" }}>
           {r.status === "fresh" ? "● LIVE" : "○ IDLE"}
         </span>
       </div>
