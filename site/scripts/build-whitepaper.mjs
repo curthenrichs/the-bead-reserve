@@ -20,7 +20,7 @@ try {
         break;
       } catch (err) {
         if (err.code === "ENOENT") continue; // this shell isn't installed; try the next
-        throw err;                            // real build failure — propagate
+        throw err;                            // real build failure, propagate
       }
     }
     if (!ran) throw new Error("neither pwsh nor powershell.exe found on PATH");
@@ -33,7 +33,7 @@ try {
 }
 
 if (!existsSync(pdfSrc)) {
-  console.error(`whitepaper PDF not found at ${pdfSrc} after build — refusing to ship a dead /whitepaper.pdf link.`);
+  console.error(`whitepaper PDF not found at ${pdfSrc} after build; refusing to ship a dead /whitepaper.pdf link.`);
   process.exit(1);
 }
 mkdirSync(dirname(pdfDst), { recursive: true });

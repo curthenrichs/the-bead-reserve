@@ -12,8 +12,8 @@ interface Reserve {
 
 const COPY: Record<Status, string> = {
   fresh: "REC · reserve in view",
-  stale: "signal delayed — last frame retained",
-  dark: "signal interrupted — reserve remains sealed",
+  stale: "signal delayed, last frame retained",
+  dark: "signal interrupted, reserve remains sealed",
 };
 
 export default function CameraMonitor({ pollMs = 60_000 }: { pollMs?: number }) {
@@ -43,19 +43,19 @@ export default function CameraMonitor({ pollMs = 60_000 }: { pollMs?: number }) 
   }, [pollMs]);
 
   const showFrame = r.status !== "dark" && r.counter !== null;
-  // The dark placeholder text is the single source of the "sealed" message —
-  // the caption is suppressed in the dark state so the two never render the
+  // The dark placeholder text is the single source of the "sealed" message.
+  // The caption is suppressed in the dark state so the two never render the
   // same text simultaneously (which would break a singular getByText query).
   const captionText = r.status === "dark"
     ? null
     : `${r.status === "fresh" ? COPY.fresh : COPY.stale}${r.croText ? ` · ${r.croText}` : ""}`;
   return (
-    <div style={{ border: "1px solid var(--hairline)", background: "var(--monitor-bg)", margin: "24px 0" }}>
+    <div style={{ border: "3px solid var(--line)", background: "var(--monitor-bg)", margin: "24px 0" }}>
       <div className="mono" style={{ display: "flex", justifyContent: "space-between",
         fontSize: 9, letterSpacing: ".12em", textTransform: "uppercase",
-        padding: "6px 9px", color: "var(--text-soft)", borderBottom: "1px solid var(--hairline)" }}>
-        <span>Reserve Monitoring — Cam 01</span>
-        <span style={{ color: r.status === "fresh" ? "var(--live)" : "var(--text-soft)" }}>
+        padding: "6px 9px", color: "var(--monitor-text)", borderBottom: "2px solid var(--monitor-line)" }}>
+        <span>Reserve Monitoring: Fault Cam 01</span>
+        <span style={{ color: r.status === "fresh" ? "var(--live)" : "var(--monitor-text)" }}>
           {r.status === "fresh" ? "● LIVE" : "○ IDLE"}
         </span>
       </div>
@@ -65,13 +65,13 @@ export default function CameraMonitor({ pollMs = 60_000 }: { pollMs?: number }) 
           <img src="/api/frame/latest" alt="Camera view of the reserve jar"
             loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         ) : (
-          <span className="mono" style={{ color: "var(--text-soft)", fontSize: 12, padding: 16, textAlign: "center" }}>
+          <span className="mono" style={{ color: "var(--monitor-text)", fontSize: 12, padding: 16, textAlign: "center" }}>
             {COPY.dark}
           </span>
         )}
       </div>
-      <div className="mono" style={{ fontSize: 10, color: "var(--text-soft)", padding: "6px 9px",
-        borderTop: "1px solid var(--hairline)" }}>
+      <div className="mono" style={{ fontSize: 10, color: "var(--monitor-text)", padding: "6px 9px",
+        borderTop: "2px solid var(--monitor-line)" }}>
         {captionText}
       </div>
     </div>

@@ -1,9 +1,71 @@
 ---
-import { STATS } from "../config";
+import { STATS, GENESIS_BEADS } from "../config";
 ---
-<div aria-label="Reserve verified seal" role="img" class="mono"
-  style="border:1px solid var(--amber-dark);border-radius:50%;width:132px;height:132px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--amber)">
-  <div style="font-size:20px;font-weight:600">{STATS.collateralization}</div>
-  <div style="font-size:8px;letter-spacing:.16em">RESERVED</div>
-  <div style="font-size:7px;letter-spacing:.1em;color:var(--text-soft);margin-top:4px">OFFICE OF THE<br/>VAULT KEEPER</div>
+<div class="seal" role="img" tabindex="0"
+  aria-label={`Reserve verified seal: ${STATS.collateralization} reserved. Reverse shows the BEADZ token.`}>
+  <div class="seal-inner">
+    <div class="seal-face seal-front mono">
+      <div style="font-size:20px;font-weight:600">{STATS.collateralization}</div>
+      <div style="font-size:8px;letter-spacing:.16em">RESERVED</div>
+      <div style="font-size:7px;letter-spacing:.1em;color:var(--text-soft);margin-top:4px">OFFICE OF THE<br/>VAULT KEEPER</div>
+    </div>
+    <div class="seal-face seal-back mono">
+      <div style="font-size:25px;font-weight:600;letter-spacing:.04em">BEADZ</div>
+      <div style="font-size:8px;letter-spacing:.18em;margin-top:6px">· {GENESIS_BEADS.toLocaleString("en-US")} ·</div>
+      <div style="font-size:7px;letter-spacing:.16em;color:var(--amber-mid);margin-top:5px">ERC-20 · BASE</div>
+    </div>
+  </div>
 </div>
+
+<style>
+  /* Pinned wax-seal stamp. On hover/focus it flips 180deg to reveal the BEADZ
+     token on the reverse, like the two faces of a coin. Hidden on narrow
+     viewports, where a fixed corner element would cover content. */
+  .seal {
+    position: fixed;
+    right: clamp(16px, 3vw, 32px);
+    bottom: clamp(16px, 3vw, 32px);
+    z-index: 50;
+    width: 132px;
+    height: 132px;
+    perspective: 700px;
+    outline: none;
+  }
+  .seal-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .seal:hover .seal-inner,
+  .seal:focus-visible .seal-inner {
+    transform: rotateY(180deg);
+  }
+  .seal-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid var(--amber-dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    box-shadow: 0 4px 16px rgba(38, 32, 26, 0.18);
+  }
+  .seal-front {
+    background: var(--surface);
+    color: var(--amber-dark);
+  }
+  .seal-back {
+    background: #1b140c;
+    color: var(--amber);
+    transform: rotateY(180deg);
+  }
+  @media (max-width: 640px) {
+    .seal { display: none; }
+  }
+</style>

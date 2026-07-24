@@ -10,10 +10,10 @@ const { title = "The Bead Reserve" } = Astro.props;
     <title>{title}</title>
   </head>
   <body>
-    <main style="max-width:720px;margin:0 auto;padding:clamp(16px,4vw,48px)">
+    <main style="max-width:min(1280px,92vw);margin:0 auto;padding:clamp(16px,4vw,48px)">
       <slot />
-      <footer style="margin-top:48px;border-top:1px solid var(--hairline);padding-top:16px">
-        <a href="/whitepaper.pdf" class="mono">Read the whitepaper</a>
+      <footer style="margin-top:48px;border-top:2px solid var(--line);padding-top:16px">
+        <a href="/whitepaper.pdf" class="mono" target="_blank" rel="noopener">Read the whitepaper</a>
       </footer>
     </main>
   </body>

@@ -4,15 +4,33 @@
 @import "@fontsource/roboto-mono/600.css";
 
 :root {
-  --bg: #1b140c;
-  --text: #faf7f1;
-  --text-soft: #baab92;
+  /* Light house style, matching the half-built-robots blog: white page,
+     warm near-black text, amber as the accent. Bright --amber is for fills,
+     borders, and text on dark surfaces; --amber-dark is the accessible amber
+     for text/links on the white page. */
+  --bg: #ffffff;
+  --surface: #faf8f4;
+  --text: #26201a;
+  --text-soft: #6f6152;
   --amber: #ffaa3c;
-  --amber-dark: #a8650f;
-  --hairline: #3b2e1e;
-  --monitor-bg: #0e1a14;
-  --live: #e3564a;
-  --track-bg: #241a10;
+  --amber-dark: #b5680c;
+  --amber-mid: #e07c14;   /* lighter orange for display accents (masthead) */
+  /* Meter tick = one segment of the bead scale, so the segmentation (and its
+     leftover partial cell) is tied to the data, not to pixel width, and stays
+     fixed as the window resizes. 10.5667% = 5,000 beads of the 47,318 genesis
+     supply; the final partial cell is the 2,318-bead remainder. */
+  --meter-seg: 10.5667%;
+  --hairline: #e6ddd0;
+  /* Black rule color for the half-built-robots line system: bold 3px frames,
+     2px standard boxes/dividers. (--hairline stays for faint light dividers.) */
+  --line: #1b140c;
+  --live: #d8442f;
+  --track-bg: #f0eadf;
+  /* The camera monitor is a deliberately dark "screen" island on the light
+     page: neutral warm-black (no green), with its own light-on-dark text. */
+  --monitor-bg: #14100a;
+  --monitor-text: #b7ab97;
+  --monitor-line: #3b2e1e;
   --serif: "Roboto Serif", Georgia, serif;
   --mono: "Roboto Mono", ui-monospace, monospace;
 }
@@ -33,10 +51,35 @@ body {
   font-size: 11px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--amber);
+  color: var(--amber-dark);
   font-weight: 600;
 }
-a { color: var(--amber); }
+a { color: var(--amber-dark); }
+
+/* Capacity meter for the claim/redeem bars. Segment ticks keep an empty bar
+   from reading as a plain 2px divider/spacer, and give it a gauge feel. */
+.meter {
+  position: relative;
+  height: 18px;
+  background: var(--track-bg);
+  border: 2px solid var(--line);
+  margin: 8px 0;
+  overflow: hidden;
+}
+.meter-fill { height: 100%; background: var(--amber-dark); }
+.meter::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.4;
+  background-image: repeating-linear-gradient(
+    to right,
+    transparent 0 calc(var(--meter-seg) - 2px),
+    var(--line) calc(var(--meter-seg) - 2px),
+    var(--line) var(--meter-seg)
+  );
+}
 
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
