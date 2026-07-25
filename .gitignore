@@ -55,6 +55,10 @@ service-account*.json
 *.raw
 *.dng
 
+# Exception: generated brand raster assets (favicons, token images, OG image)
+# in the Astro public/ folder — build output, never a bead photo, never has EXIF.
+!/site/public/*.png
+
 # ---------------------------------------------------------------------------
 # Dependencies & build output (add/remove per chosen stack)
 # ---------------------------------------------------------------------------
