@@ -1,6 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { loadFont, flatLine, arcLine } from "./lettering.mjs";
 
+// Sample every coordinate pair in the path data, not just M/L commands —
+// opentype.js emits C and Q for curved glyphs, and ignoring those
+// under-samples the bounding box for round letters like B, D, R, S.
+const points = (d) =>
+  [...d.matchAll(/(-?[\d.]+)\s(-?[\d.]+)/g)].map((m) => [Number(m[1]), Number(m[2])]);
+
 describe("loadFont", () => {
   it("loads bold at weight 700 and regular at 400", () => {
     expect(loadFont("bold").tables.os2.usWeightClass).toBe(700);
@@ -24,7 +30,7 @@ describe("flatLine", () => {
 
   it("centers on cx: the drawn ink straddles the center", () => {
     const d = flatLine({ font, text: "BEADZ", cx: 256, baseline: 100, size: 27, letterSpacing: 6 });
-    const xs = [...d.matchAll(/[ML](-?[\d.]+)\s(-?[\d.]+)/g)].map((m) => Number(m[1]));
+    const xs = points(d).map((p) => p[0]);
     const min = Math.min(...xs);
     const max = Math.max(...xs);
     // midpoint of the ink is within a glyph-width of the requested center
@@ -35,7 +41,7 @@ describe("flatLine", () => {
     const tight = flatLine({ font, text: "BEADZ", cx: 256, baseline: 100, size: 27, letterSpacing: 0 });
     const loose = flatLine({ font, text: "BEADZ", cx: 256, baseline: 100, size: 27, letterSpacing: 12 });
     const spanOf = (d) => {
-      const xs = [...d.matchAll(/[ML](-?[\d.]+)\s(-?[\d.]+)/g)].map((m) => Number(m[1]));
+      const xs = points(d).map((p) => p[0]);
       return Math.max(...xs) - Math.min(...xs);
     };
     expect(spanOf(loose)).toBeGreaterThan(spanOf(tight));
@@ -53,7 +59,7 @@ describe("arcLine", () => {
 
   it("places ink in the upper half, symmetric about the vertical axis", () => {
     const d = arcLine({ font, text: "THE BEAD RESERVE", cx: 256, cy: 256, radius: 196, size: 34, letterSpacing: 7 });
-    const pts = [...d.matchAll(/[ML](-?[\d.]+)\s(-?[\d.]+)/g)].map((m) => [Number(m[1]), Number(m[2])]);
+    const pts = points(d);
     const ys = pts.map((p) => p[1]);
     // every glyph sits above the horizontal centerline
     expect(Math.max(...ys)).toBeLessThan(256);

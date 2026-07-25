@@ -66,7 +66,8 @@ export function flatLine({ font, text, cx, baseline, size, letterSpacing = 0 }) 
 export function arcLine({ font, text, cx, cy, radius, size, letterSpacing = 0 }) {
   const chars = [...text];
   const widths = chars.map((c) => font.getAdvanceWidth(c, size) + letterSpacing);
-  const total = widths.reduce((a, b) => a + b, 0);
+  // exclude the trailing gap after the final glyph — it spans nothing
+  const total = widths.reduce((a, b) => a + b, 0) - letterSpacing;
 
   // sweep centered on 12 o'clock (-90deg), running clockwise = left to right
   let angle = -Math.PI / 2 - total / radius / 2;
