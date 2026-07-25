@@ -23,17 +23,31 @@ const small = sealSvg({ lettering: false });
 // Guard the invariant at build time as well as in tests: a <text> element here
 // would rasterize differently on a machine without the font installed.
 for (const [name, svg] of [["full", full], ["small", small]]) {
-  if (/<text[\s>]/.test(svg)) {
+  if (/<text[\s>/]/.test(svg)) {
     throw new Error(`${name} seal contains a <text> element; glyphs must be outlined paths`);
   }
 }
 
-/** Rasterize at the target size directly — never upsample a smaller bitmap. */
+/**
+ * Rasterize at the target size directly — never upsample a smaller bitmap.
+ *
+ * resize() unconditionally forces the output to width x height, which would
+ * silently mask a density-scaling defect (e.g. librsvg rounding the
+ * fractional DPI at small sizes) by upsampling an under-rasterized bitmap —
+ * exactly the failure mode this build exists to prevent. So the pre-resize
+ * raster is checked first; resize() is then a no-op snap, not a rescue.
+ */
 async function render(svg, width, height = width) {
-  return sharp(Buffer.from(svg), { density: (72 * width) / 512 })
-    .resize(width, height)
+  const raw = await sharp(Buffer.from(svg), { density: (72 * width) / 512 })
     .png()
     .toBuffer();
+  const meta = await sharp(raw).metadata();
+  if (Math.abs(meta.width - width) > 1 || Math.abs(meta.height - height) > 1) {
+    throw new Error(
+      `render: pre-resize raster mismatch — expected ~${width}x${height}, got ${meta.width}x${meta.height} (density scaling defect)`
+    );
+  }
+  return sharp(raw).resize(width, height).png().toBuffer();
 }
 
 const PNG_OUTPUTS = [
@@ -96,9 +110,41 @@ async function main() {
     throw new Error(`og-image.png: expected 1200x630, got ${og.width}x${og.height}`);
   }
 
-  const layers = fs.readFileSync(path.join(OUT, "favicon.ico")).readUInt16LE(4);
+  const icoBuf = fs.readFileSync(path.join(OUT, "favicon.ico"));
+  const layers = icoBuf.readUInt16LE(4);
   if (layers !== ICO_LAYERS.length) {
     throw new Error(`favicon.ico: expected ${ICO_LAYERS.length} layers, got ${layers}`);
+  }
+  // ICONDIR entries start at offset 6, 16 bytes each: byte 0 = width, byte 1 =
+  // height, where 0 means 256. A correct layer count with a wrongly-sized
+  // layer would otherwise pass silently.
+  const expectedSizes = ICO_LAYERS.map((l) => l.width).sort((a, b) => a - b);
+  const actualSizes = [];
+  for (let i = 0; i < layers; i++) {
+    const entry = 6 + i * 16;
+    const w = icoBuf.readUInt8(entry) || 256;
+    const h = icoBuf.readUInt8(entry + 1) || 256;
+    if (w !== h) {
+      throw new Error(`favicon.ico: layer ${i} is not square — declared ${w}x${h}`);
+    }
+    actualSizes.push(w);
+  }
+  actualSizes.sort((a, b) => a - b);
+  if (actualSizes.join(",") !== expectedSizes.join(",")) {
+    throw new Error(
+      `favicon.ico: expected layer sizes [${expectedSizes.join(", ")}], got [${actualSizes.join(", ")}]`
+    );
+  }
+
+  const ogPixel = await sharp(path.join(OUT, "og-image.png"))
+    .extract({ left: 0, top: 0, width: 1, height: 1 })
+    .raw()
+    .toBuffer();
+  const [r, g, b] = ogPixel;
+  if (r !== 0x1b || g !== 0x14 || b !== 0x0c) {
+    throw new Error(
+      `og-image.png: expected background rgb(0x1b, 0x14, 0x0c), got rgb(${r.toString(16)}, ${g.toString(16)}, ${b.toString(16)})`
+    );
   }
 
   console.log(
