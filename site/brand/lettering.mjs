@@ -66,8 +66,11 @@ export function flatLine({ font, text, cx, baseline, size, letterSpacing = 0 }) 
 export function arcLine({ font, text, cx, cy, radius, size, letterSpacing = 0 }) {
   const chars = [...text];
   const widths = chars.map((c) => font.getAdvanceWidth(c, size) + letterSpacing);
-  // exclude the trailing gap after the final glyph — it spans nothing
-  const total = widths.reduce((a, b) => a + b, 0) - letterSpacing;
+  // total intentionally includes the trailing letterSpacing: mid uses the
+  // cell width (advance + letterSpacing) for its half-offset, and the two
+  // compensate exactly. Changing either alone shifts every glyph by
+  // letterSpacing/2.
+  const total = widths.reduce((a, b) => a + b, 0);
 
   // sweep centered on 12 o'clock (-90deg), running clockwise = left to right
   let angle = -Math.PI / 2 - total / radius / 2;

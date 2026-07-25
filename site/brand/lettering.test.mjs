@@ -72,4 +72,19 @@ describe("arcLine", () => {
     expect(d).not.toContain("rotate");
     expect(d).not.toContain("transform");
   });
+
+  it("stays centered under wide letter spacing (regression: trailing-gap compensation)", () => {
+    // Short text so the arc sweep stays well under 360deg at this radius —
+    // with a long string the wide letterSpacing wraps the text around the
+    // circle and the bounding box stops being a meaningful centering signal.
+    const d = arcLine({ font, text: "BEADZ", cx: 256, cy: 256, radius: 120, size: 34, letterSpacing: 40 });
+    const xs = points(d).map((p) => p[0]);
+    const min = Math.min(...xs);
+    const max = Math.max(...xs);
+    // total must include the trailing letterSpacing to match mid's cell-width
+    // half-offset; dropping it shifts every glyph by letterSpacing/2, which
+    // this tolerance is tight enough to catch but the coarser symmetry check
+    // above is not.
+    expect(Math.abs((min + max) / 2 - 256)).toBeLessThan(8);
+  });
 });
