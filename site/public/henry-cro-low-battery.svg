@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 136">
+  <!-- Low battery: droopy half-lid eyes, ball reduced to a hollow outline
+       with no glow halo, battery-sliver icon beside the head. Robot +8y. -->
+  <circle cx="80" cy="21.5" r="7" fill="none" stroke="#ffaa3c" stroke-width="3.5"/>
+  <rect x="76.5" y="28" width="7" height="24" rx="3" fill="#555555"/>
+  <rect x="28" y="54.5" width="104" height="73" rx="17.5" fill="#ffffff" stroke="#555555" stroke-width="5"/>
+  <!-- droopy half-lid eyes (same lower-semicircle shape as sleepy) -->
+  <path d="M 53 91 A 8.5 8.5 0 0 0 70 91 Z" fill="#ffaa3c"/>
+  <path d="M 90 91 A 8.5 8.5 0 0 0 107 91 Z" fill="#ffaa3c"/>
+  <!-- battery icon: outline shell, terminal nub, one sliver of charge left -->
+  <g transform="translate(154 62) rotate(8)">
+    <rect x="-13" y="-8" width="24" height="16" rx="3" fill="none" stroke="#ffaa3c" stroke-width="3.5"/>
+    <rect x="11" y="-4" width="4.5" height="8" rx="1.5" fill="#ffaa3c"/>
+    <rect x="-9.5" y="-4.5" width="5" height="9" fill="#ffc46e"/>
+  </g>
+</svg>

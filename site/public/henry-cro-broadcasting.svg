@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 150">
+  <!-- Broadcasting: happy arc eyes, ball radiating three clean signal waves
+       upward. Solid arcs = strong signal (signal-lost uses dashed). +22y. -->
+  <circle cx="80" cy="35.5" r="13" fill="#ffaa3c" opacity="0.22"/>
+  <circle cx="80" cy="35.5" r="8.5" fill="#ffaa3c"/>
+  <rect x="76.5" y="42" width="7" height="24" rx="3" fill="#555555"/>
+  <rect x="28" y="68.5" width="104" height="73" rx="17.5" fill="#ffffff" stroke="#555555" stroke-width="5"/>
+  <!-- happy arc eyes -->
+  <path d="M 51 108 A 10.5 10.5 0 0 1 72 108" fill="none" stroke="#ffaa3c" stroke-width="5.5" stroke-linecap="round"/>
+  <path d="M 88 108 A 10.5 10.5 0 0 1 109 108" fill="none" stroke="#ffaa3c" stroke-width="5.5" stroke-linecap="round"/>
+  <!-- clean broadcast waves, concentric on the ball -->
+  <g fill="none" stroke-linecap="round">
+    <path d="M 68.3 23.8 A 16.5 16.5 0 0 1 91.7 23.8" stroke="#ffaa3c" stroke-width="4"/>
+    <path d="M 62.7 18.2 A 24.5 24.5 0 0 1 97.3 18.2" stroke="#ffaa3c" stroke-width="4" opacity="0.75"/>
+    <path d="M 57 12.5 A 32.5 32.5 0 0 1 103 12.5" stroke="#ffc46e" stroke-width="4"/>
+  </g>
+</svg>

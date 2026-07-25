@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 156">
+  <!-- Signal lost: small worried eyes, lit ball with a subdued halo (trying,
+       not connecting), garbled static scribbles up-right where broadcasting
+       has clean waves. Robot shifted +24y. -->
+  <circle cx="80" cy="37.5" r="10" fill="#ffaa3c" opacity="0.15"/>
+  <circle cx="80" cy="37.5" r="8.5" fill="#ffaa3c"/>
+  <rect x="76.5" y="44" width="7" height="24" rx="3" fill="#555555"/>
+  <rect x="28" y="70.5" width="104" height="73" rx="17.5" fill="#ffffff" stroke="#555555" stroke-width="5"/>
+  <!-- small worried eyes -->
+  <circle cx="61.5" cy="107" r="6.5" fill="#ffaa3c"/>
+  <circle cx="98.5" cy="107" r="6.5" fill="#ffaa3c"/>
+  <!-- static: garbled scribbles where clean waves would be -->
+  <g fill="none" stroke-linecap="round">
+    <path d="M -18 4 Q -14 -7 -10 0 Q -7 5 -4 -3 Q -1 -8 2 -1 Q 5 5 9 -3 Q 12 -8 18 -2" transform="translate(112 18) rotate(-10)" stroke="#ffaa3c" stroke-width="4"/>
+    <path d="M -17 5 Q -11 -7 -5 1 T 7 -5 Q 11 1 17 -3" transform="translate(138 38) rotate(14) scale(0.6)" stroke="#ffc46e" stroke-width="4.5"/>
+  </g>
+</svg>

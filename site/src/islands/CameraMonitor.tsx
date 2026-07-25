@@ -16,6 +16,23 @@ const COPY: Record<Status, string> = {
   dark: "signal interrupted, reserve remains sealed",
 };
 
+// Henry, the Chief Reserve Officer, watching the jar. Illustration form
+// (transparent ground, gray outline) because the claim page is light.
+// His mood tracks the monitor state rather than the brand: broadcasting when
+// the reserve is in view, signal-lost when the feed is stale, low-battery when
+// it is dark.
+export const CRO_MOOD: Record<Status, string> = {
+  fresh: "/henry-cro-broadcasting.svg",
+  stale: "/henry-cro-signal-lost.svg",
+  dark: "/henry-cro-low-battery.svg",
+};
+
+const CRO_CAPTION: Record<Status, string> = {
+  fresh: "Chief Reserve Officer: reserve in view",
+  stale: "Chief Reserve Officer: awaiting a fresh frame",
+  dark: "Chief Reserve Officer: standing by in the dark",
+};
+
 export default function CameraMonitor({ pollMs = 60_000 }: { pollMs?: number }) {
   // Start in the dark state: it is the honest default until the Worker is
   // deployed and a camera has pushed. A failed/empty fetch stays here.
@@ -57,6 +74,19 @@ export default function CameraMonitor({ pollMs = 60_000 }: { pollMs?: number }) 
         <span>Reserve Monitoring: Fault Cam 01</span>
         <span style={{ color: r.status === "fresh" ? "var(--live)" : "var(--monitor-text)" }}>
           {r.status === "fresh" ? "● LIVE" : "○ IDLE"}
+        </span>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 9px",
+        borderBottom: "2px solid var(--monitor-line)" }}>
+        <img
+          src={CRO_MOOD[r.status]}
+          alt={`Chief Reserve Officer, ${r.status === "fresh" ? "broadcasting" : r.status === "stale" ? "signal lost" : "on low battery"}`}
+          width={44}
+          style={{ flexShrink: 0 }}
+        />
+        <span className="mono" style={{ fontSize: 10, letterSpacing: ".08em",
+          color: "var(--monitor-text)" }}>
+          {CRO_CAPTION[r.status]}
         </span>
       </div>
       <div style={{ position: "relative", aspectRatio: "16 / 10", display: "flex",

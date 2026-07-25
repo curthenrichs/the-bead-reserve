@@ -18,7 +18,7 @@ describe("CameraMonitor", () => {
     mockReserve(fresh);
     render(<CameraMonitor pollMs={0} />);
     await waitFor(() => expect(screen.getByText(/rec/i)).toBeInTheDocument());
-    expect(screen.getByRole("img", { name: /reserve/i })).toHaveAttribute("src", "/api/frame/latest");
+    expect(screen.getByRole("img", { name: /camera view/i })).toHaveAttribute("src", "/api/frame/latest");
     expect(screen.getByText(/the reserve remains sealed/i)).toBeInTheDocument();
   });
 
@@ -32,7 +32,7 @@ describe("CameraMonitor", () => {
     mockReserve({ ...fresh, status: "dark" });
     render(<CameraMonitor pollMs={0} />);
     await waitFor(() => expect(screen.getByText(/reserve remains sealed/i)).toBeInTheDocument());
-    expect(screen.queryByRole("img", { name: /reserve/i })).toBeNull();
+    expect(screen.queryByRole("img", { name: /camera view/i })).toBeNull();
   });
 
   it("empty state (nulls, status dark) is treated as dark, not an error", async () => {
