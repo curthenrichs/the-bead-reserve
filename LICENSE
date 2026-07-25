@@ -19,3 +19,44 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+
+---
+
+BRAND ASSETS EXCEPTION
+
+The MIT License above applies to the software in this repository. It does NOT
+apply to the brand assets listed below, which are excluded from that grant:
+
+  - site/brand/            (excluding site/brand/vendor/, covered separately)
+  - site/public/favicon.ico
+  - site/public/favicon-16x16.png
+  - site/public/favicon-32x32.png
+  - site/public/apple-touch-icon.png
+  - site/public/android-chrome-192x192.png
+  - site/public/android-chrome-512x512.png
+  - site/public/beadz-token-256.png
+  - site/public/beadz-token-512.png
+  - site/public/beadz-seal.svg
+  - site/public/beadz-seal-small.svg
+  - site/public/og-image.png
+  - site/public/henry-cro-*.svg
+
+These files depict "Henry," a robot mascot that is Copyright (c) Curt Henrichs,
+all rights reserved. Henry is a brand mascot, not clip art.
+
+You may fork this repository, deploy your own vault, and use the software
+freely under the MIT License. You may not use Henry, the BEADZ reserve seal, or
+the name "The Bead Reserve" as the identity of your own project, whether or not
+your copy is derived from this one.
+
+Removing or replacing these assets is expressly permitted, and is the intended
+path for a fork: the software carries no dependency on them that a substitute
+mark cannot satisfy.
+
+THIRD-PARTY FONTS
+
+Files in site/brand/vendor/ are Roboto Mono, Copyright (c) The Roboto Mono
+Project Authors, licensed under the SIL Open Font License, Version 1.1. The
+full license text is at site/brand/vendor/OFL.txt. The OFL governs those files
+in place of both the MIT License and the exception above.
