@@ -43,8 +43,8 @@ const FULL = Object.freeze({
 });
 
 const SMALL = Object.freeze({
-  ringR: 232, ringW: 22,
-  henryScale: 0.62, henryY: 256,
+  ringR: 236, ringW: 16,
+  henryScale: 0.78, henryY: 256,
 });
 
 export function sealSvg({ lettering = true } = {}) {

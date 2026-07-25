@@ -3,11 +3,11 @@ import { sealSvg, PALETTE, COPY } from "./seal.mjs";
 import { loadFont, arcLine } from "./lettering.mjs";
 
 // Ring radii mirror the non-exported FULL/SMALL configs in seal.mjs (FULL.ringR
-// = 240, SMALL.ringR = 232). Hardcoding them here matches the existing style
+// = 240, SMALL.ringR = 236). Hardcoding them here matches the existing style
 // at "draws the circular ground and the ring" below, and lets the thickness
 // test key off the ring element itself instead of emission order.
 const FULL_RING_R = 240;
-const SMALL_RING_R = 232;
+const SMALL_RING_R = 236;
 
 function ringStrokeWidth(svg, ringRadius) {
   const m = svg.match(new RegExp(`<circle[^>]*\\br="${ringRadius}"[^>]*stroke-width="(\\d+)"`));
@@ -156,5 +156,23 @@ describe("sealSvg (small)", () => {
     const thick = ringStrokeWidth(svg, SMALL_RING_R);
     const thin = ringStrokeWidth(sealSvg({ lettering: true }), FULL_RING_R);
     expect(thick).toBeGreaterThan(thin);
+  });
+});
+
+describe("small form geometry (tuned)", () => {
+  it("keeps a visible gap between the ring and Henry's head", () => {
+    const svg = sealSvg({ lettering: false });
+    const ringR = Number(svg.match(/r="(\d+)" fill="none"/)[1]);
+    const ringW = Number(svg.match(/stroke-width="(\d+)"/)[1]);
+    const scale = Number(svg.match(/scale\(([\d.]+)\)/)[1]);
+    // head half-width is 150 master units; inner edge of the ring must clear it
+    const innerEdge = ringR - ringW / 2;
+    expect(150 * scale).toBeLessThan(innerEdge - 8);
+  });
+
+  it("makes Henry larger in the small form than in the full form", () => {
+    const small = Number(sealSvg({ lettering: false }).match(/scale\(([\d.]+)\)/)[1]);
+    const full = Number(sealSvg({ lettering: true }).match(/scale\(([\d.]+)\)/)[1]);
+    expect(small).toBeGreaterThan(full);
   });
 });
