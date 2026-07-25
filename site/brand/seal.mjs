@@ -82,7 +82,7 @@ export function sealSvg({ lettering = true } = {}) {
 
   const henry = henryGroup({
     cx: 256, cy: cfg.henryY, scale: cfg.henryScale,
-    ground: PALETTE.ground, accent: PALETTE.accent, bead: true,
+    ground: PALETTE.ground, accent: PALETTE.accent, bead: true, head: PALETTE.head,
   });
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">

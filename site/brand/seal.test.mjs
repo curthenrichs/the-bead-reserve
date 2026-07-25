@@ -41,6 +41,7 @@ describe("copy and palette are exact", () => {
     expect(PALETTE.ground).toBe("#1b140c");
     expect(PALETTE.accent).toBe("#ffaa3c");
     expect(PALETTE.accentSoft).toBe("#ffc46e");
+    expect(PALETTE.head).toBe("#ffffff");
   });
 });
 

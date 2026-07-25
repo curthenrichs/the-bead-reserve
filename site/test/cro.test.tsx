@@ -19,11 +19,31 @@ describe("CRO mood mapping", () => {
     expect(fs.existsSync(path.join(publicDir, src.replace(/^\//, "")))).toBe(true);
   });
 
-  it("uses illustration form: gray outline, no dark ground rect", () => {
+  it("uses illustration form: #555555 outline, transparent ground, no icon-form ground rect", () => {
     for (const src of Object.values(CRO_MOOD)) {
       const svg = fs.readFileSync(path.join(publicDir, src.replace(/^\//, "")), "utf8");
+
+      // Illustration form has the #555555 outline; icon form has none.
       expect(svg).toContain("#555555");
-      expect(svg).not.toContain('width="512" height="512"');
+
+      // Icon form's ground fill; illustration form must never use it.
+      expect(svg).not.toContain("#111111");
+
+      // Illustration form has a transparent ground: no <rect> may cover the
+      // full viewBox (that would be an opaque icon-form ground rect). Parse
+      // the actual viewBox rather than assuming 512x512, since these three
+      // files have distinct, non-square viewBoxes.
+      const viewBoxMatch = svg.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/);
+      expect(viewBoxMatch, `no viewBox found in ${src}`).not.toBeNull();
+      const [, vbWidth, vbHeight] = viewBoxMatch as RegExpMatchArray;
+
+      const rectTags = svg.match(/<rect\b[^>]*>/g) || [];
+      const fullViewBoxRect = rectTags.find((tag) => {
+        const w = tag.match(/width="([\d.]+)"/);
+        const h = tag.match(/height="([\d.]+)"/);
+        return !!w && !!h && w[1] === vbWidth && h[1] === vbHeight;
+      });
+      expect(fullViewBoxRect, `found a full-viewBox rect in ${src}: ${fullViewBoxRect}`).toBeUndefined();
     }
   });
 });

@@ -79,6 +79,11 @@ describe("Base.astro head metadata", () => {
     expect(tag, `no matching apple-touch-icon <link> in head:\n${head}`).toBeTruthy();
   });
 
+  it("links the web manifest", () => {
+    const tag = findTag(head, "link", ['rel="manifest"', 'href="/site.webmanifest"']);
+    expect(tag, `no matching manifest <link> in head:\n${head}`).toBeTruthy();
+  });
+
   it("declares OG type/title/description bound to the layout props", () => {
     expect(findTag(head, "meta", ['property="og:type"', 'content="website"'])).toBeTruthy();
     expect(findTag(head, "meta", ['property="og:title"', "content={title}"])).toBeTruthy();
@@ -128,8 +133,39 @@ describe("Base.astro <body> is unchanged", () => {
 });
 
 describe("referenced favicon/OG files exist in public/", () => {
-  const referenced = ["favicon.ico", "favicon-16x16.png", "favicon-32x32.png", "apple-touch-icon.png", "og-image.png"];
+  const referenced = [
+    "favicon.ico",
+    "favicon-16x16.png",
+    "favicon-32x32.png",
+    "apple-touch-icon.png",
+    "og-image.png",
+    "site.webmanifest",
+  ];
   it.each(referenced)("%s is present in public/", (file) => {
     expect(fs.existsSync(path.join(publicDir, file))).toBe(true);
+  });
+});
+
+describe("site.webmanifest", () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(publicDir, "site.webmanifest"), "utf8"));
+
+  it("declares name, short_name, and theme/background matching the brand ground", () => {
+    expect(manifest.name).toBe("The Bead Reserve");
+    expect(typeof manifest.short_name).toBe("string");
+    expect(manifest.short_name.length).toBeGreaterThan(0);
+    expect(manifest.theme_color).toBe("#1b140c");
+    expect(manifest.background_color).toBe("#1b140c");
+  });
+
+  it("references both android-chrome icons with correct sizes and type", () => {
+    const bySrc = Object.fromEntries((manifest.icons || []).map((i) => [i.src, i]));
+    expect(bySrc["/android-chrome-192x192.png"]).toMatchObject({ sizes: "192x192", type: "image/png" });
+    expect(bySrc["/android-chrome-512x512.png"]).toMatchObject({ sizes: "512x512", type: "image/png" });
+  });
+
+  it("references icon files that exist in public/", () => {
+    for (const icon of manifest.icons) {
+      expect(fs.existsSync(path.join(publicDir, icon.src.replace(/^\//, "")))).toBe(true);
+    }
   });
 });

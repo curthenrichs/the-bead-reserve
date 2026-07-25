@@ -9,7 +9,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import sharp from "sharp";
 import pngToIco from "png-to-ico";
 import { sealSvg } from "./seal.mjs";
@@ -50,7 +50,10 @@ async function render(svg, width, height = width) {
   return sharp(raw).resize(width, height).png().toBuffer();
 }
 
-const PNG_OUTPUTS = [
+// Exported so the .gitignore exception list (which must mirror this exactly)
+// can be asserted against it in a test instead of drifting silently — see
+// build.test.mjs.
+export const PNG_OUTPUTS = [
   { file: "favicon-16x16.png", svg: small, width: 16 },
   { file: "favicon-32x32.png", svg: small, width: 32 },
   { file: "apple-touch-icon.png", svg: full, width: 180 },
@@ -153,7 +156,14 @@ async function main() {
   console.log("All outputs generated and verified.");
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+// Only run the build when this file is executed directly (`node brand/build.mjs`
+// / `npm run brand:build`), not when it's imported — build.test.mjs imports
+// this module purely to read PNG_OUTPUTS, and must not trigger a full
+// rasterization pass as a side effect of that import.
+const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (isMain) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}

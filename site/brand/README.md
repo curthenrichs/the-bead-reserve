@@ -18,7 +18,7 @@ in `seal.mjs` and regenerate.
 | `henry.mjs` | vendored character geometry + the bead tip. Knows Henry, not the seal. |
 | `seal.mjs` | composes both, owns the copy and the palette. |
 | `build.mjs` | rasterizes and verifies into `site/public/`. |
-| `vendor/` | third-party and upstream files, copied verbatim. |
+| `vendor/` | the Henry master SVG and third-party font files, copied verbatim. Not the only vendored Henry assets in this repo — see "The CRO illustrations" below. |
 
 ## The vendoring rule
 
@@ -66,6 +66,31 @@ rim type turns to mush, and a scaled-down full mark reads as an amber smudge.
 The consequence is deliberate: **the favicon carries the mark but not the joke.**
 The deadpan needs legible rim lettering, which needs roughly 96px. It lands on
 the token logo and the OG image.
+
+## The CRO illustrations (vendored outside brand/)
+
+`site/public/henry-cro-broadcasting.svg`, `site/public/henry-cro-signal-lost.svg`,
+and `site/public/henry-cro-low-battery.svg` are also vendored Henry artwork, but
+they live in `site/public/`, not `site/brand/vendor/`, because they are consumed
+directly by the site (the `CameraMonitor` island) rather than composed by
+`seal.mjs`.
+
+They are verbatim copies of upstream illustration-form SVGs from the mascot
+repo, renamed on copy:
+
+| Upstream (`henry-mascot/dist/half-built-robots-amber/`) | Vendored as |
+|---|---|
+| `henry-illustration-broadcasting.svg` | `site/public/henry-cro-broadcasting.svg` |
+| `henry-illustration-signal-lost.svg` | `site/public/henry-cro-signal-lost.svg` |
+| `henry-illustration-low-battery.svg` | `site/public/henry-cro-low-battery.svg` |
+
+They are refreshed by re-copying from that upstream path, exactly like
+`vendor/henry-master.svg`. Unlike the master, **there is no automated drift
+guard for these three files** — a true guard would have to compare against
+the mascot repo's checked-out contents, which is not present in this repo's
+CI, so no such check exists here. If upstream changes, these three files must
+be re-copied and renamed by hand; nothing in this repository will notice on
+its own if they go stale.
 
 ## Licensing
 

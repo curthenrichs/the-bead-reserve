@@ -62,8 +62,10 @@ service-account*.json
 # folder, so it is exactly where a jar photo would plausibly be dropped later;
 # a blanket !/site/public/*.png would silently un-ban it. These names are the
 # complete output set of brand/build.mjs — if that script gains an output, you
-# must add it here too. Nothing will warn you if you forget: git add skips
-# ignored files silently, and the build has no way to know what git did.
+# must add it here too. site/brand/build.test.mjs asserts every filename in
+# build.mjs's exported PNG_OUTPUTS (plus og-image.png) has a matching line
+# below, so forgetting one now fails the test suite instead of silently
+# un-tracking a generated file.
 !/site/public/favicon-16x16.png
 !/site/public/favicon-32x32.png
 !/site/public/apple-touch-icon.png

@@ -42,5 +42,16 @@ jobs:
       - name: Unit tests (Vitest + RTL)
         run: npm test
 
+      - name: Rebuild brand assets
+        run: npm run brand:build
+
+      - name: Fail if committed brand assets drifted from source
+        working-directory: ${{ github.workspace }}
+        run: |
+          if ! git diff --exit-code -- site/public; then
+            echo "::error::site/public differs from 'npm run brand:build' output. The committed favicon/OG/token images are stale — regenerate with 'npm run brand:build' inside site/ and commit the result." >&2
+            exit 1
+          fi
+
       - name: Build (runs whitepaper prebuild + astro build)
         run: npm run build

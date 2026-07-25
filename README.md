@@ -149,7 +149,10 @@ These are statements of design intent, made in earnest, and are not legal, finan
 
 ## License
 
-MIT. Fork it, deploy your own vault, reserve your own beads.
+MIT. Fork it, deploy your own vault, reserve your own beads. Henry the mascot
+and the other brand marks (the reserve seal, favicons, token art, OG image)
+are carved out of that grant — see the BRAND ASSETS EXCEPTION in
+[`LICENSE`](./LICENSE) before reusing them.
 
 ---
 

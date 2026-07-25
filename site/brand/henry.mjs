@@ -31,8 +31,6 @@ export const HENRY_GEOMETRY = Object.freeze({
   ]),
 });
 
-const HEAD_FILL = "#ffffff";
-
 /**
  * Henry as an SVG <g>, positioned and scaled.
  *
@@ -43,9 +41,11 @@ const HEAD_FILL = "#ffffff";
  * @param {string}  o.ground  ground colour, used for the bead hole
  * @param {string}  o.accent  accent colour for eyes/ball/halo
  * @param {boolean} o.bead    whether the antenna tip is a bead (hole) or a ball
+ * @param {string}  o.head    head/stem fill colour; callers own the single
+ *                            source of truth (seal.mjs passes PALETTE.head)
  * @returns {string} SVG markup
  */
-export function henryGroup({ cx, cy, scale, ground, accent = "#ffaa3c", bead = true }) {
+export function henryGroup({ cx, cy, scale, ground, accent = "#ffaa3c", bead = true, head = "#ffffff" }) {
   const g = HENRY_GEOMETRY;
   const o = g.origin;
   const beadHole = bead
@@ -55,8 +55,8 @@ export function henryGroup({ cx, cy, scale, ground, accent = "#ffaa3c", bead = t
   return `<g transform="translate(${cx},${cy}) scale(${scale}) translate(${-o.x},${-o.y})">
     <circle cx="${g.halo.cx}" cy="${g.halo.cy}" r="${g.halo.r}" fill="${accent}" opacity="${g.halo.opacity}"/>
     <circle cx="${g.ball.cx}" cy="${g.ball.cy}" r="${g.ball.r}" fill="${accent}"/>${beadHole}
-    <rect x="${g.stem.x}" y="${g.stem.y}" width="${g.stem.w}" height="${g.stem.h}" rx="${g.stem.rx}" fill="${HEAD_FILL}"/>
-    <rect x="${g.head.x}" y="${g.head.y}" width="${g.head.w}" height="${g.head.h}" rx="${g.head.rx}" fill="${HEAD_FILL}"/>
+    <rect x="${g.stem.x}" y="${g.stem.y}" width="${g.stem.w}" height="${g.stem.h}" rx="${g.stem.rx}" fill="${head}"/>
+    <rect x="${g.head.x}" y="${g.head.y}" width="${g.head.w}" height="${g.head.h}" rx="${g.head.rx}" fill="${head}"/>
     <circle cx="${g.eyes[0].cx}" cy="${g.eyes[0].cy}" r="${g.eyes[0].r}" fill="${accent}"/>
     <circle cx="${g.eyes[1].cx}" cy="${g.eyes[1].cy}" r="${g.eyes[1].r}" fill="${accent}"/>
   </g>`;
