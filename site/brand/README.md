@@ -96,4 +96,10 @@ its own if they go stale.
 
 Henry is © Curt Henrichs, all rights reserved, and is excluded from this
 repository's MIT grant — see the BRAND ASSETS EXCEPTION in the root `LICENSE`.
-Fonts in `vendor/` are governed by the OFL instead.
+That exclusion covers `vendor/henry-master.svg` too.
+
+Only the three Roboto Mono files in `vendor/` (`RobotoMono-Bold.ttf`,
+`RobotoMono-Regular.ttf`, `OFL.txt`) are governed by the OFL. Naming them
+individually rather than saying "fonts in `vendor/`" is deliberate: `vendor/`
+also holds Henry's master, and a directory-wide phrasing once read as putting
+that master under the OFL.
