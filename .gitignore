@@ -57,7 +57,20 @@ service-account*.json
 
 # Exception: generated brand raster assets (favicons, token images, OG image)
 # in the Astro public/ folder — build output, never a bead photo, never has EXIF.
-!/site/public/*.png
+#
+# Enumerated deliberately rather than globbed. site/public/ is the web-servable
+# folder, so it is exactly where a jar photo would plausibly be dropped later;
+# a blanket !/site/public/*.png would silently un-ban it. These names are the
+# complete output set of brand/build.mjs — if that script gains an output, add
+# it here too and the build will tell you (the file simply won't be committed).
+!/site/public/favicon-16x16.png
+!/site/public/favicon-32x32.png
+!/site/public/apple-touch-icon.png
+!/site/public/android-chrome-192x192.png
+!/site/public/android-chrome-512x512.png
+!/site/public/beadz-token-256.png
+!/site/public/beadz-token-512.png
+!/site/public/og-image.png
 
 # ---------------------------------------------------------------------------
 # Dependencies & build output (add/remove per chosen stack)
