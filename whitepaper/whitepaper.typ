@@ -72,11 +72,15 @@ established once, under trust, and the seal is monitored forever.
 
 == 3.2 Continuous attestation
 A camera ("Fault-Cam 01") observes the jar and captures periodic images.
-Each image is hashed and the hash is recorded on-chain alongside an
-`attestBeadCount` call, producing a tamper-evident, timestamped feed of
-the reserve's status. This is functionally identical to a commercial
-proof-of-reserve oracle, differing only in that the underlying asset is
-beads and the oracle is a webcam.
+Each image is hashed and signed at the device, and the hashes are
+published, continuously and publicly, for independent verification. The
+chain is engaged on a reporting cadence rather than per image: each
+period's published hashes are committed to a Merkle root and anchored
+on-chain via `attestReserveRecord`, while bead recounts are logged
+separately via `attestBeadCount`. Together these produce a
+tamper-evident, timestamped record of the reserve's status. This is
+functionally identical to a commercial proof-of-reserve oracle, differing
+only in that the underlying asset is beads and the oracle is a webcam.
 
 == 3.3 Automated audit (optional module)
 A small vision-language model may be pointed at the camera feed to
@@ -104,7 +108,11 @@ advisory. It cannot count the beads but may, from time to time, claim to.
 Although a bead is physically indivisible, #meta.symbol is divisible to
 10#super[−#meta.decimals]. The smallest unit is one *bead-wei*. The Bead
 Reserve makes no attempt to explain what one quintillionth of a bead is
-and advises holders against redeeming for one.
+and advises holders against redeeming for one.#footnote[The contract
+enforces this advice on the Reserve's behalf: redemption is accepted in
+whole beads only (§6.2), a guard included principally so that the Vault
+Keeper can never be asked to divide a bead with a hacksaw — an operation
+the Reserve has considered and declined to attempt.]
 
 The supply guarantee is structural rather than promissory. The contract
 contains no owner, no minter role, and no mint path of any kind; the
@@ -119,13 +127,17 @@ reserve*. There is no sale, no presale, and no liquidity pool created or
 endorsed by the Bead Reserve.
 
 At deployment the full supply is minted once and split between (i) the
-token contract, which holds the *open-claim pile*, and (ii) the Vault
-Keeper's *discretionary reserve* (the "treasury"), for hand-distribution:
-gifts and airdrops to correspondents at the Keeper's discretion. The
-split is carved from the fixed genesis supply, not minted in addition to
-it: it changes neither total supply nor collateralization, and dilutes no
-one, there being nothing to dilute. The size of each portion is fixed at
-deployment and disclosed on-chain via the `GenesisAllocated` event.
+token contract, which holds the *open-claim pile*, and (ii) a
+*discretionary reserve* (the "treasury"): a separate pile of #meta.symbol,
+distinct from the open-claim pile, held at its own fixed address for
+hand-distribution — gifts, airdrops, and such marketing as a token of no
+value can be said to require. The treasury address is set at genesis and
+no code path can reassign it; it is deliberately not the Vault Keeper's
+key, which holds no tokens in any capacity (§8). The split is carved from
+the fixed genesis supply, not minted in addition to it: it changes
+neither total supply nor collateralization, and dilutes no one, there
+being nothing to dilute. The size of each portion is fixed at deployment
+and disclosed on-chain via the `GenesisAllocated` event.
 
 Any wallet may call `claim()` once to receive one (1) #meta.symbol from
 the open-claim pile, paying only network gas. Claiming distributes
@@ -145,7 +157,10 @@ wallets waiting at one faucet still share the faucet.
 
 A holder may also *surrender* #meta.symbol back to the open-claim pile at
 any time, returning the tokens to circulation for others to claim and
-reopening their own eligibility to claim again. Surrender does not burn:
+reopening their own eligibility to claim again.#footnote[Eligibility
+reopens only when at least one (1) whole bead is returned. A sub-bead
+surrender is received as a donation to the pile and reopens nothing; the
+Reserve is grateful, and unmoved.] Surrender does not burn:
 supply and reserve are unchanged; the beads simply return to the pile.
 The Reserve offers this facility for holders who have reflected on their
 position and offers no opinion on why one would relinquish a free bead.
@@ -171,18 +186,20 @@ all purposes, a bead redeemed. The redeemer has been advised the contents
 are worthless and proceeds accordingly.
 
 Upon redemption, the Vault Keeper will identify the specific bead or
-beads corresponding to the particular #meta.symbol token IDs surrendered,
-drawing on institutional knowledge of the reserve to match each burned
-token to its bead in the jar. Retrieval is physical and manual, and may
+beads corresponding to the particular #meta.symbol burned, drawing on
+institutional knowledge of the reserve to match each redeemed bead-claim
+to its bead in the jar. Retrieval is physical and manual, and may
 require fishing the bead out, performed to the best of the Vault Keeper's
 ability. The Reserve represents that this mapping is exact and declines
 to elaborate on how it is maintained.
 
 == 6.2 Minimum redemption lot
 Redemption is available in lots of *#meta.min_redemption bead or
-greater* (the "creation unit"). Because the cost of the certified-mail
+greater*, in *whole beads only* (the "creation unit"): the bead is
+indivisible in fact, and the contract keeps it indivisible in settlement
+by refusing fractional lots. Because the cost of the certified-mail
 ceremony exceeds the value of a single bead by several orders of
-magnitude, redemption — though unrestricted in size — is a right that no
+magnitude, redemption — though unbounded above — is a right that no
 rational holder exercises, which is precisely what keeps the reserve
 stable.
 
@@ -244,7 +261,11 @@ tokens. The role holds no power over balances and is therefore operable
 as a low-value hot key without endangering the system. Key hygiene is the
 Keeper's own concern; a compromised Keeper key can, at worst, publish
 dishonest bead counts, which the camera would contradict, or widen a
-redemption window, which harms no one.
+redemption window, which harms no one.#footnote[At genuine worst, a
+compromised key could rotate the role to the attacker or freeze it
+outright — silencing attestation and letting the redemption window
+lapse for good. Even then, not one holder's balance moves; the loss is
+continuity, not beads, and the remedy is redeployment (§8.1).]
 
 == 8.1 Compromise, loss, and redeployment
 There is *no administrative override*. `transferVaultKeeper` is callable
@@ -376,7 +397,7 @@ The jar is on camera. The count is final. One bead is one bead.
 
 / Bead-wei: the smallest divisible unit of BEADZ, 10#super[−#meta.decimals] of a bead. Non-redeemable in practice.
 / The Fault: the cardboard box containing the reserve jar. Named for a vault that is also a structural flaw.
-/ Creation unit: the minimum redemption lot (#meta.min_redemption bead), below which physical redemption is disallowed.
+/ Creation unit: the minimum redemption lot (#meta.min_redemption bead), below which physical redemption is disallowed. Redemption proceeds in whole beads only.
 / Genesis Count: the one-time hand-count of the jar at deployment, defining total supply.
 / The ratchet: the property that supply and reserve can only decrease, via redemption.
 
@@ -387,11 +408,12 @@ entry points:
 - `claim()`: receive one bead from the genesis mint (one per address;
   disbursement metered globally at 200 beads/day — see §5).
 - `surrender(amount)`: return #meta.symbol to the open-claim pile for
-  redistribution (does not burn; reopens your claim).
-- `redeem(amount, shippingRef)`: burn ≥#meta.min_redemption bead to
-  request physical shipment, while the redemption window is open.
-  `shippingRef` is an off-chain reference only; no postal address is
-  ever written on-chain.
+  redistribution (does not burn; returning ≥1 whole bead reopens your
+  claim — less is a donation).
+- `redeem(amount, shippingRef)`: burn ≥#meta.min_redemption bead, in
+  whole beads only, to request physical shipment while the redemption
+  window is open. `shippingRef` is an off-chain reference only; no
+  postal address is ever written on-chain.
 - `redemptionOpen()` / `redemptionDeadline`: current redemption-window
   status.
 - `claimableBeads()` / `nextBeadAt()`: current faucet status — beads
@@ -404,6 +426,10 @@ entry points:
 - `attestReserveRecord(merkleRoot, uri)`: Vault Keeper only. Anchors a
   period's published reserve record (merkle root of signed camera-frame
   hashes); event-only, changes no state.
+- `transferVaultKeeper(action, newKeeper, confirmKeeper)`: Vault Keeper
+  only. Rotates the role to a new key — entered twice, to survive the
+  Keeper's own typing — or, with the zero address in both slots,
+  freezes the role permanently. There is no recovery path; see §8.1.
 - `collateralizationBps()`: attested beads vs. outstanding supply, in
   basis points.
 
