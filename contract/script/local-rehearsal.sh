@@ -83,6 +83,9 @@ check "fully collateralized (10000 bps)"      "10000"        "$(view 'collateral
 check "keeper wired"                          "$KEEPER"      "$(view 'vaultKeeper()(address)')"
 
 # claim: one per address
+# Advance chain time past the drip gate (DRIP_INTERVAL = 432 s; faucet starts empty at genesis).
+cast rpc evm_increaseTime 432 --rpc-url "$RPC" >/dev/null
+cast rpc evm_mine --rpc-url "$RPC" >/dev/null
 send_as "$ALICE" "claim()"
 check "claim transfers one bead"              "$ONE_BEAD"    "$(view 'balanceOf(address)(uint256)' "$ALICE")"
 expect_revert "second claim reverts"          "$ALICE" "claim()"
