@@ -132,6 +132,17 @@ the open-claim pile, paying only network gas. Claiming distributes
 pre-existing supply; it does not mint, and it does not remove any bead
 from the Fault. Only the entitlement moves.
 
+The pile does not dispense on demand. Disbursement is _metered_: the
+faucet accrues exactly one claimable bead every 432 seconds (200 beads
+per day), beginning empty at genesis, and holds at most one day's
+allotment (200 beads) pending at any moment. Allotments left unclaimed
+beyond that day _lapse_; the Reserve does not bank inattention. The rate
+is a compile-time constant of the contract — no party, including the
+Vault Keeper, can raise, lower, or suspend it. The Reserve adopted this
+schedule after observing that an unmetered pile is chiefly an invitation
+to operate wallets in bulk, and notes for the record that a thousand
+wallets waiting at one faucet still share the faucet.
+
 A holder may also *surrender* #meta.symbol back to the open-claim pile at
 any time, returning the tokens to circulation for others to claim and
 reopening their own eligibility to claim again. Surrender does not burn:
@@ -270,6 +281,10 @@ Prospective holders should be aware:
 - *#meta.symbol has no monetary value and is not expected to acquire
   any.* This is by design, not misfortune.
 - *There is no market.* No pool is provided; there is nowhere to sell.
+- *The faucet may be empty when you arrive.* Claims are metered at 200
+  beads per day (§5) and unclaimed allotments lapse. A visitor may need
+  to return later, which the Reserve regrets precisely as much as it
+  planned.
 - *The reserve is uninsured* and stored in a cardboard box.
 - *The Genesis Count may be wrong.* See §3.1.
 - *Redemption costs vastly more than the beads are worth.* See §6.2.
@@ -369,7 +384,8 @@ The jar is on camera. The count is final. One bead is one bead.
 Deployed on #meta.chain. Built on OpenZeppelin's audited ERC-20. Key
 entry points:
 
-- `claim()`: receive one bead from the genesis mint (one per address).
+- `claim()`: receive one bead from the genesis mint (one per address;
+  disbursement metered globally at 200 beads/day — see §5).
 - `surrender(amount)`: return #meta.symbol to the open-claim pile for
   redistribution (does not burn; reopens your claim).
 - `redeem(amount, shippingRef)`: burn ≥#meta.min_redemption bead to
@@ -378,6 +394,8 @@ entry points:
   ever written on-chain.
 - `redemptionOpen()` / `redemptionDeadline`: current redemption-window
   status.
+- `claimableBeads()` / `nextBeadAt()`: current faucet status — beads
+  claimable this moment, and when the next bead drips.
 - `setRedemptionDeadline(newDeadline)`: Vault Keeper only. Extends an
   open window or reopens a lapsed one, capped at ~1 year per action;
   cannot shorten an open window.
