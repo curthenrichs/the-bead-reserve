@@ -7,7 +7,7 @@
   subtitle: "A Technical and Monetary Whitepaper of The Bead Reserve",
   office: meta.office,
   series: meta.series,
-  draft: true,
+  draft: false,
 )
 
 = Abstract
