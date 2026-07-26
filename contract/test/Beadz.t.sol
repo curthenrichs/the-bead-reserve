@@ -182,6 +182,13 @@ contract BeadzTest is Test {
         assertEq(fresh.nextBeadAt(), t0 + 2 * fresh.DRIP_INTERVAL());
     }
 
+    function test_dripConstants_matchPublishedSchedule() public view {
+        // The whitepaper and handoff doc hardcode "one bead per 432 seconds, 200/day, 200 cap".
+        // Pin the literals so the docs' numbers are regression-checked, not just the mechanism.
+        assertEq(beadz.DRIP_INTERVAL(), 432);
+        assertEq(beadz.DRIP_CAP(), 200);
+    }
+
     // --- redeem ---
 
     function test_redeem_burnsSupply() public {

@@ -171,6 +171,7 @@ contract Beadz is ERC20 {
         // Advance the faucet one interval; the max() drags a stale anchor up to exactly one
         // day behind first, forfeiting idle excess. Since claimable >= 1 here, the anchor
         // never passes the present.
+        // The subtraction assumes block.timestamp is real epoch time (>= 1 day), true on any live chain.
         dripAnchor = Math.max(dripAnchor, block.timestamp - DRIP_CAP * DRIP_INTERVAL) + DRIP_INTERVAL;
 
         hasClaimed[msg.sender] = true;
@@ -323,8 +324,8 @@ contract Beadz is ERC20 {
         return accrued < pile ? accrued : pile;
     }
 
-    /// @notice Timestamp at which the next bead drips ("come back at" UX). Already in the past
-    ///         whenever claimableBeads() > 0.
+    /// @notice Timestamp at which the next bead drips ("come back at" UX). Never in the future
+    ///         once a bead is claimable.
     function nextBeadAt() external view returns (uint256) {
         return dripAnchor + DRIP_INTERVAL;
     }
