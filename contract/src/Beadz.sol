@@ -325,9 +325,17 @@ contract Beadz is ERC20 {
     }
 
     /// @notice Timestamp at which the next bead drips ("come back at" UX). Never in the future
-    ///         once a bead is claimable.
+    ///         once a bead is claimable. Reports the clock only: it keeps ticking even when the
+    ///         pile is exhausted and claim() would revert regardless, so UIs should read
+    ///         claimableBeads() alongside it.
     function nextBeadAt() external view returns (uint256) {
         return dripAnchor + DRIP_INTERVAL;
+    }
+
+    /// @notice Lifetime count of successful claims — equivalently, the latest bead number issued
+    ///         by claim(). Monotone: surrender() reopens a claimer's door but never rewinds this.
+    function claimedCount() external view returns (uint256) {
+        return _claimCounter;
     }
 
     /// @notice Whether physical redemption is currently open.

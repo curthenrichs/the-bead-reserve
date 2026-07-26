@@ -182,6 +182,19 @@ contract BeadzTest is Test {
         assertEq(fresh.nextBeadAt(), t0 + 2 * fresh.DRIP_INTERVAL());
     }
 
+    function test_claimedCount_countsClaimsAndIgnoresSurrender() public {
+        assertEq(beadz.claimedCount(), 0);
+        vm.prank(alice);
+        beadz.claim();
+        vm.prank(bob);
+        beadz.claim();
+        assertEq(beadz.claimedCount(), 2);
+        uint256 claimAmount = beadz.CLAIM_AMOUNT(); // hoisted: see prank-scoping note above
+        vm.prank(alice);
+        beadz.surrender(claimAmount);
+        assertEq(beadz.claimedCount(), 2); // lifetime counter: surrender never rewinds it
+    }
+
     function test_dripConstants_matchPublishedSchedule() public view {
         // The whitepaper and handoff doc hardcode "one bead per 432 seconds, 200/day, 200 cap".
         // Pin the literals so the docs' numbers are regression-checked, not just the mechanism.

@@ -78,8 +78,8 @@ Built on OpenZeppelin ERC-20 v5.1.0, Solidity `0.8.24`.
 `attestBeadCount(beads)` *[keeper]* · `acknowledgeRedemption(bearer, beads, trackingNumber)` *[keeper]* ·
 `attestReserveRecord(merkleRoot, uri)` *[keeper]* ·
 `setRedemptionDeadline(newDeadline)` *[keeper]* · `transferVaultKeeper(action, newKeeper, confirmKeeper)` *[keeper]* ·
-`unclaimedBeads()` · `claimableBeads()` · `nextBeadAt()` · `redemptionOpen()` ·
-`collateralizationBps()` · plus standard ERC-20.
+`unclaimedBeads()` · `claimableBeads()` · `nextBeadAt()` · `claimedCount()` ·
+`redemptionOpen()` · `collateralizationBps()` · plus standard ERC-20.
 
 **Events:** `BeadClaimed` · `GenesisAllocated` · `BeadCountAttested` · `PhysicalBeadRedemptionRequested`
 · `BeadsSurrendered` · `RedemptionAcknowledged` · `ReserveRecordAttested` · `RedemptionWindowSet` · `VaultKeeperTransferred`.
