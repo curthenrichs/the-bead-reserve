@@ -96,9 +96,9 @@ describe("brand page copy", () => {
     expect(template.toLowerCase()).toContain("will not change");
   });
 
-  it("notes the Trust Wallet 256px sizing requirement", () => {
-    expect(template).toContain("Trust Wallet");
-    expect(template).toContain("256");
+  it("offers the 256px file, the size wallets and token lists expect", () => {
+    expect(template).toContain("beadz-token-256.png");
+    expect(template).toContain("256×256");
   });
 
   it("states the MIT / brand-assets-exception licensing split", () => {
@@ -110,7 +110,7 @@ describe("brand page copy", () => {
   it("carries the counterfeit note tied to the no-liquidity-pool fact", () => {
     const lower = template.toLowerCase();
     expect(lower).toContain("liquidity pool");
-    expect(lower).toMatch(/misus/);
+    expect(lower).toMatch(/not endorsed/);
   });
 });
 
