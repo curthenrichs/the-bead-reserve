@@ -14,6 +14,9 @@ contract BeadzTest is Test {
 
     function setUp() public {
         beadz = new Beadz(keeper, treasury, 0); // pure open claim: whole supply in the contract
+        // The faucet starts EMPTY at deploy and fills at one bead per DRIP_INTERVAL. Warp one
+        // full day so the bucket sits at DRIP_CAP and pre-trickle tests keep passing unchanged.
+        vm.warp(block.timestamp + 1 days);
     }
 
     // Deploy a variant with the entire supply airdropped to treasury, for redeem tests.
@@ -81,6 +84,75 @@ contract BeadzTest is Test {
         vm.prank(alice);
         vm.expectRevert("BEADZ: address already claimed");
         beadz.claim();
+    }
+
+    // --- drip faucet ---
+
+    function test_claim_revertsWhenFaucetEmptyAtDeploy() public {
+        Beadz fresh = new Beadz(keeper, treasury, 0); // no warp after deploy: faucet empty
+        vm.prank(alice);
+        vm.expectRevert("BEADZ: faucet is empty");
+        fresh.claim();
+    }
+
+    function test_claim_succeedsAfterFirstInterval() public {
+        Beadz fresh = new Beadz(keeper, treasury, 0);
+        vm.warp(block.timestamp + fresh.DRIP_INTERVAL());
+        vm.prank(alice);
+        fresh.claim();
+        assertEq(fresh.balanceOf(alice), fresh.CLAIM_AMOUNT());
+    }
+
+    function test_drip_globalCapacitySharedAcrossAddresses() public {
+        Beadz fresh = new Beadz(keeper, treasury, 0);
+        vm.warp(block.timestamp + 3 * fresh.DRIP_INTERVAL()); // exactly 3 beads accrued
+        for (uint256 i = 0; i < 3; i++) {
+            address who = address(uint160(0x2000 + i));
+            vm.prank(who);
+            fresh.claim();
+        }
+        vm.prank(alice); // 4th fresh address in the same block: the trickle is global
+        vm.expectRevert("BEADZ: faucet is empty");
+        fresh.claim();
+    }
+
+    function test_drip_idleExcessForfeited() public {
+        Beadz fresh = new Beadz(keeper, treasury, 0);
+        vm.warp(block.timestamp + 10 days); // idle far past the one-day cap
+        uint256 cap = fresh.DRIP_CAP();
+        for (uint256 i = 0; i < cap; i++) {
+            address who = address(uint160(0x3000 + i));
+            vm.prank(who);
+            fresh.claim();
+        }
+        vm.prank(alice); // claim #201: the 9 idle days must NOT have banked
+        vm.expectRevert("BEADZ: faucet is empty");
+        fresh.claim();
+        vm.warp(block.timestamp + fresh.DRIP_INTERVAL()); // one interval later: exactly one more
+        vm.prank(alice);
+        fresh.claim();
+        assertEq(fresh.balanceOf(alice), fresh.CLAIM_AMOUNT());
+    }
+
+    function test_surrender_doesNotRefundDripCapacity() public {
+        Beadz fresh = new Beadz(keeper, treasury, 0);
+        vm.warp(block.timestamp + fresh.DRIP_INTERVAL()); // exactly one bead accrued
+        vm.prank(alice);
+        fresh.claim();
+        uint256 claimAmount = fresh.CLAIM_AMOUNT(); // hoisted: prank covers only the next call
+        vm.prank(alice);
+        fresh.surrender(claimAmount); // pile refilled — but the clock was not
+        vm.prank(alice);
+        vm.expectRevert("BEADZ: faucet is empty");
+        fresh.claim();
+    }
+
+    function test_claim_pileExhaustedRevertWinsOverFaucet() public {
+        Beadz b = _allToTreasury(); // pile is empty; the faucet accrues regardless
+        vm.warp(block.timestamp + b.DRIP_INTERVAL());
+        vm.prank(alice);
+        vm.expectRevert("BEADZ: genesis pile exhausted");
+        b.claim();
     }
 
     // --- redeem ---

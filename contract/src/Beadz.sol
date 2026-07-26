@@ -18,6 +18,9 @@ import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
  *          - Supply is minted exactly once, in the constructor. There is NO other mint path
  *            anywhere in this contract, so total supply can only ever DECREASE (via redemption).
  *            "Renouncing the mint" is achieved structurally: the ability simply does not exist.
+ *          - Distribution is metered: claim() dispenses at most one bead per 432 seconds
+ *            (200/day) globally, with at most one day's allotment pending; idle excess lapses.
+ *            The rate is a constant. No role — not even the Vault Keeper — can change it.
  *          - The Vault Keeper role is deliberately powerless over tokens. It can only log bead
  *            recounts and acknowledge shipments. It cannot mint, move, freeze, or seize anyone's
  *            balance. It is therefore safe to operate as a low-stakes hot key.
@@ -51,6 +54,15 @@ contract Beadz is ERC20 {
     /// @notice Beads distributed per claim: one (1) whole bead.
     uint256 public constant CLAIM_AMOUNT = 1e18;
 
+    /// @notice Seconds per dripped bead. 86,400 / 432 = exactly 200 beads/day: the open-claim
+    ///         pile dispenses as a metered trickle, never on demand. A constant, on purpose —
+    ///         no role (not even the Vault Keeper) can raise, lower, or pause the rate.
+    uint256 public constant DRIP_INTERVAL = 432;
+
+    /// @notice Maximum beads pending in the faucet: one day's accrual. Idle time beyond this
+    ///         is forfeited (not banked), so quiet periods never build a burstable pile.
+    uint256 public constant DRIP_CAP = 200;
+
     /// @notice Minimum redemption lot (a "creation unit"): a single whole bead. The certified-mail
     ///         ceremony still costs orders of magnitude more than one bead, so it is never rationally
     ///         worth exercising.
@@ -81,6 +93,12 @@ contract Beadz is ERC20 {
 
     /// @notice One live claim per address at a time (surrender a whole bead to re-open).
     mapping(address => bool) public hasClaimed;
+
+    /// @notice Single-slot faucet state. Claimable beads = min((now - dripAnchor) / DRIP_INTERVAL,
+    ///         DRIP_CAP). Each claim advances the anchor one interval; when the anchor has fallen
+    ///         more than DRIP_CAP intervals behind, it is dragged forward first, which is what
+    ///         forfeits idle excess.
+    uint256 public dripAnchor;
 
     uint256 private _claimCounter;
 
@@ -119,6 +137,7 @@ contract Beadz is ERC20 {
         attestedBeads = GENESIS_BEADS;
         lastAttestation = block.timestamp;
         redemptionDeadline = block.timestamp + 365 days; // redemption open for one year from genesis
+        dripAnchor = block.timestamp; // faucet starts EMPTY: first bead drips DRIP_INTERVAL from now
 
         // The one and only mint, ever — split from the fixed supply, summing to exactly GENESIS_BEADS.
         uint256 airdropAmount = airdropBeads * 1e18;
@@ -146,6 +165,13 @@ contract Beadz is ERC20 {
     function claim() external {
         require(!hasClaimed[msg.sender], "BEADZ: address already claimed");
         require(balanceOf(address(this)) >= CLAIM_AMOUNT, "BEADZ: genesis pile exhausted");
+
+        // The global trickle: sybil wallets share this gate — 1,000 addresses still split 200/day.
+        require(block.timestamp - dripAnchor >= DRIP_INTERVAL, "BEADZ: faucet is empty");
+        // Advance the faucet one interval; the max() drags a stale anchor up to exactly one
+        // day behind first, forfeiting idle excess. Since claimable >= 1 here, the anchor
+        // never passes the present.
+        dripAnchor = Math.max(dripAnchor, block.timestamp - DRIP_CAP * DRIP_INTERVAL) + DRIP_INTERVAL;
 
         hasClaimed[msg.sender] = true;
         uint256 beadNumber = ++_claimCounter;
