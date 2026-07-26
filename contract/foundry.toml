@@ -14,3 +14,6 @@ runs = 256
 [invariant]
 runs = 128
 depth = 32
+# A tolerated revert makes every invariant vacuously passable (a claim() that always
+# reverts satisfies them all). The handler guards every action, so reverts are bugs.
+fail_on_revert = true

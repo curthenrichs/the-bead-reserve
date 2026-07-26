@@ -112,6 +112,11 @@ contract BeadzInvariants is Test {
     uint256 internal genesisSupply;
 
     function setUp() public {
+        // Forge invariant runs start at block.timestamp ~= 1. The claim() cap-drag subtraction
+        // (block.timestamp - DRIP_CAP * DRIP_INTERVAL) assumes real epoch time and underflows for
+        // the first simulated day otherwise — impossible on a live chain, guaranteed here. Warp to
+        // a realistic epoch so fail_on_revert can stay on and the invariants stay falsifiable.
+        vm.warp(1_700_000_000);
         address keeper = makeAddr("keeper");
         address treasury = makeAddr("treasury");
         // `Beadz.GENESIS_BEADS` (bare type-qualified access to another contract's public

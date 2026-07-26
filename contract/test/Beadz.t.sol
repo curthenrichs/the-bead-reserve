@@ -339,6 +339,30 @@ contract BeadzTest is Test {
         assertEq(beadz.totalSupply(), beadz.GENESIS_BEADS() * 1e18);
     }
 
+    function test_constructor_revertsOnZeroTreasury() public {
+        vm.expectRevert("BEADZ: treasury is the zero address");
+        new Beadz(keeper, address(0), 0);
+    }
+
+    function test_constructor_splitsSupplyBetweenTreasuryAndPile() public {
+        uint256 airdropBeads = 1_000;
+        Beadz b = new Beadz(keeper, treasury, airdropBeads);
+        // Pin the split itself, not just the total: a swapped-recipient or arithmetic
+        // regression in the constructor would pass the totalSupply-only test above.
+        assertEq(b.balanceOf(treasury), airdropBeads * 1e18);
+        assertEq(b.balanceOf(address(b)), (b.GENESIS_BEADS() - airdropBeads) * 1e18);
+        assertEq(b.totalSupply(), b.GENESIS_BEADS() * 1e18);
+    }
+
+    event GenesisAllocated(address indexed treasury, uint256 airdropAmount, uint256 claimAmount);
+
+    function test_constructor_emitsGenesisAllocatedArgs() public {
+        uint256 genesisBeads = beadz.GENESIS_BEADS(); // hoisted: see prank-scoping note above
+        vm.expectEmit(true, false, false, true);
+        emit GenesisAllocated(treasury, 1_000 * 1e18, (genesisBeads - 1_000) * 1e18);
+        new Beadz(keeper, treasury, 1_000);
+    }
+
     // --- collateralizationBps ---
 
     function test_collateralizationBps_fullyReserved() public {
