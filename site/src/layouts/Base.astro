@@ -34,9 +34,13 @@ const site = "https://beadz.half-built-robots.com";
     <main style="max-width:min(1280px,92vw);margin:0 auto;padding:clamp(16px,4vw,48px)">
       <slot />
       <footer style="margin-top:48px;border-top:2px solid var(--line);padding-top:16px">
-        <a href="/whitepaper.pdf" class="mono" target="_blank" rel="noopener">Read the whitepaper</a>
-        <span class="mono" style="color:var(--text-soft);padding:0 10px">·</span>
-        <a href="/brand" class="mono">Brand assets</a>
+        <nav class="mono" style="font-size:13px" aria-label="Site">
+          <a href="/">The Bead Reserve</a>
+          <span style="color:var(--text-soft);padding:0 10px">·</span>
+          <a href="/whitepaper.pdf" target="_blank" rel="noopener">Read the whitepaper</a>
+          <span style="color:var(--text-soft);padding:0 10px">·</span>
+          <a href="/brand">Brand assets</a>
+        </nav>
       </footer>
     </main>
   </body>

@@ -56,6 +56,49 @@ body {
 }
 a { color: var(--amber-dark); }
 
+/* Bracket-frame header, borrowed from the half-built-robots blog header
+   (.site-header-wrapper): 2px rules top and bottom, with 2px vertical accent
+   lines at the edges that are solid at the corners and fade out toward the
+   middle. Shared by every page's header so they frame identically; it lives
+   here rather than in Masthead.astro because Astro component styles are
+   scoped and a second page cannot reuse them. */
+.masthead {
+  position: relative;
+  border-top: 2px solid var(--line);
+  border-bottom: 2px solid var(--line);
+  padding: clamp(22px, 4vw, 34px) clamp(20px, 3vw, 30px);
+  margin: 8px 0 30px;
+}
+.masthead::before,
+.masthead::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    var(--line) 0%,
+    transparent 35%,
+    transparent 65%,
+    var(--line) 100%
+  );
+}
+.masthead::before { left: 0; }
+.masthead::after { right: 0; }
+
+.masthead h1 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(34px, 9vw, 64px);
+  line-height: 0.95;
+  margin: 14px 0 4px;
+}
+.masthead h1 em {
+  color: var(--amber-mid);
+  font-style: italic;
+}
+
 /* Capacity meter for the claim/redeem bars. Segment ticks keep an empty bar
    from reading as a plain 2px divider/spacer, and give it a gauge feel. */
 .meter {
