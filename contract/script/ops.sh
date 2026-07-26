@@ -79,5 +79,8 @@ rotate)
     echo "rotated to '$1' — keeper actions now need: BEADZ_KEEPER_ROLE=$1 ops.sh <cmd>"
     ;;
 
+# Deliberately no `freeze` subcommand. Freezing retires the Vault Keeper role forever
+# (transferVaultKeeper with action=1 and the zero address in both slots) — it stays a
+# manual ceremony, not a one-liner waiting in someone's shell history.
 *) usage ;;
 esac

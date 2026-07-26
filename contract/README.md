@@ -8,8 +8,12 @@ testing, analyzing, and deploying the contract itself.
 
 The entire supply (47,318 BEADZ, one per bead in the jar) is minted once, in the constructor.
 There is no `mint` function, so supply can only shrink: `redeem()` burns tokens in exchange for
-a physical shipment of beads. Distribution happens through `claim()`, one bead per address, out
-of a pre-minted pile held by the contract; `surrender()` returns beads to that pile. The Vault
+a physical shipment of beads. Distribution happens through `claim()` — one bead per address,
+drawn from a pre-minted pile held by the contract and dispensed as a *global metered trickle*:
+one bead per 432 seconds (200/day, `DRIP_INTERVAL`/`DRIP_CAP`), at most one day's allotment
+pending, starting empty at deploy, idle excess forfeited; `claimableBeads()` and `nextBeadAt()`
+report the faucet state. `surrender()` returns beads to that pile (a whole bead or more reopens
+the sender's claim; the meter is never refunded). The Vault
 Keeper role can log bead recounts, acknowledge shipments, widen (never shorten) the redemption
 window, and rotate or permanently freeze its own key. It cannot mint, move, or seize anyone's
 balance, and there is no admin recovery path: a lost keeper key means redeploying a fresh
@@ -21,16 +25,17 @@ contract, not rescuing the old one. The NatSpec in `Beadz.sol` is the full desig
 |---|---|
 | `src/Beadz.sol` | The token contract |
 | `test/Beadz.t.sol` | Unit and fuzz tests |
-| `test/BeadzInvariants.t.sol` | Invariant suite driven by a randomized handler; checks that supply only ever shrinks and that an open redemption window is never shortened |
+| `test/BeadzInvariants.t.sol` | Invariant suite driven by a randomized handler; checks that supply only ever shrinks, that an open redemption window is never shortened, and that claims never outrun the drip clock |
 | `script/Deploy.s.sol` | Deployment script; constructor arguments come from environment variables |
 | `script/local-rehearsal.sh` | Deploys to a disposable Anvil chain and walks the full token lifecycle |
 | `script/run-slither.sh` | Bootstraps Slither and runs the detector policy in `slither.config.json` |
 
 ## Toolchain
 
-Solidity 0.8.24 (pinned in `foundry.toml`), OpenZeppelin Contracts v5.1.0 vendored under
-`lib/`, and Foundry for build, test, and deploy. Fuzz tests run 256 iterations; the invariant
-suite runs 128 sequences at depth 32.
+Solidity 0.8.24 and EVM target `shanghai` (both pinned in `foundry.toml`), OpenZeppelin
+Contracts v5.1.0 vendored under `lib/`, and Foundry for build, test, and deploy. Fuzz tests run
+256 iterations; the invariant suite runs 128 sequences at depth 32 with `fail_on_revert` on, so
+any handler revert fails the run rather than passing vacuously.
 
 ## Build and test
 
@@ -74,9 +79,10 @@ rehearsal. For a fuller one on a live local node:
 
 ```bash
 bash script/local-rehearsal.sh   # boots Anvil, deploys, then checks the lifecycle:
-                                 # genesis state -> claim -> double-claim revert ->
-                                 # redeem (burn) -> non-keeper attest revert ->
-                                 # keeper attest -> collateralization
+                                 # genesis state -> drip-gate time advance -> claim ->
+                                 # double-claim revert -> redeem (burn) ->
+                                 # non-keeper attest revert -> keeper attest ->
+                                 # collateralization
 ```
 
 The script exits 0 and prints `REHEARSAL PASSED` when every check holds.

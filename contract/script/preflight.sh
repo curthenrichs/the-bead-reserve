@@ -76,7 +76,8 @@ phase_a() {
     gate "HEAD is release-tagged" git describe --exact-match --tags HEAD
     local fn
     for fn in claim surrender redeem attestBeadCount attestReserveRecord acknowledgeRedemption \
-              setRedemptionDeadline transferVaultKeeper ReserveRecordAttested; do
+              setRedemptionDeadline transferVaultKeeper ReserveRecordAttested \
+              claimableBeads nextBeadAt DRIP_INTERVAL; do
         gate "README documents $fn" grep -q "$fn" "$(git rev-parse --show-toplevel)/README.md"
     done
     echo "== PHASE A PASSED"

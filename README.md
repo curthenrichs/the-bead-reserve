@@ -31,8 +31,10 @@ The terminal state of the whole system is an empty jar in a box.
 - **Fixed supply, no mint path.** The entire supply is minted once in the constructor. There is no
   `mint` function afterward. The supply cap is enforced by absence, which is stronger than any
   renounce ceremony.
-- **Airdrop-only claim, no liquidity pool.** Supply is distributed by claim, one per address. The
-  project seeds no market and endorses none.
+- **Airdrop-only claim, no liquidity pool.** Supply is distributed by claim — one per address,
+  metered globally at one bead per 432 seconds (200/day, one day's allotment cap, faucet starts
+  empty), so a thousand wallets still share one trickle. The project seeds no market and
+  endorses none.
 - **Peg to beads, not dollars.** "1 BEADZ = 1 bead" is a collectible peg, not a monetary one. BEADZ
   makes no representation of a stable value against any currency.
 - **Redemption is a one-way ratchet.** `redeem()` burns tokens in exchange for a physical shipment of
@@ -55,7 +57,8 @@ The reserve can be watched, not just claimed. The intended pipeline:
 1. A small always-on capture device photographs the jar on a schedule.
 2. Each still is hashed (SHA-256) and the hash is signed with an **Ed25519** key whose public half is
    published, so anyone can verify a frame is authentic and fresh.
-3. The image and its hash are published; the Keeper later attests the hash on chain.
+3. The image and its hash are published continuously; on a reporting cadence the Keeper anchors
+   a Merkle root of the published hashes on chain (`attestReserveRecord`).
 
 Capture and attestation are separate jobs. The camera device holds no chain key. The claim site at
 [beadz.half-built-robots.com](https://beadz.half-built-robots.com) surfaces a three-state monitor
@@ -68,13 +71,15 @@ Built on OpenZeppelin ERC-20 v5.1.0, Solidity `0.8.24`.
 **Constructor:** `constructor(address keeper, address treasury_, uint256 airdropBeads)`
 
 **Constants:** `GENESIS_BEADS = 47_318` · `CLAIM_AMOUNT = 1e18` · `MIN_REDEMPTION = 1e18` ·
-`MAX_EXTENSION = 366 days`
+`MAX_EXTENSION = 366 days` · `DRIP_INTERVAL = 432` (seconds per claimable bead; 200/day) ·
+`DRIP_CAP = 200` (one-day faucet bucket)
 
 **Functions:** `claim()` · `surrender(amount)` · `redeem(amount, shippingRef)` ·
 `attestBeadCount(beads)` *[keeper]* · `acknowledgeRedemption(bearer, beads, trackingNumber)` *[keeper]* ·
 `attestReserveRecord(merkleRoot, uri)` *[keeper]* ·
 `setRedemptionDeadline(newDeadline)` *[keeper]* · `transferVaultKeeper(action, newKeeper, confirmKeeper)` *[keeper]* ·
-`unclaimedBeads()` · `redemptionOpen()` · `collateralizationBps()` · plus standard ERC-20.
+`unclaimedBeads()` · `claimableBeads()` · `nextBeadAt()` · `redemptionOpen()` ·
+`collateralizationBps()` · plus standard ERC-20.
 
 **Events:** `BeadClaimed` · `GenesisAllocated` · `BeadCountAttested` · `PhysicalBeadRedemptionRequested`
 · `BeadsSurrendered` · `RedemptionAcknowledged` · `ReserveRecordAttested` · `RedemptionWindowSet` · `VaultKeeperTransferred`.

@@ -4,6 +4,9 @@ test = "test"
 out = "out"
 libs = ["lib"]
 solc = "0.8.24"
+# Pinned: solc 0.8.24's default target today. An unpinned evm_version drifts with
+# forge/solc releases and would silently change the deployed bytecode.
+evm_version = "shanghai"
 optimizer = true
 optimizer_runs = 200
 remappings = ["@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/", "forge-std/=lib/forge-std/src/"]

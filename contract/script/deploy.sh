@@ -43,8 +43,12 @@ if [ "$broadcast" -eq 1 ]; then
             "$LOG" | head -1)
         [ -n "$addr" ] || die "could not read deployed address from broadcast log"
         if grep -q '^BEADZ_ADDRESS=' .env 2>/dev/null; then
-            sed -i.bak "s/^BEADZ_ADDRESS=.*/BEADZ_ADDRESS=$addr/" .env || die "failed to update BEADZ_ADDRESS in .env"
-            rm -f .env.bak
+            # Rewrite via a temp file OUTSIDE the repo: sed -i.bak would leave a full
+            # .env copy (secrets included) sitting next to it if the update failed.
+            tmp=$(mktemp) || die "mktemp failed"
+            sed "s/^BEADZ_ADDRESS=.*/BEADZ_ADDRESS=$addr/" .env > "$tmp" \
+                && mv "$tmp" .env \
+                || { rm -f "$tmp"; die "failed to update BEADZ_ADDRESS in .env"; }
         else
             echo "BEADZ_ADDRESS=$addr" >> .env || die "failed to append BEADZ_ADDRESS to .env"
         fi
