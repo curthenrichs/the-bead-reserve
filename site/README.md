@@ -12,6 +12,46 @@ wallet connection, no chain reads, no new backend; this slice only renders. The
 backend it eventually talks to is `../service`, a separate Cloudflare Worker
 (subsystem B).
 
+## House style
+
+Rules the pages are expected to follow. They exist because each one has already
+been got wrong once.
+
+**Never cap prose width.** No `max-width`, no `ch` measures, no wrapper divs
+that narrow text. The column set by `<main>` in `Base.astro` is the only width
+authority, and paragraphs inherit it. This is a standing instruction from the
+maintainer, not a preference to re-litigate. Sizing a non-prose element to its
+content (a small data table, an image) is a different thing and is fine.
+
+**Every page header uses `.masthead`.** It lives in `src/styles/tokens.css`
+rather than in `Masthead.astro`, because Astro scopes component styles and a
+second page cannot reuse them. The frame is 2px rules top and bottom plus 2px
+vertical accent lines at the left and right edges that fade toward the middle.
+A header that sets its own borders will silently lose those verticals and frame
+differently from the rest of the site.
+
+**Page titles read `The Bead Reserve : <Page>`,** with spaces around the colon.
+The `<h1>` says the same thing, with `<em>` around `Reserve` so it picks up the
+amber italic from `.masthead h1 em`.
+
+**Footer nav lives in `Base.astro`** and is shared by every page: site root,
+whitepaper, brand assets. A new page gets it for free and should not add its
+own.
+
+**Use the tokens.** Colors come from `src/styles/tokens.css`. Don't hardcode a
+hex in a page; if a value is missing, add a token.
+
+**Dark elements get their own surface.** The page is light. The camera monitor
+and the reserve seal are dark-grounded and must sit on a dark panel rather than
+directly on white.
+
+**Copy register: dry and institutional.** State the thing and stop. No
+marketing language, no em dashes, no rule-of-three lists, and no sentence
+explaining why the reader should do what you just told them to do. The project's
+humor comes from playing the reserve-bank bit straight, so anything that reads
+as enthusiasm undercuts it. This matters most on outward-facing pages like
+`/brand`, which press and listing venues read.
+
 ## Local dev
 
 ```bash
