@@ -314,6 +314,21 @@ contract Beadz is ERC20 {
         return balanceOf(address(this)) / 1e18;
     }
 
+    /// @notice Beads claimable right now: the time-accrued drip, capped at DRIP_CAP and bounded
+    ///         by what is actually left in the pile.
+    function claimableBeads() external view returns (uint256) {
+        uint256 accrued = (block.timestamp - dripAnchor) / DRIP_INTERVAL;
+        if (accrued > DRIP_CAP) accrued = DRIP_CAP;
+        uint256 pile = balanceOf(address(this)) / 1e18;
+        return accrued < pile ? accrued : pile;
+    }
+
+    /// @notice Timestamp at which the next bead drips ("come back at" UX). Already in the past
+    ///         whenever claimableBeads() > 0.
+    function nextBeadAt() external view returns (uint256) {
+        return dripAnchor + DRIP_INTERVAL;
+    }
+
     /// @notice Whether physical redemption is currently open.
     function redemptionOpen() external view returns (bool) {
         return block.timestamp <= redemptionDeadline;

@@ -155,6 +155,33 @@ contract BeadzTest is Test {
         b.claim();
     }
 
+    function test_claimableBeads_tracksAccrualAndCap() public {
+        Beadz fresh = new Beadz(keeper, treasury, 0);
+        assertEq(fresh.claimableBeads(), 0); // empty at deploy
+        vm.warp(block.timestamp + fresh.DRIP_INTERVAL() - 1);
+        assertEq(fresh.claimableBeads(), 0); // one second early
+        vm.warp(block.timestamp + 1);
+        assertEq(fresh.claimableBeads(), 1); // first drip lands exactly on the interval
+        vm.warp(block.timestamp + 30 days);
+        assertEq(fresh.claimableBeads(), fresh.DRIP_CAP()); // capped at one day's allotment
+    }
+
+    function test_claimableBeads_boundedByPile() public {
+        Beadz b = _allToTreasury(); // pile is empty
+        vm.warp(block.timestamp + 30 days);
+        assertEq(b.claimableBeads(), 0); // time accrues, but there is nothing to dispense
+    }
+
+    function test_nextBeadAt_advancesOnClaim() public {
+        Beadz fresh = new Beadz(keeper, treasury, 0);
+        uint256 t0 = block.timestamp;
+        assertEq(fresh.nextBeadAt(), t0 + fresh.DRIP_INTERVAL());
+        vm.warp(t0 + fresh.DRIP_INTERVAL());
+        vm.prank(alice);
+        fresh.claim();
+        assertEq(fresh.nextBeadAt(), t0 + 2 * fresh.DRIP_INTERVAL());
+    }
+
     // --- redeem ---
 
     function test_redeem_burnsSupply() public {
