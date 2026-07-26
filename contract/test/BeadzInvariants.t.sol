@@ -15,11 +15,14 @@ contract BeadzHandler is Test {
 
     uint256 public maxSupplySeen;       // ghost: highest totalSupply observed
     bool public everShortenedWhileOpen; // ghost: violated guarantee flag
+    uint256 public deployTime;          // ghost: faucet genesis, for the drip-rate invariant
+    uint256 public claimCount;          // ghost: successful claim() calls observed
 
     constructor(Beadz _beadz, address _keeper, address _treasury, uint256 treasuryBeads) {
         beadz = _beadz;
         keeper = _keeper;
         maxSupplySeen = _beadz.totalSupply();
+        deployTime = block.timestamp;
         // seed a small actor set, funded from treasury — keep total funding well below the
         // treasury's balance (treasuryBeads whole beads) so redeem() lots stay exercisable.
         uint256 perActor = (treasuryBeads * 1e18) / 40; // 4 actors ≈ 1/10 of the treasury, total
@@ -51,9 +54,10 @@ contract BeadzHandler is Test {
     function claim(uint256 actorSeed) external {
         address a = _actor(actorSeed);
         if (beadz.hasClaimed(a)) return;
-        if (beadz.balanceOf(address(beadz)) < beadz.CLAIM_AMOUNT()) return;
+        if (beadz.claimableBeads() == 0) return; // faucet empty or pile exhausted
         vm.prank(a);
         beadz.claim();
+        claimCount++;
         _trackMaxSupply();
     }
 
@@ -137,5 +141,12 @@ contract BeadzInvariants is Test {
     /// totalSupply ever observed by the handler should never have risen past genesis.
     function invariant_supplyNeverRoseAboveGenesis() public view {
         assertEq(handler.maxSupplySeen(), genesisSupply);
+    }
+
+    /// The trickle holds under any interleaving: successful claims never outrun the clock.
+    /// The faucet starts empty at genesis, so the bound is exactly elapsed / DRIP_INTERVAL.
+    function invariant_dripRateNeverExceeded() public view {
+        uint256 elapsed = block.timestamp - handler.deployTime();
+        assertLe(handler.claimCount(), elapsed / beadz.DRIP_INTERVAL());
     }
 }
