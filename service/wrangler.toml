@@ -4,10 +4,10 @@ compatibility_date = "2024-12-01"
 # Required by @cloudflare/vitest-pool-workers to boot the test harness; also applies to the deployed Worker.
 compatibility_flags = ["nodejs_compat"]
 
-# Ed25519 public key (published by design — not a secret). Placeholder until
-# a device key exists; the conformance run (S6) uses the key it generates.
+# Ed25519 public key (published by design — not a secret): fault-cam-01's device
+# key, generated on-device 2026-07-19. Publishing it is how anyone verifies a frame.
 [vars]
-ED25519_PUBKEY = "0000000000000000000000000000000000000000000000000000000000000000"
+ED25519_PUBKEY = "de649d130c8c7d559b424f1fbd7150b1dc18ffb00c33addaf8b171a2db049dfc"
 FRESH_MAX_S = "5400"     # 90 min
 STALE_MAX_S = "21600"    # 6 h
 SUPPORTED_PROTOCOLS = "1"
