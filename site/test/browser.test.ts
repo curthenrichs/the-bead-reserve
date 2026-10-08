@@ -80,16 +80,19 @@ describe("layout in a real browser", () => {
     const p = await open();
     await scrollToEnd(p);
 
-    const { sealTop, lastBottom } = await p.evaluate(() => {
+    const { sealTop, lastBottom, linkCount } = await p.evaluate(() => {
       const links = [...document.querySelectorAll("footer a")];
-      const last = links[links.length - 1]?.getBoundingClientRect().bottom ?? 0;
+      const last = links.at(-1)?.getBoundingClientRect().bottom;
+      const seal = document.querySelector(".seal")?.getBoundingClientRect();
       return {
-        sealTop:
-          document.querySelector(".seal")?.getBoundingClientRect().top ?? 0,
-        lastBottom: last,
+        sealTop: seal?.top ?? Number.NaN,
+        lastBottom: last ?? Number.NaN,
+        linkCount: links.length,
       };
     });
 
+    expect(linkCount, "no footer links matched").toBeGreaterThan(0);
+    expect(sealTop, "no .seal on the page").not.toBeNaN();
     expect(lastBottom).toBeLessThanOrEqual(sealTop);
   });
 });

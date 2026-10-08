@@ -44,36 +44,42 @@ const ROLES: Record<string, string> = {
               The seal has a dark ground. Put it on a dark surface, as shown
               here, rather than straight onto white.
             </p>
-            <table>
-              <thead>
-                <tr>
-                  <th>File</th>
-                  <th>Format</th>
-                  <th>Use</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>beadz-token-512.png</td>
-                  <td>PNG, 512×512</td>
-                  <td>General logo use, app icons</td>
-                  <td><a href="/beadz-token-512.png" download>Download</a></td>
-                </tr>
-                <tr>
-                  <td>beadz-token-256.png</td>
-                  <td>PNG, 256×256</td>
-                  <td>Token lists, wallets</td>
-                  <td><a href="/beadz-token-256.png" download>Download</a></td>
-                </tr>
-                <tr>
-                  <td>beadz-seal.svg</td>
-                  <td>SVG, vector</td>
-                  <td>Print, press, anything that needs to scale</td>
-                  <td><a href="/beadz-seal.svg" download>Download</a></td>
-                </tr>
-              </tbody>
-            </table>
+            <section class="table-scroll" tabindex="0" aria-label="Brand files">
+              <table>
+                <thead>
+                  <tr>
+                    <th>File</th>
+                    <th>Format</th>
+                    <th>Use</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>beadz-token-512.png</td>
+                    <td>PNG, 512×512</td>
+                    <td>General logo use, app icons</td>
+                    <td>
+                      <a href="/beadz-token-512.png" download>Download</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>beadz-token-256.png</td>
+                    <td>PNG, 256×256</td>
+                    <td>Token lists, wallets</td>
+                    <td>
+                      <a href="/beadz-token-256.png" download>Download</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>beadz-seal.svg</td>
+                    <td>SVG, vector</td>
+                    <td>Print, press, anything that needs to scale</td>
+                    <td><a href="/beadz-seal.svg" download>Download</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
           </div>
         </div>
       </section>
@@ -178,6 +184,7 @@ const ROLES: Record<string, string> = {
 
   .brand-heading {
     margin: 0 0 12px;
+    font-size: var(--font-size-xs);
     color: var(--ink-muted);
     text-transform: uppercase;
   }
@@ -197,9 +204,12 @@ const ROLES: Record<string, string> = {
 
   .brand-seal img {
     display: block;
+    border: 0;
     width: 100%;
     height: auto;
   }
+
+  .brand-mark > div:last-child { min-width: 0; }
 
   .swatch {
     display: inline-block;

@@ -1,16 +1,14 @@
 # Site: The Bead Reserve claim office
 
-**Subsystem A, no-chain slice.** A static Astro site that presents the reserve
-as a single page: masthead, reserve ledger, a verified seal, a live camera
-monitor, a claim panel, a redemption panel, a newsletter signup, and
-disclaimers. The interactive pieces are four React islands (camera monitor,
-claim, redeem, newsletter); everything else is static Astro. Light theme in
-keeping with the half-built-robots blog: white page, warm near-black text, and
-an amber accent (`#ffaa3c`, or `#b5680c` for text on white), in Roboto Mono /
-Roboto Serif. The camera monitor is a deliberately dark "screen" island. No
-wallet connection, no chain reads, no new backend; this slice only renders. The
-backend it eventually talks to is `../service`, a separate Cloudflare Worker
-(subsystem B).
+**Subsystem A, no-chain slice.** A static Astro 5 site on the @half-built
+design system (`@half-built/css`, `@half-built/astro`, `@half-built/tooling`,
+all pinned at 0.12.0). It presents the reserve as a single page: header, reserve
+ledger, a verified seal, a live camera monitor, a claim panel, a redemption
+panel, a newsletter signup, and disclaimers, plus a `/brand` page. There is no
+React. The camera monitor is the one script-driven piece, and it is plain
+TypeScript under `src/scripts`. No wallet connection, no chain reads, no new
+backend; this slice only renders. The backend it eventually talks to is
+`../service`, a separate Cloudflare Worker (subsystem B).
 
 ## House style
 
@@ -18,32 +16,31 @@ Rules the pages are expected to follow. They exist because each one has already
 been got wrong once.
 
 **Never cap prose width.** No `max-width`, no `ch` measures, no wrapper divs
-that narrow text. The column set by `<main>` in `Base.astro` is the only width
+that narrow text. The column set by the package layout is the only width
 authority, and paragraphs inherit it. This is a standing instruction from the
 maintainer, not a preference to re-litigate. Sizing a non-prose element to its
 content (a small data table, an image) is a different thing and is fine.
 
-**Every page header uses `.masthead`.** It lives in `src/styles/tokens.css`
-rather than in `Masthead.astro`, because Astro scopes component styles and a
-second page cannot reuse them. The frame is 2px rules top and bottom plus 2px
-vertical accent lines at the left and right edges that fade toward the middle.
-A header that sets its own borders will silently lose those verticals and frame
-differently from the rest of the site.
+**Every page uses `Layout.astro`.** It wraps the package `Shell`, `SiteHeader`,
+and `Footer`, and a page owns its own `<main>`. A new page gets the header,
+footer, and theme toggle for free and does not add its own.
 
 **Page titles read `The Bead Reserve : <Page>`,** with spaces around the colon.
-The `<h1>` says the same thing, with `<em>` around `Reserve` so it picks up the
-amber italic from `.masthead h1 em`.
+The page opens with the receipt `<h1>` (`ReceiptHeader.astro`), which says the
+same thing with `<em>` around `Reserve`.
 
-**Footer nav lives in `Base.astro`** and is shared by every page: site root,
-whitepaper, brand assets. A new page gets it for free and should not add its
-own.
+**Colors come only from @half-built tokens.** `test/no-hex.test.ts` fails on any
+hex literal in `src/`. Brand palette values live in `brand/palette.mjs`, outside
+`src`. If a token is missing, fix the choice, do not add a hex.
 
-**Use the tokens.** Colors come from `src/styles/tokens.css`. Don't hardcode a
-hex in a page; if a value is missing, add a token.
+**`--beadz-font-display` is the one local token.** It is the serif used by the
+wordmark and the receipt heading. Everything else is a @half-built token.
 
-**Dark elements get their own surface.** The page is light. The camera monitor
-and the reserve seal are dark-grounded and must sit on a dark panel rather than
-directly on white.
+**Components.** Site-specific components stay in `src/components`. A generic
+component goes to `half-built-ui` first and arrives here by a version bump.
+
+**Dark elements get their own surface.** The camera monitor and the reserve seal
+are dark-grounded and sit on a dark panel in both themes.
 
 **Copy register: dry and institutional.** State the thing and stop. No
 marketing language, no em dashes, no rule-of-three lists, and no sentence
@@ -59,7 +56,7 @@ npm install
 npm run dev        # astro dev, prints a localhost URL
 ```
 
-The `<CameraMonitor>` island polls `/api/reserve` and renders `/api/frame/latest`.
+The camera monitor polls `/api/reserve` and renders `/api/frame/latest`.
 In dev, `astro.config.mjs` proxies `/api/*` to `http://localhost:8787`, so to see
 a live feed instead of the placeholder, open a **second terminal** and run the
 Worker alongside the site:
@@ -77,16 +74,18 @@ falls back to it.
 
 ## Testing
 
-- **`npm test`**: Vitest + React Testing Library. Covers three of the four
-  islands (`CameraMonitor`'s fresh/stale/dark states plus the poll-failure
-  fallback, the disabled `ClaimPanel` stub, and `Subscribe`'s email validation
-  and stub confirmation) and a static-content check that runs a real
-  `astro build` and greps the emitted `dist/index.html` for the masthead,
-  genesis-count, and collateralization text. `RedeemPanel` is a static stub
-  mirroring `ClaimPanel` and has no dedicated test yet. Test files live in
-  `test/`.
-- **`npm run check`**: `astro check && tsc --noEmit`. Type-checks `.astro`
-  files and the rest of the TypeScript/TSX tree.
+- **`npm test`**: Vitest. Unit tests for the camera state and monitor DOM, the
+  panels, content, and head tags, plus suites that run a real `astro build` and
+  read `dist/`: html-validate over every built page, the manifest, the token
+  list, the whitepaper palette, and the hex guard over `src/`.
+- **`npm run test:browser`**: headless Chrome against `astro preview` of the
+  built `dist/` (ports 4351 and 4352). It checks layout, runs axe-core (WCAG
+  2.2 A and AA) on each page in both themes and at phone width, and walks the
+  Tab order of the home page to confirm every stop, the seal included, shows a
+  focus ring. Run `npm run build` first or let the global setup do it.
+- **`npm run check`**: `astro check && tsc --noEmit`.
+- **`npm run lint`**: stylelint, eslint, and prettier from `@half-built/tooling`.
+  `npm run lint:fix` applies the fixes.
 
 ## Build
 
@@ -105,8 +104,8 @@ This runs the `prebuild` script (`scripts/build-whitepaper.mjs`) before
 3. Refuses to proceed (exits non-zero) if the PDF didn't land, rather than
    shipping a dead `/whitepaper.pdf` link.
 
-The whitepaper is linked twice from the page: an in-voice line in the masthead
-and a link in the footer, both opening in a new tab. `astro build` then emits
+The whitepaper is linked from the header navigation, the footer, and an
+in-voice line on the home page. `astro build` then emits
 the static site to `dist/`. `public/whitepaper.pdf` is gitignored; it's a build
 artifact, regenerated every build, never committed.
 
@@ -115,23 +114,20 @@ production output before deploying.
 
 ## What's stubbed
 
-Three seams are deliberately incomplete in this slice, all waiting on the
-contract being deployed:
+Two seams are deliberately incomplete in this slice, waiting on the contract
+being deployed:
 
 - **`ClaimPanel`**: "Connect wallet" / "Claim your bead" buttons are rendered
   disabled with "Claim opens at launch." Wiring this up waits on the contract
-  and a wagmi/viem connect flow; there's nothing to connect to yet.
+  and a wallet connect flow; there is nothing to connect to yet.
 - **`RedeemPanel`**: "Connect wallet" / "Redeem for beads" buttons rendered
   disabled with "Redemption opens at launch." The real flow burns BEADZ for a
   physical bead (irreversible; supply only shrinks) and captures a shipping
-  address off-chain. The stubbed progress bar and copy stand in until the
-  wallet slice reads chain.
-- **`Subscribe`**: validates the email client-side and shows a confirmation
-  message, but doesn't send anywhere. The `// WIRING:` comment in
-  `src/islands/Subscribe.tsx` marks where a later slice POSTs to an ESP.
+  address off-chain.
 
-These are honest placeholders, not broken features; the copy and behavior are
-what a visitor should see today.
+The panels are static. Subscribe is live: it posts to the shared Buttondown
+list that the half-built-robots blog uses. These are honest placeholders, not
+broken features; the copy and behavior are what a visitor should see today.
 
 ## API integration
 
@@ -152,8 +148,9 @@ in for that route, forwarding `/api/*` to a locally running `wrangler dev`
 ## CI
 
 `.github/workflows/site.yml` runs on pushes/PRs touching `site/**`,
-`whitepaper/**`, or the workflow file itself, on `ubuntu-latest`: installs
-Typst, `npm ci`, `npm run check`, `npm test`, `npm run build`. Test-only; it
+`whitepaper/**`, or the workflow file itself, on `ubuntu-latest` with Node 22:
+installs Typst, `npm ci`, `npm run check`, `npm run lint`, `npm test`, the
+brand-drift check, `npm run build`, and `npm run test:browser`. Test-only; it
 doesn't deploy.
 
 ## Opsec

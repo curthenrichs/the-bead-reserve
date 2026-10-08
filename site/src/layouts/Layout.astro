@@ -4,7 +4,6 @@ import "@half-built/css/tokens";
 import "@half-built/css";
 import "@half-built/css/patterns.css";
 import "@half-built/css/prose.css";
-import "../styles/tokens.css";
 import "../styles/beadz.css";
 import Shell from "@half-built/astro/components/Shell.astro";
 import Masthead from "@half-built/astro/components/Masthead.astro";
@@ -21,6 +20,7 @@ import {
   ECOSYSTEM_SELF,
 } from "../data/site";
 import { THEME_STORAGE_KEY } from "../lib/keys";
+import primitives from "@half-built/css/tokens/primitives.css?raw";
 
 interface Props {
   title: string;
@@ -31,6 +31,12 @@ interface Props {
 const { title, description = DESCRIPTION, noindex = false } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL("/og-image.png", Astro.site);
+
+const prim = (name: string) =>
+  new RegExp(`--${name}:\\s*(#[0-9a-f]{6})`, "i").exec(primitives)?.[1] ?? "";
+
+const themeLight = prim("white");
+const themeDark = prim("black-900");
 ---
 
 <Shell themeStorageKey={THEME_STORAGE_KEY}>
@@ -47,12 +53,12 @@ const ogImage = new URL("/og-image.png", Astro.site);
     <meta
       name="theme-color"
       media="(prefers-color-scheme: light)"
-      content="#ffffff"
+      content={themeLight}
     />
     <meta
       name="theme-color"
       media="(prefers-color-scheme: dark)"
-      content="#111111"
+      content={themeDark}
     />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={SITE_NAME} />
