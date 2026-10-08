@@ -7,6 +7,10 @@ interface Props {
 const { eyebrow, page } = Astro.props;
 ---
 
+{/* The depository-receipt header: eyebrow, the serif h1 with the accent
+   italic, and the page's opening paragraphs in the default slot. The
+   page's one h1 (the header wordmark is a <p>). */}
+
 <header class="receipt">
   <p class="receipt-eyebrow micro-label">{eyebrow}</p>
   <h1 class="receipt-title">The Bead <em>Reserve</em>{page && ` : ${page}`}</h1>
