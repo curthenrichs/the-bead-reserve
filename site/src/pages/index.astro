@@ -5,7 +5,7 @@ import StatLedger from "@half-built/astro/components/StatLedger.astro";
 import { STATS } from "../config";
 import Seal from "../components/Seal.astro";
 import Disclaimers from "../components/Disclaimers.astro";
-import CameraMonitor from "../islands/CameraMonitor.tsx";
+import CameraMonitor from "../components/CameraMonitor.astro";
 import ClaimPanel from "../islands/ClaimPanel.tsx";
 import RedeemPanel from "../islands/RedeemPanel.tsx";
 import Subscribe from "../islands/Subscribe.tsx";
@@ -32,7 +32,7 @@ import Subscribe from "../islands/Subscribe.tsx";
     ]}
   />
   <Seal />
-  <CameraMonitor client:load />
+  <CameraMonitor />
   <ClaimPanel client:load />
   <RedeemPanel client:load />
   <Disclaimers />

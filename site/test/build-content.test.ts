@@ -34,3 +34,15 @@ describe("claim office content", () => {
     expect(text(".signature-role")).toBe("Authorized signatory · The Bead Reserve");
   });
 });
+
+describe("camera monitor without JavaScript", () => {
+  const doc = page("/");
+
+  it("server-renders the honest dark state with the low-battery CRO", () => {
+    const m = doc.querySelector("[data-camera-monitor]");
+    expect(m?.getAttribute("data-status")).toBe("dark");
+    expect(m?.querySelector("[data-cm-placeholder]")?.textContent).toBe("signal interrupted, reserve remains sealed");
+    expect(m?.querySelector("[data-cm-mood]")?.getAttribute("src")).toBe("/henry-cro-low-battery.svg");
+    expect(m?.querySelector("[data-cm-screen] img")).toBeNull();
+  });
+});
