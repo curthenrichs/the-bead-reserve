@@ -4,33 +4,37 @@ import { STATS, GENESIS_BEADS } from "../config";
 <div class="seal" role="img" tabindex="0"
   aria-label={`Reserve verified seal: ${STATS.collateralization} reserved. Reverse shows the BEADZ token.`}>
   <div class="seal-inner">
-    <div class="seal-face seal-front mono">
-      <div style="font-size:20px;font-weight:600">{STATS.collateralization}</div>
-      <div style="font-size:8px;letter-spacing:.16em">RESERVED</div>
-      <div style="font-size:7px;letter-spacing:.1em;color:var(--text-soft);margin-top:4px">OFFICE OF THE<br/>VAULT KEEPER</div>
+    <div class="seal-face seal-front">
+      <div class="seal-big">{STATS.collateralization}</div>
+      <div class="seal-small">RESERVED</div>
+      <div class="seal-tiny seal-muted">OFFICE OF THE<br />VAULT KEEPER</div>
     </div>
-    <div class="seal-face seal-back mono">
-      <div style="font-size:25px;font-weight:600;letter-spacing:.04em">BEADZ</div>
-      <div style="font-size:8px;letter-spacing:.18em;margin-top:6px">· {GENESIS_BEADS.toLocaleString("en-US")} ·</div>
-      <div style="font-size:7px;letter-spacing:.16em;color:var(--amber-mid);margin-top:5px">ERC-20 · BASE</div>
+    <div class="seal-face seal-back">
+      <div class="seal-big seal-mark">BEADZ</div>
+      <div class="seal-small">· {GENESIS_BEADS.toLocaleString("en-US")} ·</div>
+      <div class="seal-tiny">ERC-20 · BASE</div>
     </div>
   </div>
 </div>
 
 <style>
-  /* Pinned wax-seal stamp. On hover/focus it flips 180deg to reveal the BEADZ
-     token on the reverse, like the two faces of a coin. Hidden on narrow
-     viewports, where a fixed corner element would cover content. */
+  /* A pinned wax-seal stamp that flips on hover or focus to show the
+     token on its reverse. Stacked above the package scroll-to-top
+     button, and it reserves its height under the footer through
+     --dock-bottom (the bottom-docked rule). Hidden on phones, where a
+     fixed corner element would cover content. The focus ring is the
+     system's; never outline: none. */
   .seal {
     position: fixed;
-    right: clamp(16px, 3vw, 32px);
-    bottom: clamp(16px, 3vw, 32px);
-    z-index: 50;
+    right: 30px;
+    bottom: 109px;
+    z-index: var(--z-scroll-top);
     width: 132px;
     height: 132px;
     perspective: 700px;
-    outline: none;
+    border-radius: 50%;
   }
+
   .seal-inner {
     position: relative;
     width: 100%;
@@ -38,34 +42,46 @@ import { STATS, GENESIS_BEADS } from "../config";
     transform-style: preserve-3d;
     transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
   }
+
   .seal:hover .seal-inner,
-  .seal:focus-visible .seal-inner {
-    transform: rotateY(180deg);
-  }
+  .seal:focus-visible .seal-inner { transform: rotateY(180deg); }
+
   .seal-face {
     position: absolute;
     inset: 0;
-    border-radius: 50%;
-    border: 2px solid var(--amber-dark);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
+    border: var(--stroke) solid var(--accent-1-ink);
+    border-radius: 50%;
+    box-shadow: var(--shadow);
     backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    box-shadow: 0 4px 16px rgba(38, 32, 26, 0.18);
   }
+
   .seal-front {
+    color: var(--accent-1-ink);
     background: var(--surface);
-    color: var(--amber-dark);
   }
+
   .seal-back {
-    background: #1b140c;
-    color: var(--amber);
+    color: var(--accent-1);
+    background: var(--black-900);
     transform: rotateY(180deg);
   }
-  @media (max-width: 640px) {
+
+  .seal-big { font-size: 20px; font-weight: 700; }
+  .seal-mark { font-size: 25px; letter-spacing: 0.04em; }
+  .seal-small { margin-top: 4px; font-size: 8px; letter-spacing: 0.16em; }
+  .seal-tiny { margin-top: 4px; font-size: 7px; letter-spacing: 0.1em; }
+  .seal-muted { color: var(--ink-muted); }
+
+  @media (--bp-phone) {
     .seal { display: none; }
+  }
+
+  @media (--bp-phone-up) {
+    :global(:root) { --dock-bottom: 257px; }
   }
 </style>
