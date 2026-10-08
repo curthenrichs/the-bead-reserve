@@ -6,6 +6,14 @@ import { fileURLToPath } from "node:url";
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.join(HERE, "..", "public");
 
+interface Manifest {
+  name: string;
+  short_name: string;
+  theme_color: string;
+  background_color: string;
+  icons?: ManifestIcon[];
+}
+
 interface ManifestIcon {
   src: string;
   sizes: string;
@@ -15,7 +23,7 @@ interface ManifestIcon {
 describe("site.webmanifest", () => {
   const manifest = JSON.parse(
     fs.readFileSync(path.join(publicDir, "site.webmanifest"), "utf8"),
-  );
+  ) as Manifest;
 
   it("declares name, short_name, and theme/background matching the brand ground", () => {
     expect(manifest.name).toBe("The Bead Reserve");
@@ -27,7 +35,7 @@ describe("site.webmanifest", () => {
 
   it("references both android-chrome icons with correct sizes and type", () => {
     const bySrc = Object.fromEntries(
-      ((manifest.icons || []) as ManifestIcon[]).map((i) => [i.src, i]),
+      (manifest.icons ?? []).map((i) => [i.src, i]),
     );
 
     expect(bySrc["/android-chrome-192x192.png"]).toMatchObject({
@@ -42,7 +50,7 @@ describe("site.webmanifest", () => {
   });
 
   it("references icon files that exist in public/", () => {
-    for (const icon of manifest.icons as ManifestIcon[]) {
+    for (const icon of manifest.icons ?? []) {
       expect(
         fs.existsSync(path.join(publicDir, icon.src.replace(/^\//, ""))),
       ).toBe(true);

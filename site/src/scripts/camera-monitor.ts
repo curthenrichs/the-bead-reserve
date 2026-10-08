@@ -50,7 +50,15 @@ export function mountCameraMonitor(
 ): { destroy(): void } {
   const { pollMs = 60_000, fetchImpl = fetch } = options;
   const el = root.querySelector("[data-camera-monitor]");
-  if (!(el instanceof HTMLElement)) return { destroy() {} };
+
+  if (!(el instanceof HTMLElement)) {
+    return {
+      destroy() {
+        /* nothing mounted */
+      },
+    };
+  }
+
   let alive = true;
 
   const poll = async (): Promise<void> => {

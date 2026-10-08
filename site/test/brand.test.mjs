@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import fs from "node:fs";
-import { fileURLToPath } from "node:url";
+import { URL, fileURLToPath } from "node:url";
 import { page } from "./dist";
 import { PALETTE } from "../brand/palette.mjs";
 

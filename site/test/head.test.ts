@@ -60,7 +60,7 @@ describe("layout chrome", () => {
     expect(header).not.toBeNull();
     const mark = header?.querySelector(".beadz-wordmark");
 
-    expect(mark?.textContent?.replace(/\s+/g, " ").trim()).toBe(
+    expect(mark?.textContent.replace(/\s+/g, " ").trim()).toBe(
       "The Bead Reserve",
     );
 
@@ -81,7 +81,7 @@ describe("layout chrome", () => {
     expect(footer?.textContent).toContain("Curt Henrichs");
 
     const eco = [...(footer?.querySelectorAll("[data-ecosystem] a") ?? [])].map(
-      (a) => a.textContent?.trim(),
+      (a) => a.textContent.trim(),
     );
 
     expect(eco).toContain("Half-Built Robots");

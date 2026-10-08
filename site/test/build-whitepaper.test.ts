@@ -20,9 +20,10 @@ describe("whitepaper prebuild", () => {
         env: { ...process.env, PATH: "" },
         encoding: "utf8",
       });
-    } catch (e: any) {
+    } catch (e) {
       failed = true;
-      output = `${e.stdout ?? ""}${e.stderr ?? ""}${e.message ?? ""}`;
+      const err = e as { stdout?: string; stderr?: string; message?: string };
+      output = `${err.stdout ?? ""}${err.stderr ?? ""}${err.message ?? ""}`;
     }
 
     expect(failed).toBe(true);

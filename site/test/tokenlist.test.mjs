@@ -1,4 +1,5 @@
 import { describe, it, expect, afterEach } from "vitest";
+import process from "node:process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -234,18 +235,18 @@ describe("CLI end-to-end, against the real (pre-launch) src/config.ts", () => {
 
     const before = fs.existsSync(REAL_PUBLIC_TOKENLIST);
 
-    let stdout = "";
-    let threw = false;
+    const { threw, stdout } = (() => {
+      try {
+        const out = execFileSync(process.execPath, [CLI_PATH], {
+          cwd: SITE_ROOT,
+          encoding: "utf8",
+        });
 
-    try {
-      stdout = execFileSync(process.execPath, [CLI_PATH], {
-        cwd: SITE_ROOT,
-        encoding: "utf8",
-      });
-    } catch (e) {
-      threw = true;
-      stdout = `${e.stdout ?? ""}${e.stderr ?? ""}`;
-    }
+        return { threw: false, stdout: out };
+      } catch (e) {
+        return { threw: true, stdout: `${e.stdout ?? ""}${e.stderr ?? ""}` };
+      }
+    })();
 
     expect(threw).toBe(false); // real CLI process exited 0
     expect(stdout.toLowerCase()).toContain("null");

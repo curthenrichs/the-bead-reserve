@@ -14,7 +14,7 @@ describe("claim and redemption panels", () => {
 
     const buttons = [...(claim?.querySelectorAll("button") ?? [])];
 
-    expect(buttons.map((b) => b.textContent?.trim())).toEqual([
+    expect(buttons.map((b) => b.textContent.trim())).toEqual([
       "Connect wallet",
       "Claim your bead",
     ]);

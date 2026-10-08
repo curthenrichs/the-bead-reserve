@@ -5,7 +5,7 @@ describe("claim office content", () => {
   const doc = page("/");
 
   const text = (sel: string) =>
-    doc.querySelector(sel)?.textContent?.replace(/\s+/g, " ").trim();
+    doc.querySelector(sel)?.textContent.replace(/\s+/g, " ").trim();
 
   it("opens with the receipt header, verbatim", () => {
     expect(text(".receipt-eyebrow")).toBe(
@@ -26,8 +26,8 @@ describe("claim office content", () => {
   it("states the reserve figures in a StatLedger, collateralization accented", () => {
     const cells = [...doc.querySelectorAll(".stat-ledger dl > div")].map(
       (c) => ({
-        dt: c.querySelector("dt")?.textContent?.trim(),
-        dd: c.querySelector("dd")?.textContent?.trim(),
+        dt: c.querySelector("dt")?.textContent.trim(),
+        dd: c.querySelector("dd")?.textContent.trim(),
         accent: c
           .querySelector("dd")
           ?.classList.contains("stat-ledger-value-accent"),

@@ -26,7 +26,7 @@ describe("CRO mood mapping", () => {
       expect(svg).not.toContain("#111111");
       const vb = /viewBox="0 0 ([\d.]+) ([\d.]+)"/.exec(svg);
       expect(vb).not.toBeNull();
-      const [, w, h] = vb!;
+      const [, w, h] = vb ?? [];
 
       const full = (svg.match(/<rect\b[^>]*>/g) ?? []).find(
         (tag) => tag.includes(`width="${w}"`) && tag.includes(`height="${h}"`),
