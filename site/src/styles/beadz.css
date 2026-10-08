@@ -80,3 +80,10 @@
   color: var(--ink-muted);
   font-size: var(--font-size-xs);
 }
+
+/* Policy pages and the 404: the article heading. */
+.policy h1 {
+  margin: 0 0 15px;
+  font-family: var(--beadz-font-display);
+  font-size: var(--font-size-lg);
+}

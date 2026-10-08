@@ -32,6 +32,16 @@ export const FOOTER_SITEMAP: SitemapGroup[] = [
       { label: "Brand assets", href: "/brand/" },
     ],
   },
+  {
+    title: "Rules",
+    collapsible: true,
+    links: [
+      { label: "Policies", href: "/policies/" },
+      { label: "Privacy", href: "/privacy/" },
+      { label: "Terms", href: "/terms/" },
+      { label: "Accessibility", href: "/accessibility/" },
+    ],
+  },
 ];
 
 /* The baseline the ecosystem island replaces at runtime: this site

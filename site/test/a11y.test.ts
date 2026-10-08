@@ -31,7 +31,15 @@ const AXE = createRequire(import.meta.url).resolve("axe-core/axe.min.js");
    those by URL). Add a path here when a new template lands, not a new
    post: axe on a representative page is the regression class this
    suite exists for, and the whole-site sweep stays with html-validate. */
-const PAGES = ["/", "/brand/"];
+const PAGES = [
+  "/",
+  "/brand/",
+  "/privacy/",
+  "/accessibility/",
+  "/terms/",
+  "/policies/",
+  "/nope/",
+];
 
 /* The phone chrome is a different DOM (collapsed nav, footer details
    closed), so the two templates that change most get a second pass. */
