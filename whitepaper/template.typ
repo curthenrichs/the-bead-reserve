@@ -8,7 +8,6 @@
 #let ink-soft   = rgb("#555555")  // system --ink-muted
 #let amber      = rgb("#FFAA3C")  // system --accent-1, rules and accents
 #let amber-dark = rgb("#A36300")  // system --accent-1-ink, amber text on light
-#let paper      = rgb("#FFFFFF")  // system --surface
 #let hairline   = rgb("#D9D9D9")  // system --hairline
 
 #let serif = "Roboto Serif"
@@ -54,7 +53,6 @@
   set document(title: title, author: "The Bead Reserve", description: subtitle)
   set page(
     paper: "a4",
-    fill: paper,
     margin: (x: 2.4cm, top: 2.6cm, bottom: 2.6cm),
     background: if draft { draft-watermark },
     footer: context {
