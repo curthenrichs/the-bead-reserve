@@ -97,9 +97,9 @@ This repository has six independent parts:
 | `cro-bench/` | Chief Reserve Officer prompt/grammar bench (SmolVLM experiment rig) | Built |
 | `whitepaper/` | Typst source for the whitepaper | Reserved |
 | `site/` | Static Astro site on the @half-built design system (claim office, `/brand`, policy pages) | Built |
-| `service/` | Cloudflare Worker backend for the site (reserve and frame endpoints) | Built |
+| `service/` | Cloudflare Worker that ingests the camera's signed frames and serves the reserve and latest-frame endpoints the site reads | Proof of concept |
 
-`Reserved` paths exist in the tree as placeholders; their contents land as each subsystem clears review.
+`Reserved` paths exist in the tree as placeholders; their contents land as each subsystem clears review. `Proof of concept` means the part runs but is not the production design.
 
 ### Verifying the contract
 
