@@ -88,8 +88,12 @@ import { STATS, GENESIS_BEADS } from "../config";
     .seal { display: none; }
   }
 
-  /* 30 (bottom offset) + 132 (seal) + 16 (clearance) = 178. */
+  /* 30 (bottom offset) + 132 (seal) + 16 (clearance) = 178. The same
+     reserve is the scroll padding, so focus-driven scrolling stops above
+     the seal and never parks a focused link under it (WCAG 2.2 SC
+     2.4.11). */
   @media (--bp-phone-up) {
     :global(:root) { --dock-bottom: 178px; }
+    :global(html) { scroll-padding-bottom: var(--dock-bottom); }
   }
 </style>

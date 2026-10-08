@@ -78,6 +78,7 @@ export function renderMonitor(root: HTMLElement, v: MonitorView): void {
       lightboxes.set(root, mountLightbox(root));
     }
   } else if (!screen.querySelector("[data-cm-placeholder]")) {
+    /* Intended: when the feed drops, an open lightbox closes with it. */
     unmountLightbox(root);
     const span = document.createElement("span");
     span.dataset.cmPlaceholder = "";

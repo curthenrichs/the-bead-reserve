@@ -118,6 +118,57 @@ describe("layout in a real browser", () => {
     expect(lastBottom).toBeLessThanOrEqual(sealTop);
   });
 
+  /* WCAG 2.2 SC 2.4.11: focus-driven scrolling must not park a small
+     focused link under the fixed seal. scroll-padding-bottom reserves
+     the seal's dock. */
+  it("a Tabbed-to note reference is not hidden under the seal", async () => {
+    const p = await open();
+    let found = false;
+
+    for (let i = 0; i < 80 && !found; i++) {
+      await p.keyboard.press("Tab");
+
+      found = await p.evaluate(
+        () =>
+          !!document.activeElement?.closest(
+            'section[aria-labelledby="redeem-heading"] sup.note-ref',
+          ),
+      );
+    }
+
+    expect(found, "Tab never reached the redemption note ref").toBe(true);
+
+    /* The page scrolls smoothly; wait for the focus scroll to settle. */
+    await p.evaluate(async () => {
+      let last = -1;
+
+      while (window.scrollY !== last) {
+        last = window.scrollY;
+        await new Promise((r) => setTimeout(r, 150));
+      }
+    });
+
+    const ref = await box(p, ":focus");
+    const seal = await box(p, ".seal");
+
+    const inside =
+      ref.left >= seal.left &&
+      ref.right <= seal.right &&
+      ref.top >= seal.top &&
+      ref.bottom <= seal.bottom;
+
+    expect(inside, JSON.stringify({ ref, seal })).toBe(false);
+    expect(intersects(ref, seal), JSON.stringify({ ref, seal })).toBe(false);
+
+    /* The mechanism itself: at 1280 the ref happens to sit just right of
+       the seal, so the geometry alone would pass without the padding. */
+    const padding = await p.evaluate(
+      () => getComputedStyle(document.documentElement).scrollPaddingBottom,
+    );
+
+    expect(padding).toBe("178px");
+  });
+
   it("the monitor is at most 480px wide and centered in main", async () => {
     const p = await open();
     const m = await box(p, "[data-camera-monitor]");
