@@ -6,9 +6,9 @@ import { STATS } from "../config";
 import Seal from "../components/Seal.astro";
 import Disclaimers from "../components/Disclaimers.astro";
 import CameraMonitor from "../components/CameraMonitor.astro";
-import ClaimPanel from "../islands/ClaimPanel.tsx";
-import RedeemPanel from "../islands/RedeemPanel.tsx";
-import Subscribe from "../islands/Subscribe.tsx";
+import ClaimPanel from "../components/ClaimPanel.astro";
+import RedeemPanel from "../components/RedeemPanel.astro";
+import SubscribeBand from "../components/SubscribeBand.astro";
 ---
 <Layout title="The Bead Reserve : Claim Office">
 <main>
@@ -33,9 +33,9 @@ import Subscribe from "../islands/Subscribe.tsx";
   />
   <Seal />
   <CameraMonitor />
-  <ClaimPanel client:load />
-  <RedeemPanel client:load />
+  <ClaimPanel />
+  <RedeemPanel />
   <Disclaimers />
-  <Subscribe client:load />
+  <SubscribeBand />
 </main>
 </Layout>
