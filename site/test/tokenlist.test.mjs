@@ -32,11 +32,13 @@ const MALFORMED_ADDRESS = "0x123"; // right prefix, truncated
 const PLACEHOLDER_ADDRESS = "YOUR_CONTRACT_ADDRESS_HERE"; // not address-shaped at all
 
 const tmpDirs = [];
+
 function makeTmpDir() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "beadz-tokenlist-"));
   tmpDirs.push(dir);
   return dir;
 }
+
 afterEach(() => {
   while (tmpDirs.length) {
     fs.rmSync(tmpDirs.pop(), { recursive: true, force: true });
@@ -65,11 +67,15 @@ describe("isValidAddress", () => {
 
 describe("buildTokenList: abort paths actually throw", () => {
   it("aborts on a malformed/truncated address", () => {
-    expect(() => buildTokenList(MALFORMED_ADDRESS)).toThrow(/not a valid EVM address/);
+    expect(() => buildTokenList(MALFORMED_ADDRESS)).toThrow(
+      /not a valid EVM address/,
+    );
   });
 
   it("aborts on a placeholder string", () => {
-    expect(() => buildTokenList(PLACEHOLDER_ADDRESS)).toThrow(/not a valid EVM address/);
+    expect(() => buildTokenList(PLACEHOLDER_ADDRESS)).toThrow(
+      /not a valid EVM address/,
+    );
   });
 
   it("aborts on the zero address, with a message naming it explicitly", () => {
@@ -87,7 +93,13 @@ describe("buildTokenList: valid address produces a correct token list", () => {
   it("carries the required top-level schema fields", () => {
     expect(list.name).toBeTruthy();
     expect(typeof list.timestamp).toBe("string");
-    expect(list.version).toMatchObject({ major: expect.any(Number), minor: expect.any(Number), patch: expect.any(Number) });
+
+    expect(list.version).toMatchObject({
+      major: expect.any(Number),
+      minor: expect.any(Number),
+      patch: expect.any(Number),
+    });
+
     expect(Array.isArray(list.tokens)).toBe(true);
     expect(list.tokens).toHaveLength(1);
   });
@@ -101,7 +113,11 @@ describe("buildTokenList: valid address produces a correct token list", () => {
     expect(token.symbol).toBe(SYMBOL);
     expect(token.decimals).toBe(18);
     expect(token.decimals).toBe(DECIMALS);
-    expect(token.logoURI).toBe("https://beadz.half-built-robots.com/beadz-token-256.png");
+
+    expect(token.logoURI).toBe(
+      "https://beadz.half-built-robots.com/beadz-token-256.png",
+    );
+
     expect(token.logoURI).toBe(LOGO_URI);
   });
 });
@@ -109,6 +125,7 @@ describe("buildTokenList: valid address produces a correct token list", () => {
 describe("serializeTokenList determinism", () => {
   it("produces byte-identical output across two calls, even if the clock moves", () => {
     const before = Date.now;
+
     try {
       Date.now = () => 1;
       const first = serializeTokenList(buildTokenList(VALID_ADDRESS));
@@ -129,7 +146,7 @@ describe("serializeTokenList determinism", () => {
 
 describe("parseBeadzAddress: reads src/config.ts's BEADZ_ADDRESS declaration as text", () => {
   it("returns null for the literal `null`", () => {
-    const source = 'export const BEADZ_ADDRESS: string | null = null;';
+    const source = "export const BEADZ_ADDRESS: string | null = null;";
     expect(parseBeadzAddress(source)).toBeNull();
   });
 
@@ -144,7 +161,9 @@ describe("parseBeadzAddress: reads src/config.ts's BEADZ_ADDRESS declaration as 
   });
 
   it("throws when the declaration can't be found (config.ts shape drifted)", () => {
-    expect(() => parseBeadzAddress("export const SOMETHING_ELSE = 1;")).toThrow(/BEADZ_ADDRESS/);
+    expect(() => parseBeadzAddress("export const SOMETHING_ELSE = 1;")).toThrow(
+      /BEADZ_ADDRESS/,
+    );
   });
 
   it("agrees with the real, current src/config.ts: still null pre-launch", () => {
@@ -166,13 +185,16 @@ describe("run(): orchestration writes only on a valid address, never on invalid 
     ["a malformed address", MALFORMED_ADDRESS],
     ["a placeholder", PLACEHOLDER_ADDRESS],
     ["the zero address", ZERO_ADDRESS],
-  ])("with %s: throws and writes no file, not even the directory", (_label, badAddress) => {
-    const outDir = path.join(makeTmpDir(), "nested", "public");
-    expect(fs.existsSync(outDir)).toBe(false);
-    expect(() => run({ address: badAddress, outDir })).toThrow();
-    expect(fs.existsSync(outDir)).toBe(false);
-    expect(fs.existsSync(path.join(outDir, "tokenlist.json"))).toBe(false);
-  });
+  ])(
+    "with %s: throws and writes no file, not even the directory",
+    (_label, badAddress) => {
+      const outDir = path.join(makeTmpDir(), "nested", "public");
+      expect(fs.existsSync(outDir)).toBe(false);
+      expect(() => run({ address: badAddress, outDir })).toThrow();
+      expect(fs.existsSync(outDir)).toBe(false);
+      expect(fs.existsSync(path.join(outDir, "tokenlist.json"))).toBe(false);
+    },
+  );
 
   it("with a valid address: writes tokenlist.json with the correct fields", () => {
     const outDir = makeTmpDir();
@@ -181,6 +203,7 @@ describe("run(): orchestration writes only on a valid address, never on invalid 
     const outPath = path.join(outDir, "tokenlist.json");
     expect(fs.existsSync(outPath)).toBe(true);
     const parsed = JSON.parse(fs.readFileSync(outPath, "utf8"));
+
     expect(parsed.tokens[0]).toMatchObject({
       chainId: 8453,
       address: VALID_ADDRESS,
@@ -213,8 +236,12 @@ describe("CLI end-to-end, against the real (pre-launch) src/config.ts", () => {
 
     let stdout = "";
     let threw = false;
+
     try {
-      stdout = execFileSync(process.execPath, [CLI_PATH], { cwd: SITE_ROOT, encoding: "utf8" });
+      stdout = execFileSync(process.execPath, [CLI_PATH], {
+        cwd: SITE_ROOT,
+        encoding: "utf8",
+      });
     } catch (e) {
       threw = true;
       stdout = `${e.stdout ?? ""}${e.stderr ?? ""}`;

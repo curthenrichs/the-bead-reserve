@@ -45,9 +45,18 @@ export const HENRY_GEOMETRY = Object.freeze({
  *                            source of truth (seal.mjs passes PALETTE.head)
  * @returns {string} SVG markup
  */
-export function henryGroup({ cx, cy, scale, ground, accent = "#ffaa3c", bead = true, head = "#ffffff" }) {
+export function henryGroup({
+  cx,
+  cy,
+  scale,
+  ground,
+  accent = "#ffaa3c",
+  bead = true,
+  head = "#ffffff",
+}) {
   const g = HENRY_GEOMETRY;
   const o = g.origin;
+
   const beadHole = bead
     ? `\n    <circle cx="${g.beadHole.cx}" cy="${g.beadHole.cy}" r="${g.beadHole.r}" fill="${ground}"/>`
     : "";

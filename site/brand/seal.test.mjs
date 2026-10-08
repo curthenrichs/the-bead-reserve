@@ -10,8 +10,16 @@ const FULL_RING_R = 240;
 const SMALL_RING_R = 236;
 
 function ringStrokeWidth(svg, ringRadius) {
-  const m = svg.match(new RegExp(`<circle[^>]*\\br="${ringRadius}"[^>]*stroke-width="(\\d+)"`));
-  if (!m) throw new Error(`no circle with r="${ringRadius}" and a stroke-width found`);
+  const m = svg.match(
+    new RegExp(`<circle[^>]*\\br="${ringRadius}"[^>]*stroke-width="(\\d+)"`),
+  );
+
+  if (!m) {
+    throw new Error(
+      `no circle with r="${ringRadius}" and a stroke-width found`,
+    );
+  }
+
   return Number(m[1]);
 }
 
@@ -57,12 +65,17 @@ describe("sealSvg (full)", () => {
   });
 
   it("draws the circular ground and the ring", () => {
-    expect(svg).toContain(`<circle cx="256" cy="256" r="256" fill="${PALETTE.ground}"/>`);
+    expect(svg).toContain(
+      `<circle cx="256" cy="256" r="256" fill="${PALETTE.ground}"/>`,
+    );
+
     expect(svg).toContain('r="240" fill="none"');
   });
 
   it("includes Henry with the bead hole", () => {
-    expect(svg).toContain(`<circle cx="256" cy="112" r="11" fill="${PALETTE.ground}"/>`);
+    expect(svg).toContain(
+      `<circle cx="256" cy="112" r="11" fill="${PALETTE.ground}"/>`,
+    );
   });
 
   it("emits three lettering paths", () => {
@@ -78,7 +91,11 @@ describe("arcLine glyph orientation (regression guard for the shipped inversion 
   // the task writeup for why that made the old version of this test vacuous.
   // These tests instead decode actual glyph geometry.
   const font = loadFont("bold");
-  const cx = 256, cy = 256, radius = 200, size = 34;
+
+  const cx = 256,
+    cy = 256,
+    radius = 200,
+    size = 34;
 
   // "I" has a single contour (no counter/hole), so its path data is exactly
   // one M...Z run per glyph. That lets multi-glyph output be split into
@@ -92,7 +109,16 @@ describe("arcLine glyph orientation (regression guard for the shipped inversion 
     // of the circle. opentype places ink at negative y relative to the
     // baseline it's drawn on, so an upright glyph's coordinates must all sit
     // at or above that baseline y. A 180-degree flip would push them below.
-    const d = arcLine({ font, text: "I", cx, cy, radius, size, letterSpacing: 0 });
+    const d = arcLine({
+      font,
+      text: "I",
+      cx,
+      cy,
+      radius,
+      size,
+      letterSpacing: 0,
+    });
+
     const baselineY = cy - radius;
     const ys = coordPairs(d).map(([, y]) => y);
     expect(ys.length).toBeGreaterThan(0);
@@ -101,10 +127,22 @@ describe("arcLine glyph orientation (regression guard for the shipped inversion 
   });
 
   it("reads left to right: the first character's ink sits left of the last's", () => {
-    const d = arcLine({ font, text: "II", cx, cy, radius, size, letterSpacing: 20 });
+    const d = arcLine({
+      font,
+      text: "II",
+      cx,
+      cy,
+      radius,
+      size,
+      letterSpacing: 20,
+    });
+
     const chunks = glyphChunks(d);
     expect(chunks.length).toBe(2);
-    expect(meanX(coordPairs(chunks[0]))).toBeLessThan(meanX(coordPairs(chunks[1])));
+
+    expect(meanX(coordPairs(chunks[0]))).toBeLessThan(
+      meanX(coordPairs(chunks[1])),
+    );
   });
 
   it("rotates glyphs to their tangent with the correct sign on each side of the arc", () => {
@@ -121,9 +159,14 @@ describe("arcLine glyph orientation (regression guard for the shipped inversion 
     expect(chunks.length).toBe(5);
 
     const chars = [...text];
-    const widths = chars.map((c) => font.getAdvanceWidth(c, size) + letterSpacing);
+
+    const widths = chars.map(
+      (c) => font.getAdvanceWidth(c, size) + letterSpacing,
+    );
+
     const total = widths.reduce((a, b) => a + b, 0);
     let angle = -Math.PI / 2 - total / radius / 2;
+
     const mids = chars.map((_, i) => {
       const mid = angle + widths[i] / 2 / radius;
       angle += widths[i] / radius;
@@ -172,8 +215,14 @@ describe("small form geometry (tuned)", () => {
   });
 
   it("makes Henry larger in the small form than in the full form", () => {
-    const small = Number(sealSvg({ lettering: false }).match(/scale\(([\d.]+)\)/)[1]);
-    const full = Number(sealSvg({ lettering: true }).match(/scale\(([\d.]+)\)/)[1]);
+    const small = Number(
+      sealSvg({ lettering: false }).match(/scale\(([\d.]+)\)/)[1],
+    );
+
+    const full = Number(
+      sealSvg({ lettering: true }).match(/scale\(([\d.]+)\)/)[1],
+    );
+
     expect(small).toBeGreaterThan(full);
   });
 });

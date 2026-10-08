@@ -44,8 +44,16 @@ const ogImage = new URL("/og-image.png", Astro.site);
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111111" />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: light)"
+      content="#ffffff"
+    />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: dark)"
+      content="#111111"
+    />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={SITE_NAME} />
     <meta property="og:title" content={title} />
@@ -67,7 +75,9 @@ const ogImage = new URL("/og-image.png", Astro.site);
   >
     <div slot="band-brand" class="site-branding">
       <div class="site-identity">
-        <p class="beadz-wordmark"><a href="/" rel="home">The Bead <em>Reserve</em></a></p>
+        <p class="beadz-wordmark">
+          <a href="/" rel="home">The Bead <em>Reserve</em></a>
+        </p>
         <p class="site-description">{TAGLINE}</p>
       </div>
     </div>
@@ -95,6 +105,5 @@ const ogImage = new URL("/og-image.png", Astro.site);
       if (ECOSYSTEM_ENDPOINT !== null) {
         void mountEcosystem(document, { endpoint: ECOSYSTEM_ENDPOINT, selfKey: ECOSYSTEM_SELF_KEY }).catch(() => {});
       }
-    </script>
-  </Fragment>
+    </script></Fragment>
 </Shell>

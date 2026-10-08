@@ -28,16 +28,23 @@ const cache = new Map();
 
 export function loadFont(weight) {
   const file = FONT_FILES[weight];
+
   if (!file) {
-    throw new Error(`unknown weight "${weight}" — expected "bold" or "regular"`);
+    throw new Error(
+      `unknown weight "${weight}" — expected "bold" or "regular"`,
+    );
   }
+
   if (!cache.has(weight)) {
     const full = path.join(HERE, "vendor", file);
+
     if (!fs.existsSync(full)) {
       throw new Error(`missing vendored font ${full} — see brand/README.md`);
     }
+
     cache.set(weight, opentype.loadSync(full));
   }
+
   return cache.get(weight);
 }
 
@@ -47,14 +54,23 @@ function advanceOf(font, text, size, letterSpacing) {
 }
 
 /** A horizontal line of text, centered on cx, sitting on `baseline`. */
-export function flatLine({ font, text, cx, baseline, size, letterSpacing = 0 }) {
+export function flatLine({
+  font,
+  text,
+  cx,
+  baseline,
+  size,
+  letterSpacing = 0,
+}) {
   const chars = [...text];
   let x = cx - advanceOf(font, text, size, letterSpacing) / 2;
   let d = "";
+
   for (const ch of chars) {
     d += font.getPath(ch, x, baseline, size).toPathData(2);
     x += font.getAdvanceWidth(ch, size) + letterSpacing;
   }
+
   return d;
 }
 
@@ -63,9 +79,21 @@ export function flatLine({ font, text, cx, baseline, size, letterSpacing = 0 }) 
  * its tangent. The rotation is baked into the coordinates rather than emitted
  * as a transform, so the result is a single flat path with no grouping.
  */
-export function arcLine({ font, text, cx, cy, radius, size, letterSpacing = 0 }) {
+export function arcLine({
+  font,
+  text,
+  cx,
+  cy,
+  radius,
+  size,
+  letterSpacing = 0,
+}) {
   const chars = [...text];
-  const widths = chars.map((c) => font.getAdvanceWidth(c, size) + letterSpacing);
+
+  const widths = chars.map(
+    (c) => font.getAdvanceWidth(c, size) + letterSpacing,
+  );
+
   // total intentionally includes the trailing letterSpacing: mid uses the
   // cell width (advance + letterSpacing) for its half-offset, and the two
   // compensate exactly. Changing either alone shifts every glyph by
@@ -86,8 +114,13 @@ export function arcLine({ font, text, cx, cy, radius, size, letterSpacing = 0 })
 
     // draw the glyph centered on its own origin, then rotate+translate in place
     const p = font.getPath(ch, -font.getAdvanceWidth(ch, size) / 2, 0, size);
+
     for (const cmd of p.commands) {
-      for (const [xk, yk] of [["x", "y"], ["x1", "y1"], ["x2", "y2"]]) {
+      for (const [xk, yk] of [
+        ["x", "y"],
+        ["x1", "y1"],
+        ["x2", "y2"],
+      ]) {
         if (cmd[xk] === undefined) continue;
         const nx = cmd[xk] * cos - cmd[yk] * sin + px;
         const ny = cmd[xk] * sin + cmd[yk] * cos + py;
@@ -95,6 +128,7 @@ export function arcLine({ font, text, cx, cy, radius, size, letterSpacing = 0 })
         cmd[yk] = ny;
       }
     }
+
     d += p.toPathData(2);
     angle += widths[i] / radius;
   });

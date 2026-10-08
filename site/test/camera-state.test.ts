@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { parseReserve, viewFor, DARK, CRO_MOOD } from "../src/scripts/camera-state";
+import {
+  parseReserve,
+  viewFor,
+  DARK,
+  CRO_MOOD,
+} from "../src/scripts/camera-state";
 
 const fresh = {
   frameUrl: "/api/frame/latest",
@@ -14,11 +19,25 @@ const fresh = {
 
 describe("parseReserve", () => {
   it("accepts a well-formed fresh body", () => {
-    expect(parseReserve(fresh)).toMatchObject({ status: "fresh", counter: 7, croText: "the reserve remains sealed" });
+    expect(parseReserve(fresh)).toMatchObject({
+      status: "fresh",
+      counter: 7,
+      croText: "the reserve remains sealed",
+    });
   });
 
   it("treats the empty Worker state as dark", () => {
-    expect(parseReserve({ ...fresh, frameUrl: null, counter: null, ts: null, sha256: null, croText: null, status: "dark" }).status).toBe("dark");
+    expect(
+      parseReserve({
+        ...fresh,
+        frameUrl: null,
+        counter: null,
+        ts: null,
+        sha256: null,
+        croText: null,
+        status: "dark",
+      }).status,
+    ).toBe("dark");
   });
 
   it.each([
@@ -36,6 +55,7 @@ describe("parseReserve", () => {
 describe("viewFor", () => {
   it("fresh: live badge, frame shown, REC caption with croText", () => {
     const v = viewFor(parseReserve(fresh));
+
     expect(v).toMatchObject({
       live: true,
       badge: "● LIVE",
@@ -48,16 +68,28 @@ describe("viewFor", () => {
   });
 
   it("stale: idle badge, last frame kept, delayed caption", () => {
-    const v = viewFor(parseReserve({ ...fresh, status: "stale", croText: null }));
-    expect(v).toMatchObject({ live: false, badge: "○ IDLE", showFrame: true, caption: "signal delayed, last frame retained" });
+    const v = viewFor(
+      parseReserve({ ...fresh, status: "stale", croText: null }),
+    );
+
+    expect(v).toMatchObject({
+      live: false,
+      badge: "○ IDLE",
+      showFrame: true,
+      caption: "signal delayed, last frame retained",
+    });
   });
 
   it("stale with no frame yet shows no frame", () => {
-    expect(viewFor(parseReserve({ ...fresh, status: "stale", counter: null })).showFrame).toBe(false);
+    expect(
+      viewFor(parseReserve({ ...fresh, status: "stale", counter: null }))
+        .showFrame,
+    ).toBe(false);
   });
 
   it("dark: no frame, the sealed notice once, empty caption", () => {
     const v = viewFor(DARK);
+
     expect(v).toMatchObject({
       showFrame: false,
       placeholder: "signal interrupted, reserve remains sealed",

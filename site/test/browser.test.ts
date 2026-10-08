@@ -48,8 +48,16 @@ describe("layout in a real browser", () => {
      land. */
   async function scrollToEnd(p: Page): Promise<void> {
     await p.evaluate(async () => {
-      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" });
-      await new Promise((r) => requestAnimationFrame(() => r(null)));
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: "instant",
+      });
+
+      await new Promise((r) =>
+        requestAnimationFrame(() => {
+          r(null);
+        }),
+      );
     });
   }
 
@@ -75,7 +83,11 @@ describe("layout in a real browser", () => {
     const { sealTop, lastBottom } = await p.evaluate(() => {
       const links = [...document.querySelectorAll("footer a")];
       const last = links[links.length - 1]?.getBoundingClientRect().bottom ?? 0;
-      return { sealTop: document.querySelector(".seal")?.getBoundingClientRect().top ?? 0, lastBottom: last };
+      return {
+        sealTop:
+          document.querySelector(".seal")?.getBoundingClientRect().top ?? 0,
+        lastBottom: last,
+      };
     });
 
     expect(lastBottom).toBeLessThanOrEqual(sealTop);

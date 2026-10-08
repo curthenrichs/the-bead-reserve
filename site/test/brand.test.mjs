@@ -23,17 +23,35 @@ describe("/brand", () => {
   );
 
   it("shows the seal with a meaningful alt", () => {
-    const alt = doc.querySelector('img[src="/beadz-seal.svg"]')?.getAttribute("alt") ?? "";
+    const alt =
+      doc.querySelector('img[src="/beadz-seal.svg"]')?.getAttribute("alt") ??
+      "";
+
     expect(alt.length).toBeGreaterThan(20);
     expect(alt.toLowerCase()).toContain("seal");
   });
 
   it("names the small-size redraws, the 256px size, permanence, licensing and counterfeits", () => {
-    for (const s of ["favicon-16x16.png", "favicon-32x32.png", "beadz-seal-small.svg", "256×256", "MIT", "LICENSE"]) {
+    for (const s of [
+      "favicon-16x16.png",
+      "favicon-32x32.png",
+      "beadz-seal-small.svg",
+      "256×256",
+      "MIT",
+      "LICENSE",
+    ]) {
       expect(text).toContain(s);
     }
+
     const lower = text.toLowerCase();
-    for (const s of ["canonical", "will not change", "all rights reserved", "liquidity pool", "not endorsed"]) {
+
+    for (const s of [
+      "canonical",
+      "will not change",
+      "all rights reserved",
+      "liquidity pool",
+      "not endorsed",
+    ]) {
       expect(lower).toContain(s);
     }
   });
@@ -47,9 +65,13 @@ describe("/brand", () => {
     expect(doc.querySelector(".masthead")).toBeNull();
     const styled = [...doc.querySelectorAll("main [style]")];
     expect(styled).toHaveLength(Object.keys(PALETTE).length);
+
     for (const el of styled) {
       expect(el.classList.contains("swatch")).toBe(true);
-      expect(el.getAttribute("style")).toMatch(/^background-color:\s*#[0-9a-f]{6};?$/i);
+
+      expect(el.getAttribute("style")).toMatch(
+        /^background-color:\s*#[0-9a-f]{6};?$/i,
+      );
     }
   });
 });

@@ -13,7 +13,9 @@ interface ManifestIcon {
 }
 
 describe("site.webmanifest", () => {
-  const manifest = JSON.parse(fs.readFileSync(path.join(publicDir, "site.webmanifest"), "utf8"));
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(publicDir, "site.webmanifest"), "utf8"),
+  );
 
   it("declares name, short_name, and theme/background matching the brand ground", () => {
     expect(manifest.name).toBe("The Bead Reserve");
@@ -24,14 +26,26 @@ describe("site.webmanifest", () => {
   });
 
   it("references both android-chrome icons with correct sizes and type", () => {
-    const bySrc = Object.fromEntries(((manifest.icons || []) as ManifestIcon[]).map((i) => [i.src, i]));
-    expect(bySrc["/android-chrome-192x192.png"]).toMatchObject({ sizes: "192x192", type: "image/png" });
-    expect(bySrc["/android-chrome-512x512.png"]).toMatchObject({ sizes: "512x512", type: "image/png" });
+    const bySrc = Object.fromEntries(
+      ((manifest.icons || []) as ManifestIcon[]).map((i) => [i.src, i]),
+    );
+
+    expect(bySrc["/android-chrome-192x192.png"]).toMatchObject({
+      sizes: "192x192",
+      type: "image/png",
+    });
+
+    expect(bySrc["/android-chrome-512x512.png"]).toMatchObject({
+      sizes: "512x512",
+      type: "image/png",
+    });
   });
 
   it("references icon files that exist in public/", () => {
     for (const icon of manifest.icons as ManifestIcon[]) {
-      expect(fs.existsSync(path.join(publicDir, icon.src.replace(/^\//, "")))).toBe(true);
+      expect(
+        fs.existsSync(path.join(publicDir, icon.src.replace(/^\//, ""))),
+      ).toBe(true);
     }
   });
 });

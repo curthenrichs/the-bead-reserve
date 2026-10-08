@@ -4,7 +4,12 @@ import { DARK, viewFor } from "../scripts/camera-state";
 const v = viewFor(DARK);
 ---
 
-<section class="camera-monitor" data-camera-monitor data-status={v.status} aria-label="Reserve monitor">
+<section
+  class="camera-monitor"
+  data-camera-monitor
+  data-status={v.status}
+  aria-label="Reserve monitor"
+>
   <div class="cm-bar">
     <span>Reserve Monitoring: Fault Cam 01</span>
     <span class="cm-badge" data-cm-badge>{v.badge}</span>

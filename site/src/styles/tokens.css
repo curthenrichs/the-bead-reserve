@@ -14,18 +14,21 @@
   --text-soft: #6f6152;
   --amber: #ffaa3c;
   --amber-dark: #b5680c;
-  --amber-mid: #e07c14;   /* lighter orange for display accents (masthead) */
+  --amber-mid: #e07c14; /* lighter orange for display accents (masthead) */
+
   /* Meter tick = one segment of the bead scale, so the segmentation (and its
      leftover partial cell) is tied to the data, not to pixel width, and stays
      fixed as the window resizes. 10.5667% = 5,000 beads of the 47,318 genesis
      supply; the final partial cell is the 2,318-bead remainder. */
   --meter-seg: 10.5667%;
   --hairline: #e6ddd0;
+
   /* Black rule color for the half-built-robots line system: bold 3px frames,
      2px standard boxes/dividers. (--hairline stays for faint light dividers.) */
   --line: #1b140c;
   --live: #d8442f;
   --track-bg: #f0eadf;
+
   /* The camera monitor is a deliberately dark "screen" island on the light
      page: neutral warm-black (no green), with its own light-on-dark text. */
   --monitor-bg: #14100a;
@@ -35,7 +38,9 @@
   --mono: "Roboto Mono", ui-monospace, monospace;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -45,7 +50,10 @@ body {
   line-height: 1.55;
 }
 
-.mono { font-family: var(--mono); }
+.mono {
+  font-family: var(--mono);
+}
+
 .eyebrow {
   font-family: var(--mono);
   font-size: 11px;
@@ -54,7 +62,10 @@ body {
   color: var(--amber-dark);
   font-weight: 600;
 }
-a { color: var(--amber-dark); }
+
+a {
+  color: var(--amber-dark);
+}
 
 /* Bracket-frame header, borrowed from the half-built-robots blog header
    (.site-header-wrapper): 2px rules top and bottom, with 2px vertical accent
@@ -69,6 +80,7 @@ a { color: var(--amber-dark); }
   padding: clamp(22px, 4vw, 34px) clamp(20px, 3vw, 30px);
   margin: 8px 0 30px;
 }
+
 .masthead::before,
 .masthead::after {
   content: "";
@@ -84,8 +96,14 @@ a { color: var(--amber-dark); }
     var(--line) 100%
   );
 }
-.masthead::before { left: 0; }
-.masthead::after { right: 0; }
+
+.masthead::before {
+  left: 0;
+}
+
+.masthead::after {
+  right: 0;
+}
 
 .masthead h1 {
   font-family: var(--serif);
@@ -94,6 +112,7 @@ a { color: var(--amber-dark); }
   line-height: 0.95;
   margin: 14px 0 4px;
 }
+
 .masthead h1 em {
   color: var(--amber-mid);
   font-style: italic;
@@ -109,7 +128,12 @@ a { color: var(--amber-dark); }
   margin: 8px 0;
   overflow: hidden;
 }
-.meter-fill { height: 100%; background: var(--amber-dark); }
+
+.meter-fill {
+  height: 100%;
+  background: var(--amber-dark);
+}
+
 .meter::after {
   content: "";
   position: absolute;
@@ -125,5 +149,8 @@ a { color: var(--amber-dark); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * { animation: none !important; transition: none !important; }
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
 }

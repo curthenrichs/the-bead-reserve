@@ -38,7 +38,11 @@ export const FOOTER_SITEMAP: SitemapGroup[] = [
    plus a pointer home to the blog. */
 export const ECOSYSTEM: EcosystemEntry[] = [
   { key: "beadz", label: SITE_NAME, href: "/" },
-  { key: "blog", label: "Half-Built Robots", href: "https://half-built-robots.com/" },
+  {
+    key: "blog",
+    label: "Half-Built Robots",
+    href: "https://half-built-robots.com/",
+  },
 ];
 
 export const ECOSYSTEM_SELF = ECOSYSTEM_SELF_KEY;

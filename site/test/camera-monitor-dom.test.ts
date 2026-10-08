@@ -11,8 +11,18 @@ const MARKUP = `
     <p data-cm-caption></p>
   </div>`;
 
-const fresh = { frameUrl: "/api/frame/latest", counter: 7, ts: 1, sha256: null, croText: "sealed tight", status: "fresh" };
-const ok = (body: unknown) => Promise.resolve({ ok: true, json: () => Promise.resolve(body) } as Response);
+const fresh = {
+  frameUrl: "/api/frame/latest",
+  counter: 7,
+  ts: 1,
+  sha256: null,
+  croText: "sealed tight",
+  status: "fresh",
+};
+
+const ok = (body: unknown) =>
+  Promise.resolve({ ok: true, json: () => Promise.resolve(body) } as Response);
+
 const $ = (sel: string) => document.querySelector(sel);
 
 afterEach(() => {
@@ -27,7 +37,9 @@ describe("camera monitor island", () => {
     mountCameraMonitor(document, { pollMs: 0, fetchImpl });
 
     await vi.waitFor(() => {
-      expect($("[data-camera-monitor]")?.getAttribute("data-status")).toBe("fresh");
+      expect($("[data-camera-monitor]")?.getAttribute("data-status")).toBe(
+        "fresh",
+      );
     });
 
     const frame = $("[data-cm-screen] img");
@@ -35,37 +47,69 @@ describe("camera monitor island", () => {
     expect(frame?.getAttribute("alt")).toBe("Camera view of the reserve jar");
     expect($("[data-cm-placeholder]")).toBeNull();
     expect($("[data-cm-badge]")?.textContent).toBe("● LIVE");
-    expect($("[data-cm-caption]")?.textContent).toBe("REC · reserve in view · sealed tight");
-    expect($("[data-cm-mood]")?.getAttribute("src")).toBe("/henry-cro-broadcasting.svg");
+
+    expect($("[data-cm-caption]")?.textContent).toBe(
+      "REC · reserve in view · sealed tight",
+    );
+
+    expect($("[data-cm-mood]")?.getAttribute("src")).toBe(
+      "/henry-cro-broadcasting.svg",
+    );
   });
 
   it("a failed fetch leaves the dark state and throws nothing", async () => {
     document.body.innerHTML = MARKUP;
     const fetchImpl = vi.fn(() => Promise.reject(new Error("network")));
     mountCameraMonitor(document, { pollMs: 0, fetchImpl });
-    await vi.waitFor(() => { expect(fetchImpl).toHaveBeenCalled(); });
-    expect($("[data-camera-monitor]")?.getAttribute("data-status")).toBe("dark");
-    expect($("[data-cm-placeholder]")?.textContent).toBe("signal interrupted, reserve remains sealed");
+
+    await vi.waitFor(() => {
+      expect(fetchImpl).toHaveBeenCalled();
+    });
+
+    expect($("[data-camera-monitor]")?.getAttribute("data-status")).toBe(
+      "dark",
+    );
+
+    expect($("[data-cm-placeholder]")?.textContent).toBe(
+      "signal interrupted, reserve remains sealed",
+    );
   });
 
   it("a non-OK answer reads as dark", async () => {
     document.body.innerHTML = MARKUP;
-    const fetchImpl = vi.fn(() => Promise.resolve({ ok: false, json: () => Promise.resolve(fresh) } as Response));
+
+    const fetchImpl = vi.fn(() =>
+      Promise.resolve({
+        ok: false,
+        json: () => Promise.resolve(fresh),
+      } as Response),
+    );
+
     mountCameraMonitor(document, { pollMs: 0, fetchImpl });
-    await vi.waitFor(() => { expect(fetchImpl).toHaveBeenCalled(); });
-    expect($("[data-camera-monitor]")?.getAttribute("data-status")).toBe("dark");
+
+    await vi.waitFor(() => {
+      expect(fetchImpl).toHaveBeenCalled();
+    });
+
+    expect($("[data-camera-monitor]")?.getAttribute("data-status")).toBe(
+      "dark",
+    );
   });
 
   it("goes dark on an outage and recovers on the next good poll; destroy stops polling", async () => {
     vi.useFakeTimers();
     document.body.innerHTML = MARKUP;
+
     const fetchImpl = vi
       .fn()
       .mockImplementationOnce(() => ok(fresh))
       .mockImplementationOnce(() => Promise.reject(new Error("down")))
       .mockImplementation(() => ok(fresh));
+
     const handle = mountCameraMonitor(document, { pollMs: 1000, fetchImpl });
-    const status = () => $("[data-camera-monitor]")?.getAttribute("data-status");
+
+    const status = () =>
+      $("[data-camera-monitor]")?.getAttribute("data-status");
 
     await vi.advanceTimersByTimeAsync(0);
     expect(status()).toBe("fresh");

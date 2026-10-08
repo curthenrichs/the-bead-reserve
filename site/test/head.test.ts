@@ -30,7 +30,10 @@ describe("layout head", () => {
   });
 
   it("carries canonical, OG and Twitter tags on the site URL", () => {
-    expect(doc.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe(`${SITE}/`);
+    expect(
+      doc.querySelector('link[rel="canonical"]')?.getAttribute("href"),
+    ).toBe(`${SITE}/`);
+
     expect(meta('meta[property="og:image"]')).toBe(`${SITE}/og-image.png`);
     expect(meta('meta[property="og:url"]')).toBe(`${SITE}/`);
     expect(meta('meta[property="og:title"]')).toBe(doc.title);
@@ -39,8 +42,13 @@ describe("layout head", () => {
   });
 
   it("sets theme-color for both schemes", () => {
-    expect(meta('meta[name="theme-color"][media="(prefers-color-scheme: light)"]')).toBe("#ffffff");
-    expect(meta('meta[name="theme-color"][media="(prefers-color-scheme: dark)"]')).toBe("#111111");
+    expect(
+      meta('meta[name="theme-color"][media="(prefers-color-scheme: light)"]'),
+    ).toBe("#ffffff");
+
+    expect(
+      meta('meta[name="theme-color"][media="(prefers-color-scheme: dark)"]'),
+    ).toBe("#111111");
   });
 });
 
@@ -51,18 +59,31 @@ describe("layout chrome", () => {
     const header = doc.querySelector("header#masthead");
     expect(header).not.toBeNull();
     const mark = header?.querySelector(".beadz-wordmark");
-    expect(mark?.textContent?.replace(/\s+/g, " ").trim()).toBe("The Bead Reserve");
+
+    expect(mark?.textContent?.replace(/\s+/g, " ").trim()).toBe(
+      "The Bead Reserve",
+    );
+
     expect(mark?.querySelector("em")?.textContent).toBe("Reserve");
     expect(header?.querySelector("h1")).toBeNull();
 
-    const hrefs = [...doc.querySelectorAll(".masthead-nav a")].map((a) => a.getAttribute("href"));
-    expect(hrefs).toEqual(expect.arrayContaining(["/", "/whitepaper.pdf", "/brand/"]));
+    const hrefs = [...doc.querySelectorAll(".masthead-nav a")].map((a) =>
+      a.getAttribute("href"),
+    );
+
+    expect(hrefs).toEqual(
+      expect.arrayContaining(["/", "/whitepaper.pdf", "/brand/"]),
+    );
   });
 
   it("uses the package footer with the LICENSE holder and the ecosystem baseline", () => {
     const footer = doc.querySelector("footer");
     expect(footer?.textContent).toContain("Curt Henrichs");
-    const eco = [...(footer?.querySelectorAll("[data-ecosystem] a") ?? [])].map((a) => a.textContent?.trim());
+
+    const eco = [...(footer?.querySelectorAll("[data-ecosystem] a") ?? [])].map(
+      (a) => a.textContent?.trim(),
+    );
+
     expect(eco).toContain("Half-Built Robots");
   });
 

@@ -53,7 +53,10 @@ const nullable = (v: unknown, type: "string" | "number"): boolean =>
   v === null || typeof v === type;
 
 export function parseReserve(body: unknown): Reserve {
-  if (typeof body !== "object" || body === null || Array.isArray(body)) return DARK;
+  if (typeof body !== "object" || body === null || Array.isArray(body)) {
+    return DARK;
+  }
+
   const b = body as Record<string, unknown>;
 
   if (
@@ -93,10 +96,13 @@ export interface MonitorView {
 export function viewFor(r: Reserve): MonitorView {
   const live = r.status === "fresh";
   const showFrame = r.status !== "dark" && r.counter !== null;
+
   /* The dark placeholder is the single home of the "sealed" line; the
      caption stays empty in the dark so the two never repeat it. */
   const caption =
-    r.status === "dark" ? "" : `${COPY[r.status]}${r.croText ? ` · ${r.croText}` : ""}`;
+    r.status === "dark"
+      ? ""
+      : `${COPY[r.status]}${r.croText ? ` · ${r.croText}` : ""}`;
 
   return {
     status: r.status,

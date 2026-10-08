@@ -1,8 +1,15 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 
-const typ = readFileSync(new URL("../../whitepaper/template.typ", import.meta.url), "utf8");
-const color = (name: string) => new RegExp(`#let ${name}\\s*=\\s*rgb\\("(#[0-9A-Fa-f]{6})"\\)`).exec(typ)?.[1]?.toLowerCase();
+const typ = readFileSync(
+  new URL("../../whitepaper/template.typ", import.meta.url),
+  "utf8",
+);
+
+const color = (name: string) =>
+  new RegExp(`#let ${name}\\s*=\\s*rgb\\("(#[0-9A-Fa-f]{6})"\\)`)
+    .exec(typ)?.[1]
+    ?.toLowerCase();
 
 describe("whitepaper palette follows the system light theme", () => {
   it.each([

@@ -25,10 +25,14 @@
   text-decoration: none;
 }
 
-.beadz-wordmark em { color: var(--accent-1-ink); }
+.beadz-wordmark em {
+  color: var(--accent-1-ink);
+}
 
 /* The claim and redemption panels share one form (site-specific). */
-.panel { margin-top: 38px; }
+.panel {
+  margin-top: 38px;
+}
 
 .panel h2 {
   margin: 0 0 8px;
@@ -39,7 +43,9 @@
   text-transform: uppercase;
 }
 
-.panel p { color: var(--ink-muted); }
+.panel p {
+  color: var(--ink-muted);
+}
 
 .panel-meter-head {
   display: flex;
