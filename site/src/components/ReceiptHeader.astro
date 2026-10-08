@@ -1,0 +1,38 @@
+---
+/* The depository-receipt header: eyebrow, the serif h1 with the accent
+   italic, and the page's opening paragraphs in the default slot. The
+   page's one h1 (the header wordmark is a <p>). */
+interface Props {
+  eyebrow: string;
+  page?: string;
+}
+
+const { eyebrow, page } = Astro.props;
+---
+
+<header class="receipt">
+  <p class="receipt-eyebrow micro-label">{eyebrow}</p>
+  <h1 class="receipt-title">The Bead <em>Reserve</em>{page && ` : ${page}`}</h1>
+  <slot />
+</header>
+
+<style>
+  .receipt { margin: 0 0 30px; }
+
+  .receipt-eyebrow {
+    margin: 0 0 8px;
+    color: var(--accent-1-ink);
+    text-transform: uppercase;
+  }
+
+  .receipt-title {
+    margin: 0 0 12px;
+    font-family: var(--beadz-font-display);
+    font-size: var(--font-size-xxl);
+    font-weight: 600;
+    line-height: 1.05;
+  }
+
+  .receipt-title em { color: var(--accent-1-ink); }
+  .receipt :global(p:not(.receipt-eyebrow)) { color: var(--ink-muted); }
+</style>

@@ -1,7 +1,8 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Masthead from "../components/Masthead.astro";
-import Ledger from "../components/Ledger.astro";
+import ReceiptHeader from "../components/ReceiptHeader.astro";
+import StatLedger from "@half-built/astro/components/StatLedger.astro";
+import { STATS } from "../config";
 import Seal from "../components/Seal.astro";
 import Disclaimers from "../components/Disclaimers.astro";
 import CameraMonitor from "../islands/CameraMonitor.tsx";
@@ -11,8 +12,25 @@ import Subscribe from "../islands/Subscribe.tsx";
 ---
 <Layout title="The Bead Reserve : Claim Office">
 <main>
-  <Masthead />
-  <Ledger />
+  <ReceiptHeader eyebrow="Depository Receipt · Office of the Vault Keeper">
+    <p>
+      The Bead Reserve maintains <b>full physical collateralization</b> of every outstanding
+      BEADZ against a monitored reserve of glass seed beads, held in a sealed jar and observed
+      continuously by camera. Supply was minted once at genesis and fixed permanently.
+      One (1) BEADZ is entitled to one (1) bead.
+    </p>
+    <p class="receipt-link">
+      <a href="/whitepaper.pdf" target="_blank" rel="noopener">The full terms are set out in the whitepaper&nbsp;↗</a>
+    </p>
+  </ReceiptHeader>
+  <StatLedger
+    label="Reserve figures"
+    items={[
+      { label: "Physical Reserve", value: STATS.reserve },
+      { label: "Outstanding BEADZ", value: STATS.outstanding },
+      { label: "Collateralization", value: STATS.collateralization, accent: true },
+    ]}
+  />
   <Seal />
   <CameraMonitor client:load />
   <ClaimPanel client:load />
