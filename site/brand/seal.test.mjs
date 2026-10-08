@@ -38,7 +38,7 @@ describe("copy and palette are exact", () => {
   });
 
   it("uses the agreed palette", () => {
-    expect(PALETTE.ground).toBe("#1b140c");
+    expect(PALETTE.ground).toBe("#111111");
     expect(PALETTE.accent).toBe("#ffaa3c");
     expect(PALETTE.accentSoft).toBe("#ffc46e");
     expect(PALETTE.head).toBe("#ffffff");

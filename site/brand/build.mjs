@@ -75,7 +75,7 @@ async function ogImage() {
   return sharp({
     create: {
       width: 1200, height: 630, channels: 4,
-      background: { r: 0x1b, g: 0x14, b: 0x0c, alpha: 1 },
+      background: { r: 0x11, g: 0x11, b: 0x11, alpha: 1 },
     },
   })
     .composite([{ input: seal, top: 55, left: 340 }])
@@ -144,9 +144,9 @@ async function main() {
     .raw()
     .toBuffer();
   const [r, g, b] = ogPixel;
-  if (r !== 0x1b || g !== 0x14 || b !== 0x0c) {
+  if (r !== 0x11 || g !== 0x11 || b !== 0x11) {
     throw new Error(
-      `og-image.png: expected background rgb(0x1b, 0x14, 0x0c), got rgb(${r.toString(16)}, ${g.toString(16)}, ${b.toString(16)})`
+      `og-image.png: expected background rgb(0x11, 0x11, 0x11), got rgb(${r.toString(16)}, ${g.toString(16)}, ${b.toString(16)})`
     );
   }
 

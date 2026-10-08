@@ -19,8 +19,8 @@ describe("site.webmanifest", () => {
     expect(manifest.name).toBe("The Bead Reserve");
     expect(typeof manifest.short_name).toBe("string");
     expect(manifest.short_name.length).toBeGreaterThan(0);
-    expect(manifest.theme_color).toBe("#1b140c");
-    expect(manifest.background_color).toBe("#1b140c");
+    expect(manifest.theme_color).toBe("#111111");
+    expect(manifest.background_color).toBe("#111111");
   });
 
   it("references both android-chrome icons with correct sizes and type", () => {
