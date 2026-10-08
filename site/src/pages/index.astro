@@ -19,7 +19,10 @@ import SubscribeBand from "../components/SubscribeBand.astro";
         every outstanding BEADZ against a monitored reserve of glass seed beads,
         held in a sealed jar and observed continuously by camera. Supply was
         minted once at genesis and fixed permanently. One (1) BEADZ is entitled
-        to one (1) bead.
+        to one (1)
+        bead.<sup class="note-ref"
+          ><a href="#note-1" aria-label="Note 1">1</a></sup
+        >
       </p>
       <p class="receipt-link">
         <a href="/whitepaper.pdf" target="_blank" rel="noopener"
@@ -44,6 +47,15 @@ import SubscribeBand from "../components/SubscribeBand.astro";
     <ClaimPanel />
     <RedeemPanel />
     <Disclaimers />
-    <SubscribeBand />
+    {/* A very large pause after the Vault Keeper signs, before the
+       newsletter (owner call 2026-10-08): the receipt ends, then the
+       bridge back to the workshop. Scales down on phones. */}
+    <div class="subscribe-gap">
+      <SubscribeBand />
+    </div>
   </main>
 </Layout>
+
+<style>
+  .subscribe-gap { margin-top: clamp(96px, 14vw, 180px); }
+</style>

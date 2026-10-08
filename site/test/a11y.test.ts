@@ -22,6 +22,7 @@ import {
   desktopPage,
   phonePage,
 } from "@half-built/tooling/test-kit/browser-server.ts";
+import { stubLiveReserve } from "./stub-api";
 
 const PORT = 4352;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -37,7 +38,6 @@ const PAGES = [
   "/privacy/",
   "/accessibility/",
   "/terms/",
-  "/policies/",
   "/nope/",
 ];
 
@@ -117,10 +117,15 @@ describe("accessibility", () => {
     page = undefined;
   });
 
-  async function open(path: string, phone = false): Promise<Page> {
+  async function open(
+    path: string,
+    phone = false,
+    live = false,
+  ): Promise<Page> {
     if (!browser) throw new Error("no browser (beforeAll failed)");
     const p = phone ? await phonePage(browser) : await desktopPage(browser);
     page = p;
+    if (live) await stubLiveReserve(p);
     /* networkidle0: the islands mount from module scripts with no DOM
        marker to wait on, and axe must see the mounted DOM. */
     await p.goto(`${ORIGIN}${path}`, { waitUntil: "networkidle0" });
@@ -197,6 +202,26 @@ describe("accessibility", () => {
       });
 
       await bothThemes(p, `${path} @390`);
+    }, 60_000);
+  }
+
+  /* The fine print highlighted as the jump target of a note reference:
+     the muted ink must still read on the band. */
+  it("/#note-1 (the targeted note) has no WCAG 2.2 AA violations in either theme", async () => {
+    const p = await open("/#note-1");
+    await bothThemes(p, "/#note-1");
+  }, 60_000);
+
+  /* The camera frame's lightbox, open over a stubbed live reserve
+     (stub-api.ts), at desktop and phone width. */
+  for (const phone of [false, true]) {
+    it(`the open frame lightbox has no WCAG 2.2 AA violations${phone ? " at phone width" : ""}`, async () => {
+      const p = await open("/", phone, true);
+      const link = await p.waitForSelector("[data-cm-screen] a.lightbox-link");
+      await link?.scrollIntoView();
+      await link?.click();
+      await p.waitForSelector("dialog.lb-dialog[open] .lb-img");
+      await bothThemes(p, `/ lightbox${phone ? " @390" : ""}`);
     }, 60_000);
   }
 

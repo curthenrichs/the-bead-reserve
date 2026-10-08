@@ -8,7 +8,9 @@ import {
   stopPreview,
   launchChrome,
   desktopPage,
+  phonePage,
 } from "@half-built/tooling/test-kit/browser-server.ts";
+import { stubLiveReserve } from "./stub-api";
 
 const PORT = 4351;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -36,12 +38,35 @@ describe("layout in a real browser", () => {
     page = undefined;
   });
 
-  async function open(path = "/"): Promise<Page> {
+  async function open(
+    path = "/",
+    { phone = false, live = false } = {},
+  ): Promise<Page> {
     if (!browser) throw new Error("no browser (beforeAll failed)");
-    page = await desktopPage(browser);
+    page = phone ? await phonePage(browser) : await desktopPage(browser);
+    if (live) await stubLiveReserve(page);
     await page.goto(`${ORIGIN}${path}`, { waitUntil: "networkidle0" });
     return page;
   }
+
+  interface Box {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  }
+
+  const box = (p: Page, sel: string): Promise<Box> =>
+    p.$eval(sel, (e) => {
+      const r = e.getBoundingClientRect();
+      return { top: r.top, bottom: r.bottom, left: r.left, right: r.right };
+    });
+
+  const intersects = (a: Box, b: Box): boolean =>
+    a.left < b.right &&
+    b.left < a.right &&
+    a.top < b.bottom &&
+    b.top < a.bottom;
 
   /* The page sets scroll-behavior: smooth, so a plain scrollTo is still
      in flight when the boxes are read. Jump instantly, then let a frame
@@ -61,19 +86,16 @@ describe("layout in a real browser", () => {
     });
   }
 
-  it("the seal sits above the scroll-to-top button without touching it", async () => {
+  it("the seal holds the lower left, clear of the scroll-to-top button", async () => {
     const p = await open();
     await scrollToEnd(p);
     await p.waitForSelector("a.scroll-top.show");
+    const seal = await box(p, ".seal");
+    const top = await box(p, "a.scroll-top");
+    const width = await p.evaluate(() => window.innerWidth);
 
-    const [seal, top] = await p.$$eval(".seal, a.scroll-top", (els) =>
-      els.map((e) => {
-        const r = e.getBoundingClientRect();
-        return { top: r.top, bottom: r.bottom, left: r.left, right: r.right };
-      }),
-    );
-
-    expect(seal.bottom).toBeLessThanOrEqual(top.top);
+    expect(seal.right).toBeLessThanOrEqual(width / 2);
+    expect(intersects(seal, top), JSON.stringify({ seal, top })).toBe(false);
   });
 
   it("scrolled to the end, the footer's last line clears the seal", async () => {
@@ -95,4 +117,53 @@ describe("layout in a real browser", () => {
     expect(sealTop, "no .seal on the page").not.toBeNaN();
     expect(lastBottom).toBeLessThanOrEqual(sealTop);
   });
+
+  it("the monitor is at most 480px wide and centered in main", async () => {
+    const p = await open();
+    const m = await box(p, "[data-camera-monitor]");
+    const main = await box(p, "main");
+
+    expect(m.right - m.left).toBeLessThanOrEqual(480);
+
+    expect(
+      Math.abs(m.left - main.left - (main.right - m.right)),
+      JSON.stringify({ m, main }),
+    ).toBeLessThanOrEqual(1);
+  });
+
+  /* The live frame needs the Worker; stub-api.ts stands in for it. */
+  for (const phone of [false, true]) {
+    it(`the live frame opens full size in the lightbox and Escape closes it${phone ? " (phone)" : ""}`, async () => {
+      const p = await open("/", { phone, live: true });
+      const link = await p.waitForSelector("[data-cm-screen] a.lightbox-link");
+      await link?.scrollIntoView();
+      await link?.click();
+      await p.waitForSelector("dialog.lb-dialog[open]");
+
+      await p.waitForFunction(() => {
+        const img = document.querySelector<HTMLImageElement>(
+          "dialog.lb-dialog[open] .lb-img",
+        );
+
+        return (
+          !!img &&
+          img.complete &&
+          img.naturalWidth > 0 &&
+          img.getAttribute("src") === "/api/frame/latest"
+        );
+      });
+
+      const shown = await p.$eval("dialog.lb-dialog .lb-img", (img) => {
+        const r = img.getBoundingClientRect();
+        return { w: r.width, h: r.height, alt: img.getAttribute("alt") };
+      });
+
+      expect(shown.w).toBeGreaterThan(0);
+      expect(shown.h).toBeGreaterThan(0);
+      expect(shown.alt).toBe("Camera view of the reserve jar");
+
+      await p.keyboard.press("Escape");
+      await p.waitForSelector("dialog.lb-dialog[open]", { hidden: true });
+    });
+  }
 });

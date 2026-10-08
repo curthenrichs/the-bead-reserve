@@ -5,7 +5,6 @@ describe.each([
   ["/privacy/", "The Bead Reserve : Privacy"],
   ["/accessibility/", "The Bead Reserve : Accessibility"],
   ["/terms/", "The Bead Reserve : Terms"],
-  ["/policies/", "The Bead Reserve : Policies"],
 ])("%s", (path, title) => {
   const doc = page(path);
 
@@ -15,30 +14,17 @@ describe.each([
   });
 });
 
-describe("policies hub and footer", () => {
-  it("the hub links all three", () => {
-    const hrefs = [...page("/policies/").querySelectorAll("main a")].map((a) =>
-      a.getAttribute("href"),
-    );
-
-    expect(hrefs).toEqual(
-      expect.arrayContaining(["/privacy/", "/accessibility/", "/terms/"]),
-    );
-  });
-
-  it("every page's footer carries the Rules group", () => {
+describe("policies in the footer", () => {
+  it("every page's footer carries the Rules group, the policy pages themselves", () => {
     const hrefs = [...page("/").querySelectorAll("footer a")].map((a) =>
       a.getAttribute("href"),
     );
 
     expect(hrefs).toEqual(
-      expect.arrayContaining([
-        "/policies/",
-        "/privacy/",
-        "/terms/",
-        "/accessibility/",
-      ]),
+      expect.arrayContaining(["/privacy/", "/terms/", "/accessibility/"]),
     );
+
+    expect(hrefs).not.toContain("/policies/");
   });
 
   it("the 404 is noindex and in the system chrome", () => {

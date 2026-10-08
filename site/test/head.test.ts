@@ -58,7 +58,8 @@ describe("layout chrome", () => {
   it("uses the package header with the costume wordmark and the two nav links", () => {
     const header = doc.querySelector("header#masthead");
     expect(header).not.toBeNull();
-    const mark = header?.querySelector(".beadz-wordmark");
+    const mark = header?.querySelector(".site-title a .beadz-wordmark");
+    expect(mark, "wordmark in the package title slot").not.toBeNull();
 
     expect(mark?.textContent.replace(/\s+/g, " ").trim()).toBe(
       "The Bead Reserve",
@@ -78,6 +79,29 @@ describe("layout chrome", () => {
     );
 
     expect(footer).toContain("/brand/");
+  });
+
+  it("drops the package search: the site has no search page", () => {
+    const header = doc.querySelector("header#masthead");
+    expect(header?.querySelector(".navigation-search")).toBeNull();
+    expect(header?.querySelector('form[role="search"]')).toBeNull();
+  });
+
+  it("boxes the tagline in the package's site-description", () => {
+    expect(
+      doc
+        .querySelector("header#masthead .site-description")
+        ?.textContent.replace(/\s+/g, " ")
+        .trim(),
+    ).toBe("Fully reserved. Worth nothing.");
+  });
+
+  it("titles the first footer sitemap group Site, like the blog and the ui site", () => {
+    const titles = [
+      ...doc.querySelectorAll("footer .footer-sitemap-group h2"),
+    ].map((t) => t.textContent.trim());
+
+    expect(titles[0]).toBe("Site");
   });
 
   it("uses the package footer with the LICENSE holder and the ecosystem baseline", () => {

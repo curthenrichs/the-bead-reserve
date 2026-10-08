@@ -2,10 +2,54 @@
    server-rendered markup. The markup already shows the dark state, so
    with JavaScript off, or before the first answer, the page is honest.
    A failed or malformed answer goes dark; the next good one recovers. */
+import { mountLightbox } from "@half-built/astro/scripts/lightbox.ts";
 import { DARK, parseReserve, viewFor, type MonitorView } from "./camera-state";
 
 const FRAME_SRC = "/api/frame/latest";
 const FRAME_ALT = "Camera view of the reserve jar";
+
+/* The size the lightbox is told before the frame loads: the monitor's
+   16:10. The real natural size replaces it on load. */
+const FALLBACK_W = 1600;
+const FALLBACK_H = 1000;
+
+/* One lightbox mount per monitor. The frame link is made at runtime and
+   replaced after an outage, so each new link remounts: destroy drops the
+   old link's claim and its dialog, and the fresh mount claims the new
+   one. */
+const lightboxes = new WeakMap<HTMLElement, { destroy(): void }>();
+
+function unmountLightbox(root: HTMLElement): void {
+  lightboxes.get(root)?.destroy();
+  lightboxes.delete(root);
+}
+
+/* The anchor LightboxLink renders, built here because the frame only
+   exists at runtime. */
+function frameLink(): HTMLAnchorElement {
+  const link = document.createElement("a");
+  link.className = "lightbox-link cm-frame-link";
+  link.href = FRAME_SRC;
+  link.dataset.lbW = String(FALLBACK_W);
+  link.dataset.lbH = String(FALLBACK_H);
+  link.dataset.lbCaption = FRAME_ALT;
+  link.setAttribute("aria-label", `View full-size image: ${FRAME_ALT}`);
+
+  const img = document.createElement("img");
+  img.src = FRAME_SRC;
+  img.alt = FRAME_ALT;
+  img.className = "cm-frame";
+
+  img.addEventListener("load", () => {
+    if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+      link.dataset.lbW = String(img.naturalWidth);
+      link.dataset.lbH = String(img.naturalHeight);
+    }
+  });
+
+  link.append(img);
+  return link;
+}
 
 export function renderMonitor(root: HTMLElement, v: MonitorView): void {
   root.dataset.status = v.status;
@@ -29,13 +73,12 @@ export function renderMonitor(root: HTMLElement, v: MonitorView): void {
 
   if (v.showFrame) {
     if (!screen.querySelector("img")) {
-      const img = document.createElement("img");
-      img.src = FRAME_SRC;
-      img.alt = FRAME_ALT;
-      img.className = "cm-frame";
-      screen.replaceChildren(img);
+      screen.replaceChildren(frameLink());
+      unmountLightbox(root);
+      lightboxes.set(root, mountLightbox(root));
     }
   } else if (!screen.querySelector("[data-cm-placeholder]")) {
+    unmountLightbox(root);
     const span = document.createElement("span");
     span.dataset.cmPlaceholder = "";
     span.className = "cm-placeholder";
@@ -81,6 +124,7 @@ export function mountCameraMonitor(
     destroy(): void {
       alive = false;
       if (timer !== undefined) clearInterval(timer);
+      unmountLightbox(el);
     },
   };
 }

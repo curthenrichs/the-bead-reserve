@@ -55,6 +55,68 @@ describe("claim office content", () => {
   });
 });
 
+/* The fine print is note 1 (owner request 2026-10-08): one hand-placed
+   note, referenced from the three places its terms apply. */
+const DISCLAIMER =
+  "BEADZ is a novelty collectible issued for amusement. It has no monetary value, no investment merit, and no expectation of profit. It is not a stablecoin, a security, a deposit, or a payment instrument, and is not pegged to any national currency. Supply is fixed; the mint is renounced. Physical redemption is available by prepaid certified mail with signature, in minimum lots, and costs far more than the beads are worth. Do not construe any of this as financial, legal, or horticultural advice. One (1) bead ≈ one (1) bead.";
+
+describe("the fine print as note 1", () => {
+  const doc = page("/");
+
+  const squash = (s: string | null | undefined) =>
+    s?.replace(/\s+/g, " ").trim();
+
+  it("the fine print is #note-1, led by its marker, words verbatim", () => {
+    const note = doc.querySelector("#note-1");
+    expect(note?.classList.contains("fine-print")).toBe(true);
+    const mark = note?.querySelector(".note-mark");
+    expect(mark?.textContent.trim()).toBe("1");
+    const clone = note?.cloneNode(true) as Element | undefined;
+    clone?.querySelector(".note-mark")?.remove();
+    expect(squash(clone?.textContent)).toBe(DISCLAIMER);
+  });
+
+  it("references it from the receipt, the claim panel and the redemption panel", () => {
+    const refs = (container: string) => [
+      ...doc.querySelectorAll(`${container} sup.note-ref a[href="#note-1"]`),
+    ];
+
+    for (const container of [
+      ".receipt",
+      'section[aria-labelledby="claim-heading"]',
+      'section[aria-labelledby="redeem-heading"]',
+    ]) {
+      const found = refs(container);
+      expect(found, container).toHaveLength(1);
+      expect(found[0].textContent).toBe("1");
+      expect(found[0].getAttribute("aria-label")).toBe("Note 1");
+    }
+
+    expect(doc.querySelectorAll("sup.note-ref")).toHaveLength(3);
+    expect(doc.querySelector(".stat-ledger sup")).toBeNull();
+  });
+
+  it("each reference sits directly after the sentence it qualifies", () => {
+    const before = (container: string) => {
+      const sup = doc.querySelector(`${container} sup.note-ref`);
+      const prev = sup?.previousSibling?.textContent ?? "";
+      return squash(prev);
+    };
+
+    expect(before(".receipt")).toMatch(
+      /One \(1\) BEADZ is entitled to one \(1\) bead\.$/,
+    );
+
+    expect(before('section[aria-labelledby="claim-heading"]')).toMatch(
+      /only the entitlement transfers\.$/,
+    );
+
+    expect(before('section[aria-labelledby="redeem-heading"]')).toMatch(
+      /costs far more than the beads are worth\.$/,
+    );
+  });
+});
+
 describe("camera monitor without JavaScript", () => {
   const doc = page("/");
 

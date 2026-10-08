@@ -12,17 +12,12 @@
   --beadz-font-display: "Roboto Serif", georgia, serif;
 }
 
+/* The wordmark is a span in the package header's title slot, inside
+   .site-title > a, which already sets size, line height, ink and
+   decoration. Only the costume is here. */
 .beadz-wordmark {
-  margin: 0;
   font-family: var(--beadz-font-display);
-  font-size: var(--font-size-xl);
   font-weight: 600;
-  line-height: 1.1;
-}
-
-.beadz-wordmark a {
-  color: var(--ink);
-  text-decoration: none;
 }
 
 .beadz-wordmark em {
@@ -79,6 +74,29 @@
 .panel-note {
   color: var(--ink-muted);
   font-size: var(--font-size-xs);
+}
+
+/* The fine print is note 1 (Disclaimers.astro), one hand-placed note;
+   the package has no footnote styles. The reference rides the line
+   without opening it up. The focus ring is the system's. */
+.note-ref {
+  font-size: var(--font-size-xs);
+  line-height: 0;
+  vertical-align: super;
+}
+
+.note-ref a {
+  color: var(--accent-1-ink);
+}
+
+.note-mark {
+  color: var(--accent-1-ink);
+  font-weight: 700;
+}
+
+/* Jumped to from a reference: a subtle band marks where the eye lands. */
+#note-1:target {
+  background: var(--band);
 }
 
 /* Policy pages and the 404: the article heading. */

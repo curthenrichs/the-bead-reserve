@@ -22,7 +22,7 @@ export const LEGAL_HOLDER = "Curt Henrichs LLC";
 
 export const FOOTER_SITEMAP: SitemapGroup[] = [
   {
-    title: "Reserve",
+    title: "Site",
     collapsible: true,
     phoneOpen: true,
     links: [
@@ -35,7 +35,6 @@ export const FOOTER_SITEMAP: SitemapGroup[] = [
     title: "Rules",
     collapsible: true,
     links: [
-      { label: "Policies", href: "/policies/" },
       { label: "Privacy", href: "/privacy/" },
       { label: "Terms", href: "/terms/" },
       { label: "Accessibility", href: "/accessibility/" },

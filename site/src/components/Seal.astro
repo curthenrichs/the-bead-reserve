@@ -24,15 +24,17 @@ import { STATS, GENESIS_BEADS } from "../config";
 
 <style>
   /* A pinned wax-seal stamp that flips on hover or focus to show the
-     token on its reverse. Stacked above the package scroll-to-top
-     button, and it reserves its height under the footer through
+     token on its reverse. It holds the lower left corner (owner call
+     2026-10-08), leaving the lower right to the package scroll-to-top
+     button, and reserves its height under the footer through
      --dock-bottom (the bottom-docked rule). Hidden on phones, where a
      fixed corner element would cover content. The focus ring is the
      system's; never outline: none. */
   .seal {
     position: fixed;
-    right: 30px;
-    bottom: 109px;
+    right: auto;
+    bottom: 30px;
+    left: 30px;
     z-index: var(--z-scroll-top);
     width: 132px;
     height: 132px;
@@ -86,7 +88,8 @@ import { STATS, GENESIS_BEADS } from "../config";
     .seal { display: none; }
   }
 
+  /* 30 (bottom offset) + 132 (seal) + 16 (clearance) = 178. */
   @media (--bp-phone-up) {
-    :global(:root) { --dock-bottom: 257px; }
+    :global(:root) { --dock-bottom: 178px; }
   }
 </style>
