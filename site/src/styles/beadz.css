@@ -1,0 +1,28 @@
+/* The one BEADZ-local token: the serif costume for the wordmark, the
+   receipt h1, and the signature (spec section 3). Everything else on
+   the site reads @half-built tokens. Global, because the wordmark is
+   slotted into the package header, where component-scoped styles
+   cannot reach it. */
+@import "@fontsource/roboto-serif/400.css";
+@import "@fontsource/roboto-serif/400-italic.css";
+@import "@fontsource/roboto-serif/600.css";
+@import "@fontsource/roboto-serif/600-italic.css";
+
+:root {
+  --beadz-font-display: "Roboto Serif", georgia, serif;
+}
+
+.beadz-wordmark {
+  margin: 0;
+  font-family: var(--beadz-font-display);
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.beadz-wordmark a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.beadz-wordmark em { color: var(--accent-1-ink); }

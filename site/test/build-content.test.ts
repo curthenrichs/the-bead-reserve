@@ -1,15 +1,10 @@
-import { describe, it, expect, beforeAll } from "vitest";
-import { execSync } from "node:child_process";
+import { describe, it, expect } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 const dist = resolve(__dirname, "../dist/index.html");
 
 describe("static content", () => {
-  beforeAll(() => {
-    execSync("npx astro build", { cwd: resolve(__dirname, ".."), stdio: "inherit" });
-  }, 120_000);
-
   it("emits the masthead and genesis stats", () => {
     expect(existsSync(dist)).toBe(true);
     const html = readFileSync(dist, "utf8");

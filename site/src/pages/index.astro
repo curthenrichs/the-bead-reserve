@@ -1,5 +1,5 @@
 ---
-import Base from "../layouts/Base.astro";
+import Layout from "../layouts/Layout.astro";
 import Masthead from "../components/Masthead.astro";
 import Ledger from "../components/Ledger.astro";
 import Seal from "../components/Seal.astro";
@@ -9,7 +9,8 @@ import ClaimPanel from "../islands/ClaimPanel.tsx";
 import RedeemPanel from "../islands/RedeemPanel.tsx";
 import Subscribe from "../islands/Subscribe.tsx";
 ---
-<Base title="The Bead Reserve: Claim Office">
+<Layout title="The Bead Reserve : Claim Office">
+<main>
   <Masthead />
   <Ledger />
   <Seal />
@@ -18,4 +19,5 @@ import Subscribe from "../islands/Subscribe.tsx";
   <RedeemPanel client:load />
   <Disclaimers />
   <Subscribe client:load />
-</Base>
+</main>
+</Layout>

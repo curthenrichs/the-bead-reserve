@@ -113,16 +113,3 @@ describe("brand page copy", () => {
     expect(lower).toMatch(/not endorsed/);
   });
 });
-
-describe("Base.astro footer links to /brand", () => {
-  const layoutPath = path.join(HERE, "..", "src", "layouts", "Base.astro");
-  const layout = fs.readFileSync(layoutPath, "utf8");
-  const layoutFences = [...layout.matchAll(/^---\s*$/gm)];
-  const layoutTemplate = layout.slice(layoutFences[1].index + 3);
-
-  it("footer carries an anchor to /brand alongside the whitepaper link", () => {
-    const tag = findTag(layoutTemplate, "a", ['href="/brand"']);
-    expect(tag, `no <a href="/brand"> in Base.astro footer:\n${layoutTemplate}`).toBeTruthy();
-    expect(layoutTemplate).toContain('href="/whitepaper.pdf"');
-  });
-});
