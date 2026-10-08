@@ -71,14 +71,18 @@ describe("layout chrome", () => {
       a.getAttribute("href"),
     );
 
-    expect(hrefs).toEqual(
-      expect.arrayContaining(["/", "/whitepaper.pdf", "/brand/"]),
+    expect(hrefs).toEqual(["/", "/whitepaper.pdf"]);
+
+    const footer = [...doc.querySelectorAll("footer a")].map((a) =>
+      a.getAttribute("href"),
     );
+
+    expect(footer).toContain("/brand/");
   });
 
   it("uses the package footer with the LICENSE holder and the ecosystem baseline", () => {
     const footer = doc.querySelector("footer");
-    expect(footer?.textContent).toContain("Curt Henrichs");
+    expect(footer?.textContent).toContain("Curt Henrichs LLC");
 
     const eco = [...(footer?.querySelectorAll("[data-ecosystem] a") ?? [])].map(
       (a) => a.textContent.trim(),

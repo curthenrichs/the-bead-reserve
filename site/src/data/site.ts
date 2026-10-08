@@ -14,12 +14,11 @@ export const DESCRIPTION =
 export const NAV: NavItem[] = [
   { label: "Reserve", href: "/" },
   { label: "Whitepaper", href: "/whitepaper.pdf" },
-  { label: "Brand assets", href: "/brand/" },
 ];
 
 /* Must match the holder named in the repository LICENSE (spec
    amendment 7). */
-export const LEGAL_HOLDER = "Curt Henrichs";
+export const LEGAL_HOLDER = "Curt Henrichs LLC";
 
 export const FOOTER_SITEMAP: SitemapGroup[] = [
   {
