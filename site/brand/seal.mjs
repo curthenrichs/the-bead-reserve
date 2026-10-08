@@ -20,12 +20,8 @@
 import { loadFont, flatLine, arcLine } from "./lettering.mjs";
 import { henryGroup } from "./henry.mjs";
 
-export const PALETTE = Object.freeze({
-  ground: "#1b140c",
-  accent: "#ffaa3c",
-  accentSoft: "#ffc46e",
-  head: "#ffffff",
-});
+import { PALETTE } from "./palette.mjs";
+export { PALETTE };
 
 export const COPY = Object.freeze({
   rim: "THE BEAD RESERVE",

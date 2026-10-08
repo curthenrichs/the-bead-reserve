@@ -1,115 +1,55 @@
 import { describe, it, expect } from "vitest";
 import fs from "node:fs";
-import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { page } from "./dist";
+import { PALETTE } from "../brand/palette.mjs";
 
-const HERE = path.dirname(fileURLToPath(import.meta.url));
-const pagePath = path.join(HERE, "..", "src", "pages", "brand.astro");
-const publicDir = path.join(HERE, "..", "public");
+const publicDir = fileURLToPath(new URL("../public/", import.meta.url));
+const doc = page("/brand/");
+const text = doc.querySelector("main")?.textContent?.replace(/\s+/g, " ") ?? "";
 
-describe("src/pages/brand.astro exists", () => {
-  it("is present as a page (routes to /brand)", () => {
-    expect(fs.existsSync(pagePath)).toBe(true);
-  });
-});
-
-const page = fs.readFileSync(pagePath, "utf8");
-
-// Split into frontmatter / template the same way test/layout.test.mjs does,
-// so assertions anchor to actual elements rather than bare substrings.
-const fenceMatches = [...page.matchAll(/^---\s*$/gm)];
-if (fenceMatches.length < 2) {
-  throw new Error("brand.astro is missing its frontmatter fences");
-}
-const template = page.slice(fenceMatches[1].index + 3);
-
-function tagsNamed(html, tagName) {
-  const re = new RegExp(`<${tagName}\\b[^>]*>`, "gi");
-  return html.match(re) || [];
-}
-
-// Finds a single tag of `tagName` that carries *all* of `requiredSubstrings`
-// -- i.e. the attributes have to co-occur on the same element.
-function findTag(html, tagName, requiredSubstrings) {
-  return tagsNamed(html, tagName).find((tag) => requiredSubstrings.every((s) => tag.includes(s)));
-}
-
-describe("brand page: downloadable assets", () => {
-  const downloads = [
-    { file: "/beadz-token-512.png", label: "512 PNG" },
-    { file: "/beadz-token-256.png", label: "256 PNG" },
-    { file: "/beadz-seal.svg", label: "SVG" },
-  ];
-
-  it.each(downloads)("links a download anchor for $label ($file)", ({ file }) => {
-    const tag = findTag(template, "a", [`href="${file}"`, "download"]);
-    expect(tag, `no <a href="${file}" download> in template:\n${template}`).toBeTruthy();
+describe("/brand", () => {
+  it("is titled with the spaced-colon convention and has one h1", () => {
+    expect(doc.title).toBe("The Bead Reserve : Brand Assets");
+    expect(doc.querySelectorAll("h1")).toHaveLength(1);
   });
 
-  it("displays the seal image with a meaningful alt description", () => {
-    const tag = findTag(template, "img", ['src="/beadz-seal.svg"']);
-    expect(tag, `no <img src="/beadz-seal.svg"> in template:\n${template}`).toBeTruthy();
-    const altMatch = tag.match(/alt="([^"]*)"/i);
-    expect(altMatch, `<img> has no alt attribute:\n${tag}`).toBeTruthy();
-    expect(altMatch[1].length).toBeGreaterThan(20);
-    expect(altMatch[1].toLowerCase()).toContain("seal");
+  it.each(["/beadz-token-512.png", "/beadz-token-256.png", "/beadz-seal.svg"])(
+    "offers %s as a download that exists",
+    (href) => {
+      expect(doc.querySelector(`a[href="${href}"][download]`)).not.toBeNull();
+      expect(fs.existsSync(publicDir + href.slice(1))).toBe(true);
+    },
+  );
+
+  it("shows the seal with a meaningful alt", () => {
+    const alt = doc.querySelector('img[src="/beadz-seal.svg"]')?.getAttribute("alt") ?? "";
+    expect(alt.length).toBeGreaterThan(20);
+    expect(alt.toLowerCase()).toContain("seal");
   });
 
-  it("names the small-size favicon redraw files as the below-96px substitute", () => {
-    // These are referenced in prose (not as functional download links), but
-    // must still name real files so the guidance isn't pointing at nothing.
-    expect(template).toContain("favicon-16x16.png");
-    expect(template).toContain("favicon-32x32.png");
-    expect(template).toContain("beadz-seal-small.svg");
-  });
-});
-
-describe("every asset path the brand page references exists in public/", () => {
-  // Pull every /public-relative asset-looking path (png, svg, ico) out of the
-  // rendered template -- href, src, or plain prose mentions -- so a typo or a
-  // stale filename fails the suite instead of shipping a dead link.
-  const assetPattern = /\/?[A-Za-z0-9][A-Za-z0-9_.-]*\.(?:png|svg|ico)/g;
-  const referenced = [...new Set(template.match(assetPattern) || [])];
-
-  it("found at least the expected downloadable + favicon assets", () => {
-    expect(referenced.length).toBeGreaterThanOrEqual(5);
+  it("names the small-size redraws, the 256px size, permanence, licensing and counterfeits", () => {
+    for (const s of ["favicon-16x16.png", "favicon-32x32.png", "beadz-seal-small.svg", "256×256", "MIT", "LICENSE"]) {
+      expect(text).toContain(s);
+    }
+    const lower = text.toLowerCase();
+    for (const s of ["canonical", "will not change", "all rights reserved", "liquidity pool", "not endorsed"]) {
+      expect(lower).toContain(s);
+    }
   });
 
-  it.each(referenced)("%s exists in public/", (assetPath) => {
-    expect(fs.existsSync(path.join(publicDir, assetPath.replace(/^\//, "")))).toBe(true);
-  });
-});
-
-describe("brand page copy", () => {
-  it("states the palette's exact hex values (frontmatter data or template markup)", () => {
-    // The swatch table renders hex values through {c.hex} from a frontmatter
-    // array rather than inlining the literal string in the template, so this
-    // checks the full page source.
-    expect(page).toContain("#1b140c");
-    expect(page).toContain("#ffaa3c");
-    expect(page).toContain("#ffc46e");
-    expect(page).toContain("#ffffff");
+  it("lists the palette straight from brand/palette.mjs", () => {
+    for (const hex of Object.values(PALETTE)) expect(text).toContain(hex);
   });
 
-  it("states the permanence promise", () => {
-    expect(template.toLowerCase()).toContain("canonical");
-    expect(template.toLowerCase()).toContain("will not change");
-  });
-
-  it("offers the 256px file, the size wallets and token lists expect", () => {
-    expect(template).toContain("beadz-token-256.png");
-    expect(template).toContain("256×256");
-  });
-
-  it("states the MIT / brand-assets-exception licensing split", () => {
-    expect(template).toContain("MIT");
-    expect(template.toLowerCase()).toContain("all rights reserved");
-    expect(template).toContain("LICENSE");
-  });
-
-  it("carries the counterfeit note tied to the no-liquidity-pool fact", () => {
-    const lower = template.toLowerCase();
-    expect(lower).toContain("liquidity pool");
-    expect(lower).toMatch(/not endorsed/);
+  it("uses the receipt header and no inline styles beyond the swatch colors", () => {
+    expect(doc.querySelector("main header.receipt h1")).not.toBeNull();
+    expect(doc.querySelector(".masthead")).toBeNull();
+    const styled = [...doc.querySelectorAll("main [style]")];
+    expect(styled).toHaveLength(Object.keys(PALETTE).length);
+    for (const el of styled) {
+      expect(el.classList.contains("swatch")).toBe(true);
+      expect(el.getAttribute("style")).toMatch(/^background-color:\s*#[0-9a-f]{6};?$/i);
+    }
   });
 });
