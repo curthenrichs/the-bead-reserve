@@ -14,7 +14,8 @@ export const CHAIN_ID = 8453; // Base mainnet
 export const DECIMALS = 18;
 export const SYMBOL = "BEADZ";
 export const TOKEN_NAME = "The Bead Reserve";
-export const LOGO_URI = "https://beadz.half-built-robots.com/beadz-token-256.png";
+export const LOGO_URI =
+  "https://beadz.half-built-robots.com/beadz-token-256.png";
 export const LIST_NAME = "The Bead Reserve (BEADZ)";
 
 // The token list schema wants major/minor/patch and an ISO-8601 timestamp.
@@ -33,6 +34,7 @@ export const LIST_VERSION = { major: 1, minor: 0, patch: 0 };
 export const LIST_TIMESTAMP = "2026-01-01T00:00:00Z";
 
 const EVM_ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/;
+
 export const ZERO_ADDRESS = `0x${"0".repeat(40)}`;
 
 /** True only for a syntactically valid, non-zero EVM address. */
@@ -55,17 +57,19 @@ export function isValidAddress(address) {
 export function buildTokenList(address) {
   if (typeof address !== "string" || address.length === 0) {
     throw new Error(
-      `BEADZ_ADDRESS must be a non-empty string to publish a token list; got ${JSON.stringify(address)}.`
+      `BEADZ_ADDRESS must be a non-empty string to publish a token list; got ${JSON.stringify(address)}.`,
     );
   }
+
   if (address.toLowerCase() === ZERO_ADDRESS) {
     throw new Error(
-      `BEADZ_ADDRESS is the zero address (${ZERO_ADDRESS}); refusing to publish a token list for a contract that doesn't exist.`
+      `BEADZ_ADDRESS is the zero address (${ZERO_ADDRESS}); refusing to publish a token list for a contract that doesn't exist.`,
     );
   }
+
   if (!EVM_ADDRESS_RE.test(address)) {
     throw new Error(
-      `BEADZ_ADDRESS "${address}" is not a valid EVM address; expected "0x" followed by exactly 40 hex characters.`
+      `BEADZ_ADDRESS "${address}" is not a valid EVM address; expected "0x" followed by exactly 40 hex characters.`,
     );
   }
 
@@ -91,7 +95,8 @@ export function serializeTokenList(list) {
   return `${JSON.stringify(list, null, 2)}\n`;
 }
 
-const ADDRESS_DECL_RE = /export const BEADZ_ADDRESS\s*:\s*string \| null\s*=\s*([^;]+);/;
+const ADDRESS_DECL_RE =
+  /export const BEADZ_ADDRESS\s*:\s*string \| null\s*=\s*([^;]+);/;
 
 /**
  * Extracts BEADZ_ADDRESS's declared value from src/config.ts's source text:
@@ -101,23 +106,29 @@ const ADDRESS_DECL_RE = /export const BEADZ_ADDRESS\s*:\s*string \| null\s*=\s*(
  * A plain-text regex rather than a real TypeScript import, because
  * config.ts uses TS type syntax (`: string | null`) that plain Node can't
  * parse, and this repo already treats source files as text-to-assert-on
- * elsewhere (test/layout.test.mjs's frontmatter/head splitting,
+ * elsewhere (test/head.test.ts splitting built pages,
  * brand/build.test.mjs reading .gitignore). Throws if the declaration's
  * shape has drifted, so a future refactor of config.ts fails loudly here
  * instead of this parser silently returning the wrong thing.
  */
 export function parseBeadzAddress(configSource) {
   const match = configSource.match(ADDRESS_DECL_RE);
+
   if (!match) {
     throw new Error(
-      "could not find `export const BEADZ_ADDRESS: string | null = ...;` in src/config.ts -- has its declaration shape changed?"
+      "could not find `export const BEADZ_ADDRESS: string | null = ...;` in src/config.ts -- has its declaration shape changed?",
     );
   }
+
   const raw = match[1].trim();
   if (raw === "null") return null;
   const stringLiteral = raw.match(/^(["'])(.*)\1$/);
+
   if (!stringLiteral) {
-    throw new Error(`BEADZ_ADDRESS is set to an expression this parser doesn't understand: ${raw}`);
+    throw new Error(
+      `BEADZ_ADDRESS is set to an expression this parser doesn't understand: ${raw}`,
+    );
   }
+
   return stringLiteral[2];
 }

@@ -94,7 +94,7 @@ its own if they go stale.
 
 ## Licensing
 
-Henry is © Curt Henrichs, all rights reserved, and is excluded from this
+Henry is © Curt Henrichs LLC, all rights reserved, and is excluded from this
 repository's MIT grant — see the BRAND ASSETS EXCEPTION in the root `LICENSE`.
 That exclusion covers `vendor/henry-master.svg` too.
 

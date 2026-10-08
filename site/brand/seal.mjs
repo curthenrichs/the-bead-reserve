@@ -20,12 +20,9 @@
 import { loadFont, flatLine, arcLine } from "./lettering.mjs";
 import { henryGroup } from "./henry.mjs";
 
-export const PALETTE = Object.freeze({
-  ground: "#1b140c",
-  accent: "#ffaa3c",
-  accentSoft: "#ffc46e",
-  head: "#ffffff",
-});
+import { PALETTE } from "./palette.mjs";
+
+export { PALETTE };
 
 export const COPY = Object.freeze({
   rim: "THE BEAD RESERVE",
@@ -35,16 +32,29 @@ export const COPY = Object.freeze({
 
 // Tuned against rendered output at each target size; see brand/README.md.
 const FULL = Object.freeze({
-  ringR: 240, ringW: 5, hairlineR: 229, hairlineW: 2, hairlineOpacity: 0.45,
-  rimRadius: 196, rimSize: 34, rimTracking: 7,
-  henryScale: 0.47, henryY: 232,
-  countBaseline: 386, countSize: 27, countTracking: 6,
-  chainBaseline: 422, chainSize: 20, chainTracking: 6,
+  ringR: 240,
+  ringW: 5,
+  hairlineR: 229,
+  hairlineW: 2,
+  hairlineOpacity: 0.45,
+  rimRadius: 196,
+  rimSize: 34,
+  rimTracking: 7,
+  henryScale: 0.47,
+  henryY: 232,
+  countBaseline: 386,
+  countSize: 27,
+  countTracking: 6,
+  chainBaseline: 422,
+  chainSize: 20,
+  chainTracking: 6,
 });
 
 const SMALL = Object.freeze({
-  ringR: 236, ringW: 16,
-  henryScale: 0.78, henryY: 256,
+  ringR: 236,
+  ringW: 16,
+  henryScale: 0.78,
+  henryY: 256,
 });
 
 export function sealSvg({ lettering = true } = {}) {
@@ -57,21 +67,37 @@ export function sealSvg({ lettering = true } = {}) {
     : "";
 
   let type = "";
+
   if (lettering) {
     const bold = loadFont("bold");
     const regular = loadFont("regular");
 
     const rim = arcLine({
-      font: bold, text: COPY.rim, cx: 256, cy: 256,
-      radius: FULL.rimRadius, size: FULL.rimSize, letterSpacing: FULL.rimTracking,
+      font: bold,
+      text: COPY.rim,
+      cx: 256,
+      cy: 256,
+      radius: FULL.rimRadius,
+      size: FULL.rimSize,
+      letterSpacing: FULL.rimTracking,
     });
+
     const count = flatLine({
-      font: bold, text: COPY.count, cx: 256,
-      baseline: FULL.countBaseline, size: FULL.countSize, letterSpacing: FULL.countTracking,
+      font: bold,
+      text: COPY.count,
+      cx: 256,
+      baseline: FULL.countBaseline,
+      size: FULL.countSize,
+      letterSpacing: FULL.countTracking,
     });
+
     const chain = flatLine({
-      font: regular, text: COPY.chain, cx: 256,
-      baseline: FULL.chainBaseline, size: FULL.chainSize, letterSpacing: FULL.chainTracking,
+      font: regular,
+      text: COPY.chain,
+      cx: 256,
+      baseline: FULL.chainBaseline,
+      size: FULL.chainSize,
+      letterSpacing: FULL.chainTracking,
     });
 
     type =
@@ -81,8 +107,13 @@ export function sealSvg({ lettering = true } = {}) {
   }
 
   const henry = henryGroup({
-    cx: 256, cy: cfg.henryY, scale: cfg.henryScale,
-    ground: PALETTE.ground, accent: PALETTE.accent, bead: true, head: PALETTE.head,
+    cx: 256,
+    cy: cfg.henryY,
+    scale: cfg.henryScale,
+    ground: PALETTE.ground,
+    accent: PALETTE.accent,
+    bead: true,
+    head: PALETTE.head,
   });
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">

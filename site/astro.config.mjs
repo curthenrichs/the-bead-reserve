@@ -1,10 +1,9 @@
 import { defineConfig } from "astro/config";
-import react from "@astrojs/react";
 
 // Static site (Cloudflare Pages). The API is a separate Worker reached at
 // /api/*: same-origin in prod via a Cloudflare route, proxied in dev.
 export default defineConfig({
-  integrations: [react()],
+  site: "https://beadz.half-built-robots.com",
   output: "static",
   vite: {
     server: {

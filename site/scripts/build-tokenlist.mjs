@@ -16,7 +16,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { buildTokenList, serializeTokenList, parseBeadzAddress } from "./tokenlist.mjs";
+import {
+  buildTokenList,
+  serializeTokenList,
+  parseBeadzAddress,
+} from "./tokenlist.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const CONFIG_PATH = path.join(HERE, "..", "src", "config.ts");
@@ -40,11 +44,16 @@ export function run({ address, outDir }) {
         "BEADZ_ADDRESS is null (no contract deployed yet) -- not emitting tokenlist.json. This is expected, not an error.",
     };
   }
+
   const list = buildTokenList(address); // throws a descriptive Error for any invalid address
   const outPath = path.join(outDir, "tokenlist.json");
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(outPath, serializeTokenList(list));
-  return { emitted: true, path: outPath, message: `tokenlist.json written to ${outPath}` };
+  return {
+    emitted: true,
+    path: outPath,
+    message: `tokenlist.json written to ${outPath}`,
+  };
 }
 
 function main() {
@@ -58,7 +67,9 @@ function main() {
 // / `npm run tokenlist:build`), not when it's imported -- tokenlist.test.mjs
 // imports `run` to point it at a temp directory, and must not trigger a real
 // write to site/public/ as a side effect of that import.
-const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+const isMain =
+  process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+
 if (isMain) {
   try {
     main();

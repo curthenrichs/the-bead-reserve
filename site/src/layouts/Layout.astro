@@ -1,0 +1,111 @@
+---
+import "@half-built/css/layers";
+import "@half-built/css/tokens";
+import "@half-built/css";
+import "@half-built/css/patterns.css";
+import "@half-built/css/prose.css";
+import "@half-built/css/plate-modal.css";
+import "@half-built/css/lightbox.css";
+import "../styles/beadz.css";
+import Shell from "@half-built/astro/components/Shell.astro";
+import Masthead from "@half-built/astro/components/Masthead.astro";
+import Footer from "@half-built/astro/components/Footer.astro";
+import { formatHeaderDate } from "@half-built/astro/lib/header-date.ts";
+import {
+  SITE_NAME,
+  TAGLINE,
+  DESCRIPTION,
+  NAV,
+  LEGAL_HOLDER,
+  FOOTER_SITEMAP,
+  ECOSYSTEM,
+  ECOSYSTEM_SELF,
+} from "../data/site";
+import { THEME_STORAGE_KEY } from "../lib/keys";
+import primitives from "@half-built/css/tokens/primitives.css?raw";
+
+interface Props {
+  title: string;
+  description?: string;
+  noindex?: boolean;
+}
+
+const { title, description = DESCRIPTION, noindex = false } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL("/og-image.png", Astro.site);
+
+const prim = (name: string) =>
+  new RegExp(`--${name}:\\s*(#[0-9a-f]{6})`, "i").exec(primitives)?.[1] ?? "";
+
+const themeLight = prim("white");
+const themeDark = prim("black-900");
+---
+
+<Shell themeStorageKey={THEME_STORAGE_KEY}>
+  <Fragment slot="head">
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
+    {!noindex && <link rel="canonical" href={canonical} />}
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: light)"
+      content={themeLight}
+    />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: dark)"
+      content={themeDark}
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {!noindex && <meta property="og:url" content={canonical} />}
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+  </Fragment>
+  <Masthead
+    slot="header"
+    siteName={SITE_NAME}
+    tagline={TAGLINE}
+    nav={NAV}
+    socials={[]}
+    dateStr={formatHeaderDate(new Date())}
+    searchAction={false}
+  >
+    <span slot="title" class="beadz-wordmark">The Bead <em>Reserve</em></span>
+  </Masthead>
+  <slot />
+  <Footer
+    slot="footer"
+    legalHolder={LEGAL_HOLDER}
+    sitemap={FOOTER_SITEMAP}
+    ecosystem={ECOSYSTEM}
+    ecosystemSelf={ECOSYSTEM_SELF}
+  />
+  <Fragment slot="scripts">
+    <script>
+      import { mountFocusMode } from "@half-built/astro/scripts/focus-mode.ts";
+      import { mountLinkTips } from "@half-built/astro/scripts/link-tip.ts";
+      import { mountThemeToggle } from "@half-built/astro/scripts/theme-toggle.ts";
+      import { mountScrollTop } from "@half-built/astro/scripts/scroll-top.ts";
+      import { mountEcosystem } from "@half-built/astro/scripts/ecosystem.ts";
+      import { THEME_STORAGE_KEY, ECOSYSTEM_SELF_KEY, ECOSYSTEM_ENDPOINT } from "../lib/keys";
+      mountFocusMode(document.documentElement);
+      mountLinkTips(document, { selector: 'a[href^="http"], a[data-tooltip]' });
+      mountThemeToggle(document, { storageKey: THEME_STORAGE_KEY });
+      mountScrollTop(document);
+      if (ECOSYSTEM_ENDPOINT !== null) {
+        void mountEcosystem(document, { endpoint: ECOSYSTEM_ENDPOINT, selfKey: ECOSYSTEM_SELF_KEY }).catch(() => {});
+      }
+    </script></Fragment>
+</Shell>

@@ -1,0 +1,102 @@
+---
+import Layout from "../layouts/Layout.astro";
+import PolicyContact from "../components/PolicyContact.astro";
+import { LEGAL_HOLDER } from "../data/site";
+
+const REPO = "https://github.com/curthenrichs/the-bead-reserve";
+---
+
+<Layout
+  title="The Bead Reserve : Terms"
+  description="The terms for using The Bead Reserve's website, covering the status of the token and the license for the code."
+>
+  <main>
+    <article class="policy bracket-frame">
+      <h1>Terms</h1>
+      <div class="prose">
+        <p>Last updated: October 7, 2026</p>
+        <p>
+          These terms cover the website of The Bead Reserve, operated by
+          {LEGAL_HOLDER}. Use of the site constitutes acceptance of these terms.
+        </p>
+
+        <h2>The token</h2>
+        <p>
+          BEADZ is a novelty collectible issued for amusement. It has no
+          monetary value, and none is promised. It carries no expectation of
+          profit. It is not a stablecoin, a security, a deposit, or a payment
+          instrument, and is not pegged to any national currency. The Reserve
+          sells it to no one and seeds no market. Any market a third party
+          creates is that party's doing and risk.
+        </p>
+        <p>
+          Physical redemption is available by prepaid certified mail with
+          signature, in minimum lots, while the redemption window is open. It
+          costs far more than the beads are worth. The
+          <a href="/whitepaper.pdf">whitepaper</a> sets out the full terms.
+        </p>
+        <p>Nothing on this site is financial or legal advice.</p>
+
+        <h2>Code</h2>
+        <p>
+          The software behind The Bead Reserve, this site included, is published
+          under the <a href={`${REPO}/blob/main/LICENSE`}>MIT license</a> in the
+          <a href={REPO}>public repository</a>. Anything the license allows is
+          allowed here, provided the copyright and license notice travel with
+          the code.
+        </p>
+
+        <h2>Brand assets</h2>
+        <p>
+          Henry and the reserve seal are excluded from that grant under the
+          BRAND ASSETS EXCEPTION in the repository's <code>LICENSE</code>. They
+          are &copy; {LEGAL_HOLDER}, all rights reserved. They may be used to
+          refer to The Bead Reserve. Neither they nor the name "The Bead
+          Reserve" may be used as the identity of another project, a fork of
+          this one included. The <a href="/brand/">brand assets</a> page sets
+          out the usage rules.
+        </p>
+
+        <h2>No warranty</h2>
+        <p>
+          The site and the token are provided "as is" and "as available",
+          without warranties of any kind, express or implied. The reserve is
+          uninsured. To the maximum extent permitted by law, {LEGAL_HOLDER} is
+          not liable for any damages arising from use of the site or the token,
+          or from reliance on the site's content.
+        </p>
+
+        <h2>Indemnity</h2>
+        <p>
+          Anyone who forks the software or deploys their own vault does so at
+          their own risk. They agree to indemnify and hold harmless
+          {LEGAL_HOLDER} against claims arising from that use, to the extent the
+          law allows.
+        </p>
+
+        <h2>Links to other sites</h2>
+        <p>
+          The site links to the Half-Built Robots blog and to other sites. Those
+          sites are outside this site's control, and a link is not an
+          endorsement. Their terms and privacy practices are their own.
+        </p>
+
+        <h2>Changes</h2>
+        <p>
+          These terms may change. Revisions are posted on this page with a new
+          date at the top. Continued use of the site after a change constitutes
+          acceptance of the revised terms.
+        </p>
+
+        <h2>Governing law</h2>
+        <p>
+          These terms are governed by the laws of the State of California,
+          United States.
+        </p>
+
+        <h2>Contact</h2>
+        <PolicyContact />
+      </div>
+    </article>
+  </main>
+</Layout>

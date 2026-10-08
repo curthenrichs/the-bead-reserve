@@ -1,0 +1,77 @@
+---
+import Layout from "../layouts/Layout.astro";
+import PolicyContact from "../components/PolicyContact.astro";
+import { LEGAL_HOLDER } from "../data/site";
+---
+
+<Layout
+  title="The Bead Reserve : Accessibility"
+  description="The accessibility statement for The Bead Reserve's website, with its conformance status and how to report a barrier."
+>
+  <main>
+    <article class="policy bracket-frame">
+      <h1>Accessibility</h1>
+      <div class="prose">
+        <p>
+          This is the accessibility statement of The Bead Reserve, issued by
+          {LEGAL_HOLDER} for this site.
+        </p>
+
+        <h2>Conformance status</h2>
+        <p>
+          The
+          <a href="https://www.w3.org/WAI/standards-guidelines/wcag/"
+            >Web Content Accessibility Guidelines (WCAG)</a
+          >
+          define requirements for making web content accessible to people with
+          disabilities. This site is partially conformant with WCAG 2.2 Level
+          AA. Partially conformant means that some parts of the content do not
+          fully conform to the standard.
+        </p>
+
+        <h2>Feedback</h2>
+        <p>
+          Report an accessibility barrier on this site through any of these.
+        </p>
+        <PolicyContact />
+
+        <h2>Technical specifications</h2>
+        <p>
+          The site is HTML and CSS. JavaScript runs the reserve monitor and the
+          theme toggle. Without JavaScript, the monitor remains on its sealed
+          placeholder.
+        </p>
+
+        <h2>Known limitations</h2>
+        <ol>
+          <li>
+            The reserve monitor is a black screen in both themes. This is
+            deliberate. Its state is also given in text, in the badge and the
+            captions around the screen. The camera frame carries alt text.
+          </li>
+          <li>
+            The reserve seal turns over on hover or keyboard focus to show its
+            reverse. This is deliberate. The seal's label states the reserve
+            figure and names the reverse. The genesis count lettered on the
+            reverse also appears in the reserve figures on the same page. The
+            chain it names is given in the seal image's alt text on the brand
+            assets page. The seal is not shown at phone width.
+          </li>
+        </ol>
+        <p>Report any issue not listed here.</p>
+
+        <h2>Assessment approach</h2>
+        <p>
+          {LEGAL_HOLDER} assessed this site by self-evaluation. Every change to
+          the site also runs automated checks. axe-core tests every page against
+          WCAG 2.2 A and AA in both the light and dark themes. A keyboard walk
+          of the home page confirms that every focus stop shows a ring.
+          html-validate checks the markup of every built page.
+        </p>
+
+        <h2>Date</h2>
+        <p>This statement was written on October 7, 2026.</p>
+      </div>
+    </article>
+  </main>
+</Layout>

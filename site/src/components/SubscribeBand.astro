@@ -1,0 +1,33 @@
+---
+import Subscribe from "@half-built/astro/components/Subscribe.astro";
+---
+
+{/* The bridge back to the blog: the shared list, BEADZ's own status
+   lines. Posts to the same Buttondown account as the blog, untagged
+   (tags are a paid add-on; Curt, 2026-10-06). */}
+
+<Subscribe
+  variant="page"
+  action="https://buttondown.com/api/emails/embed-subscribe/half-built-robots"
+  publicUrl="buttondown.com/half-built-robots"
+  messages={{
+    invalid: "That address does not look deliverable. Check and retry.",
+    pending: "Filing your correspondence.",
+    sent: "Enrolled as correspondent. Dispatches are irregular by design.",
+    failed: "The registry could not be reached. Retry in a minute.",
+  }}
+>
+  <Fragment slot="title">Plenty more where this came from</Fragment>
+  <Fragment slot="blurb">
+    The Bead Reserve is one of many half-built experiments in the workshop. Have
+    a look around the rest, and leave an address to hear about new ones as they
+    leave the bench.
+    <a href="https://www.half-built-robots.com">Browse the projects &rarr;</a>
+  </Fragment>
+  <Fragment slot="fine-print">
+    Double opt-in. Every email has an
+    <a href="https://www.half-built-robots.com/policies/mailing-list/"
+      >unsubscribe link</a
+    >.
+  </Fragment>
+</Subscribe>

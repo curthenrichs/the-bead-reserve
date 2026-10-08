@@ -1,15 +1,14 @@
-// Theme for the BEADZ whitepaper: clean & typographic, tuned to match the
-// half-built-robots.com blog (amber accent, Roboto Mono) while staying a
+// Theme for the BEADZ whitepaper: clean & typographic, with a palette that
+// follows the @half-built light theme (amber accent, Roboto Mono) while staying a
 // readable, printable light document.
 // Roboto Serif (body) + Roboto Mono (headings/labels/tables/identifiers) —
 // a single type family, matching the blog and reading cleanly at text sizes.
 
-#let ink        = rgb("#1B140C")  // warm dark brown-black (blog background hue)
-#let ink-soft   = rgb("#6B5541")  // warm brown, secondary text
-#let amber      = rgb("#FFAA3C")  // blog primary — used for rules/accents
-#let amber-dark = rgb("#A8650F")  // darkened amber, legible on light for text
-#let paper      = rgb("#FAF7F1")  // warm near-white page background
-#let hairline   = rgb("#DDD3C4")  // subtle warm rule (footer)
+#let ink        = rgb("#404040")  // system --ink (light theme)
+#let ink-soft   = rgb("#555555")  // system --ink-muted
+#let amber      = rgb("#FFAA3C")  // system --accent-1, rules and accents
+#let amber-dark = rgb("#A36300")  // system --accent-1-ink, amber text on light
+#let hairline   = rgb("#D9D9D9")  // system --hairline
 
 #let serif = "Roboto Serif"
 #let mono  = "Roboto Mono"
@@ -54,7 +53,6 @@
   set document(title: title, author: "The Bead Reserve", description: subtitle)
   set page(
     paper: "a4",
-    fill: paper,
     margin: (x: 2.4cm, top: 2.6cm, bottom: 2.6cm),
     background: if draft { draft-watermark },
     footer: context {

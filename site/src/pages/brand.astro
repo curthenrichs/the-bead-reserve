@@ -1,158 +1,219 @@
 ---
-import Base from "../layouts/Base.astro";
+import Layout from "../layouts/Layout.astro";
+import ReceiptHeader from "../components/ReceiptHeader.astro";
+import { PALETTE } from "../../brand/palette.mjs";
 
-const PALETTE = [
-  { name: "Ground", hex: "#1b140c" },
-  { name: "Accent", hex: "#ffaa3c" },
-  { name: "Secondary", hex: "#ffc46e" },
-  { name: "Head", hex: "#ffffff" },
-];
+const ROLES: Record<string, string> = {
+  ground: "Ground",
+  accent: "Accent",
+  accentSoft: "Secondary",
+  head: "Head",
+};
 ---
-<Base
+
+<Layout
   title="The Bead Reserve : Brand Assets"
   description="Logo files, palette, and terms of use for the BEADZ reserve seal."
 >
-  <header class="masthead">
-    <div class="eyebrow" style="color:var(--amber-mid)">Press &amp; Third-Party Use</div>
-    <h1>The Bead <em>Reserve</em> : Brand Assets</h1>
-    <p style="color:var(--text-soft);font-size:clamp(16px,1.6vw,19px)">
-      Logo files, palette, and terms of use for the BEADZ reserve seal. Take them from here rather
-      than lifting a screenshot. There is one mark, and no wordmark or alternate lockup.
-    </p>
-    <p class="mono" style="margin-top:12px;font-size:13px">
-      <a href="/">&larr;&nbsp;The Bead Reserve</a>
-    </p>
-  </header>
+  <main>
+    <ReceiptHeader eyebrow="Press & Third-Party Use" page="Brand Assets">
+      <p>
+        Logo files, palette, and terms of use for the BEADZ reserve seal. Take
+        them from here rather than lifting a screenshot. There is one mark, and
+        no wordmark or alternate lockup.
+      </p>
+      <p class="brand-back">
+        <a href="/">&larr;&nbsp;The Bead Reserve</a>
+      </p>
+    </ReceiptHeader>
 
-  <section aria-labelledby="mark-heading" style="margin:0 0 40px">
-    <h2 id="mark-heading" class="eyebrow" style="color:var(--text-soft);font-size:12px">The Mark</h2>
-    <div style="display:grid;grid-template-columns:minmax(160px,220px) 1fr;gap:28px;align-items:start;margin-top:12px">
-      <div style="background:#1b140c;border:2px solid var(--line);padding:20px;display:flex;align-items:center;justify-content:center">
-        <img
-          src="/beadz-seal.svg"
-          alt="The Bead Reserve seal: a circular mark reading THE BEAD RESERVE around the top rim, Henry the robot mascot at the center, and 47,318 / ERC-20 · BASE lettered flat beneath"
-          width="220"
-          height="220"
-          style="width:100%;height:auto;display:block"
-        />
-      </div>
-      <div>
-        <p style="margin-top:0">
-          The seal has a dark ground. Put it on a dark surface, as shown here, rather than straight
-          onto white.
+    <div class="prose">
+      <section aria-labelledby="mark-heading">
+        <h2 id="mark-heading" class="brand-heading micro-label">The Mark</h2>
+        <div class="brand-mark">
+          <div class="brand-seal">
+            <img
+              src="/beadz-seal.svg"
+              alt="The Bead Reserve seal: a circular mark reading THE BEAD RESERVE around the top rim, Henry the robot mascot at the center, and 47,318 / ERC-20 · BASE lettered flat beneath"
+              width="220"
+              height="220"
+            />
+          </div>
+          <div>
+            <p>
+              The seal carries its own black ground and sits on light or dark
+              surfaces.
+            </p>
+            <section class="table-scroll" tabindex="0" aria-label="Brand files">
+              <table>
+                <thead>
+                  <tr>
+                    <th>File</th>
+                    <th>Format</th>
+                    <th>Use</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>beadz-token-512.png</td>
+                    <td>PNG, 512×512</td>
+                    <td>General logo use, app icons</td>
+                    <td>
+                      <a href="/beadz-token-512.png" download>Download</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>beadz-token-256.png</td>
+                    <td>PNG, 256×256</td>
+                    <td>Token lists, wallets</td>
+                    <td>
+                      <a href="/beadz-token-256.png" download>Download</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>beadz-seal.svg</td>
+                    <td>SVG, vector</td>
+                    <td>Print, press, anything that needs to scale</td>
+                    <td><a href="/beadz-seal.svg" download>Download</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="permanence-heading">
+        <h2 id="permanence-heading" class="brand-heading micro-label">
+          Permanence
+        </h2>
+        <p>
+          These URLs are canonical and will not change. Listing sites and press
+          hard-code asset links and rarely re-fetch, so link to them directly
+          rather than mirroring a copy.
         </p>
-        <table class="mono" style="width:100%;border-collapse:collapse;font-size:13px;margin-top:8px">
+      </section>
+
+      <section aria-labelledby="palette-heading">
+        <h2 id="palette-heading" class="brand-heading micro-label">Palette</h2>
+        <table>
           <thead>
             <tr>
-              <th style="text-align:left;border-bottom:2px solid var(--line);padding:8px 10px 8px 0">File</th>
-              <th style="text-align:left;border-bottom:2px solid var(--line);padding:8px 10px">Format</th>
-              <th style="text-align:left;border-bottom:2px solid var(--line);padding:8px 10px">Use</th>
-              <th style="text-align:left;border-bottom:2px solid var(--line);padding:8px 0"></th>
+              <th></th>
+              <th>Role</th>
+              <th>Hex</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td style="padding:8px 10px 8px 0;border-bottom:1px solid var(--hairline)">beadz-token-512.png</td>
-              <td style="padding:8px 10px;border-bottom:1px solid var(--hairline)">PNG, 512×512</td>
-              <td style="padding:8px 10px;border-bottom:1px solid var(--hairline)">General logo use, app icons</td>
-              <td style="padding:8px 0;border-bottom:1px solid var(--hairline)">
-                <a href="/beadz-token-512.png" download>Download</a>
+            {Object.entries(PALETTE).map(([key, hex]) => <tr>
+              <td>
+                <span
+                  class="swatch"
+                  aria-hidden="true"
+                  style={`background-color:${hex}`}
+                ></span>
               </td>
-            </tr>
-            <tr>
-              <td style="padding:8px 10px 8px 0;border-bottom:1px solid var(--hairline)">beadz-token-256.png</td>
-              <td style="padding:8px 10px;border-bottom:1px solid var(--hairline)">PNG, 256×256</td>
-              <td style="padding:8px 10px;border-bottom:1px solid var(--hairline)">Token lists, wallets</td>
-              <td style="padding:8px 0;border-bottom:1px solid var(--hairline)">
-                <a href="/beadz-token-256.png" download>Download</a>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:8px 10px 8px 0">beadz-seal.svg</td>
-              <td style="padding:8px 10px">SVG, vector</td>
-              <td style="padding:8px 10px">Print, press, anything that needs to scale</td>
-              <td style="padding:8px 0">
-                <a href="/beadz-seal.svg" download>Download</a>
-              </td>
-            </tr>
+              <td>{ROLES[key]}</td>
+              <td>{hex}</td>
+            </tr>)}
           </tbody>
         </table>
-      </div>
+      </section>
+
+      <section aria-labelledby="usage-heading">
+        <h2 id="usage-heading" class="brand-heading micro-label">
+          Usage Rules
+        </h2>
+        <ul>
+          <li>Don't stretch, rotate, or recolor the mark.</li>
+          <li>
+            Don't separate Henry from the seal, or use him alone as a mark.
+          </li>
+          <li>Don't redraw the mark. Use the supplied files.</li>
+          <li>
+            The mark needs about 96px to stay legible. Below that, use the
+            favicon files (<code>favicon-16x16.png</code>,
+            <code>favicon-32x32.png</code>, <code>beadz-seal-small.svg</code>),
+            which are drawn separately for small sizes rather than scaled down.
+          </li>
+          <li>Don't crowd the rim with other text or graphics.</li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="licensing-heading">
+        <h2 id="licensing-heading" class="brand-heading micro-label">
+          Licensing
+        </h2>
+        <p>
+          The BEADZ software is MIT-licensed, and forking it is encouraged.
+          Deploy your own vault, reserve your own beads. Henry and the reserve
+          seal are the one carve-out from that grant: they are © Curt Henrichs
+          LLC, all rights reserved, under the BRAND ASSETS EXCEPTION in the
+          repository's <code>LICENSE</code>.
+        </p>
+        <p>
+          You may use this mark to <em>refer to</em> The Bead Reserve, in an
+          article, a listing, or a token-list entry. You may not use it as the
+          identity of your own project, including a fork of this one. A fork is
+          expected to swap in its own mark. Nothing in the software depends on
+          this one.
+        </p>
+      </section>
+
+      <section aria-labelledby="counterfeit-heading">
+        <h2 id="counterfeit-heading" class="brand-heading micro-label">
+          Counterfeits
+        </h2>
+        <p>
+          The Bead Reserve seeds no liquidity pool and never will. Any BEADZ
+          token that can be bought on an exchange is, by construction, not this
+          project. If you see this mark used to promote a purchasable token,
+          that use is not endorsed by The Bead Reserve.
+        </p>
+      </section>
     </div>
-  </section>
+  </main>
+</Layout>
 
-  <section aria-labelledby="permanence-heading" style="margin:0 0 40px">
-    <h2 id="permanence-heading" class="eyebrow" style="color:var(--text-soft);font-size:12px">Permanence</h2>
-    <p style="margin-top:12px">
-      These URLs are canonical and will not change. Listing sites and press hard-code asset links and
-      rarely re-fetch, so link to them directly rather than mirroring a copy.
-    </p>
-  </section>
+<style>
+  .brand-back { margin: 12px 0 0; }
 
-  <section aria-labelledby="palette-heading" style="margin:0 0 40px">
-    <h2 id="palette-heading" class="eyebrow" style="color:var(--text-soft);font-size:12px">Palette</h2>
-    <table class="mono" style="width:100%;max-width:480px;border-collapse:collapse;font-size:13px;margin-top:12px">
-      <thead>
-        <tr>
-          <th style="text-align:left;border-bottom:2px solid var(--line);padding:8px 10px 8px 0"></th>
-          <th style="text-align:left;border-bottom:2px solid var(--line);padding:8px 10px">Role</th>
-          <th style="text-align:left;border-bottom:2px solid var(--line);padding:8px 10px">Hex</th>
-        </tr>
-      </thead>
-      <tbody>
-        {PALETTE.map((c) => (
-          <tr>
-            <td style="padding:8px 10px 8px 0;border-bottom:1px solid var(--hairline)">
-              <span
-                aria-hidden="true"
-                style={`display:inline-block;width:18px;height:18px;border:2px solid var(--line);background:${c.hex};vertical-align:middle`}
-              ></span>
-            </td>
-            <td style="padding:8px 10px;border-bottom:1px solid var(--hairline)">{c.name}</td>
-            <td style="padding:8px 10px;border-bottom:1px solid var(--hairline)">{c.hex}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </section>
+  section { margin: 0 0 40px; }
+  section:last-child { margin-bottom: 0; }
 
-  <section aria-labelledby="usage-heading" style="margin:0 0 40px">
-    <h2 id="usage-heading" class="eyebrow" style="color:var(--text-soft);font-size:12px">Usage Rules</h2>
-    <ul style="margin-top:12px;padding-left:20px">
-      <li>Don't stretch, rotate, or recolor the mark.</li>
-      <li>Don't separate Henry from the seal, or use him alone as a mark.</li>
-      <li>Don't redraw the mark. Use the supplied files.</li>
-      <li>
-        The mark needs about 96px to stay legible. Below that, use the favicon files
-        (<code class="mono">favicon-16x16.png</code>, <code class="mono">favicon-32x32.png</code>,
-        <code class="mono">beadz-seal-small.svg</code>), which are drawn separately for small sizes
-        rather than scaled down.
-      </li>
-      <li>Don't crowd the rim with other text or graphics.</li>
-    </ul>
-  </section>
+  .brand-heading {
+    margin: 0 0 12px;
+    font-size: var(--font-size-xs);
+    color: var(--ink-muted);
+    text-transform: uppercase;
+  }
 
-  <section aria-labelledby="licensing-heading" style="margin:0 0 40px">
-    <h2 id="licensing-heading" class="eyebrow" style="color:var(--text-soft);font-size:12px">Licensing</h2>
-    <p style="margin-top:12px">
-      The BEADZ software is MIT-licensed, and forking it is encouraged. Deploy your own vault, reserve
-      your own beads. Henry and the reserve seal are the one carve-out from that grant: they are
-      © Curt Henrichs, all rights reserved, under the BRAND ASSETS EXCEPTION in the repository's
-      <code class="mono">LICENSE</code>.
-    </p>
-    <p>
-      You may use this mark to <em>refer to</em> The Bead Reserve, in an article, a listing, or a
-      token-list entry. You may not use it as the identity of your own project, including a fork of
-      this one. A fork is expected to swap in its own mark. Nothing in the software depends on this one.
-    </p>
-  </section>
+  .brand-mark {
+    display: grid;
+    grid-template-columns: minmax(160px, 220px) 1fr;
+    gap: 28px;
+    align-items: start;
+  }
 
-  <section aria-labelledby="counterfeit-heading">
-    <h2 id="counterfeit-heading" class="eyebrow" style="color:var(--text-soft);font-size:12px">Counterfeits</h2>
-    <p style="margin-top:12px">
-      The Bead Reserve seeds no liquidity pool and never will. Any BEADZ token that can be bought on an
-      exchange is, by construction, not this project. If you see this mark used to promote a purchasable
-      token, that use is not endorsed by The Bead Reserve.
-    </p>
-  </section>
-</Base>
+  .brand-seal img {
+    display: block;
+    border: 0;
+    width: 100%;
+    height: auto;
+  }
+
+  .brand-mark > div:last-child { min-width: 0; }
+
+  .swatch {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: var(--stroke) solid var(--rule);
+    vertical-align: middle;
+  }
+
+  @media (--bp-phone) {
+    .brand-mark { grid-template-columns: 1fr; }
+  }
+</style>

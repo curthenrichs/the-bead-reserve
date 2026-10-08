@@ -1,17 +1,57 @@
 ---
 ---
-<div style="margin-top:44px">
-  <hr style="border:0;border-top:2px solid var(--line)" />
-  <p class="mono" style="font-size:10.5px;line-height:1.9;color:var(--text-soft)">
-    BEADZ is a novelty collectible issued for amusement. It has no monetary value, no investment
-    merit, and no expectation of profit. It is not a stablecoin, a security, a deposit, or a
-    payment instrument, and is not pegged to any national currency. Supply is fixed; the mint is
-    renounced. Physical redemption is available by prepaid certified mail with signature, in
-    minimum lots, and costs far more than the beads are worth. Do not construe any of this as
-    financial, legal, or horticultural advice. One (1) bead ≈ one (1) bead.
+
+<section class="attestation" aria-label="Disclaimers">
+  {/* The fine print is note 1: the receipt, the claim panel, and the
+     redemption panel each carry a superscript reference to it (owner
+     request 2026-10-08). The marker and reference styles are in
+     beadz.css. */}
+  <p class="fine-print" id="note-1">
+    <span class="note-mark">1</span> BEADZ is a novelty collectible issued for
+    amusement. It has no monetary value, no investment merit, and no expectation
+    of profit. It is not a stablecoin, a security, a deposit, or a payment
+    instrument, and is not pegged to any national currency. Supply is fixed; the
+    mint is renounced. Physical redemption is available by prepaid certified
+    mail with signature, in minimum lots, and costs far more than the beads are
+    worth. Do not construe any of this as financial, legal, or horticultural
+    advice. One (1) bead ≈ one (1) bead.
   </p>
-  <div style="margin-top:20px">
-    <div style="font-family:var(--serif);font-style:italic;font-size:20px;border-bottom:2px solid var(--line);display:inline-block;padding:0 30px 3px 4px">The Vault Keeper</div>
-    <div class="eyebrow" style="color:var(--text-soft);margin-top:5px">Authorized signatory · The Bead Reserve</div>
+  <div class="signature">
+    <p class="signature-name">The Vault Keeper</p>
+    <p class="signature-role micro-label">
+      Authorized signatory · The Bead Reserve
+    </p>
   </div>
-</div>
+</section>
+
+<style>
+  .attestation {
+    margin-top: 44px;
+    padding-top: 16px;
+    border-top: var(--stroke) solid var(--rule);
+  }
+
+  .fine-print {
+    color: var(--ink-muted);
+    font-size: var(--font-size-xs);
+    line-height: 1.9;
+  }
+
+  .signature { margin-top: 20px; }
+
+  .signature-name {
+    display: inline-block;
+    margin: 0;
+    padding: 0 30px 3px 4px;
+    border-bottom: var(--stroke) solid var(--rule);
+    font-family: var(--beadz-font-display);
+    font-size: var(--font-size-md);
+    font-style: italic;
+  }
+
+  .signature-role {
+    margin: 5px 0 0;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+  }
+</style>

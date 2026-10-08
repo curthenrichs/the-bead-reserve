@@ -1,0 +1,34 @@
+---
+import Meter from "@half-built/astro/components/Meter.astro";
+import { GENESIS_BEADS } from "../config";
+
+const total = GENESIS_BEADS.toLocaleString("en-US");
+---
+
+{/* Stubbed until the contract is deployed. The disabled buttons are the
+   seam the wallet slice replaces (wagmi/viem, likely a React island). */}
+
+<section class="panel" aria-labelledby="claim-heading">
+  <h2 id="claim-heading">I. Certificate of Bead Entitlement</h2>
+  <p>
+    Claim one bead from the genesis mint. The reserve stays full; only the
+    entitlement
+    transfers.<sup class="note-ref"
+      ><a href="#note-1" aria-label="Note 1">1</a></sup
+    >
+  </p>
+  <div class="panel-meter-head micro-label">
+    <span>Genesis distribution</span><span>0 / {total} claimed</span>
+  </div>
+  <Meter
+    label="Genesis distribution"
+    value={0}
+    max={GENESIS_BEADS}
+    valueText={`0 of ${total} claimed`}
+  />
+  <div class="panel-actions">
+    <button type="button" class="panel-button" disabled>Connect wallet</button>
+    <button type="button" class="panel-button" disabled>Claim your bead</button>
+    <span class="panel-note">Claim opens at launch</span>
+  </div>
+</section>

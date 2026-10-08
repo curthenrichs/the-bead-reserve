@@ -1,0 +1,32 @@
+{
+  "extends": ["html-validate:recommended"],
+  "rules": {
+    "no-inline-style": [
+      "error",
+      {
+        "allowedProperties": [
+          "height",
+          "background-image",
+          "--gallery-cols",
+          "object-position",
+          "color",
+          "background-color",
+          "overflow-x",
+          "font-style",
+          "--meter-fill",
+          "--meter-segments"
+        ]
+      }
+    ],
+    "void-style": "off",
+    "no-trailing-whitespace": "off",
+    "prefer-button": "off",
+    "long-title": "off",
+    "valid-id": [
+      "error",
+      {
+        "relaxed": true
+      }
+    ]
+  }
+}

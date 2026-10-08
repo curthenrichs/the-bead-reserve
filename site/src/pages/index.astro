@@ -1,21 +1,61 @@
 ---
-import Base from "../layouts/Base.astro";
-import Masthead from "../components/Masthead.astro";
-import Ledger from "../components/Ledger.astro";
+import Layout from "../layouts/Layout.astro";
+import ReceiptHeader from "../components/ReceiptHeader.astro";
+import StatLedger from "@half-built/astro/components/StatLedger.astro";
+import { STATS } from "../config";
 import Seal from "../components/Seal.astro";
 import Disclaimers from "../components/Disclaimers.astro";
-import CameraMonitor from "../islands/CameraMonitor.tsx";
-import ClaimPanel from "../islands/ClaimPanel.tsx";
-import RedeemPanel from "../islands/RedeemPanel.tsx";
-import Subscribe from "../islands/Subscribe.tsx";
+import CameraMonitor from "../components/CameraMonitor.astro";
+import ClaimPanel from "../components/ClaimPanel.astro";
+import RedeemPanel from "../components/RedeemPanel.astro";
+import SubscribeBand from "../components/SubscribeBand.astro";
 ---
-<Base title="The Bead Reserve: Claim Office">
-  <Masthead />
-  <Ledger />
-  <Seal />
-  <CameraMonitor client:load />
-  <ClaimPanel client:load />
-  <RedeemPanel client:load />
-  <Disclaimers />
-  <Subscribe client:load />
-</Base>
+
+<Layout title="The Bead Reserve : Claim Office">
+  <main>
+    <ReceiptHeader eyebrow="Depository Receipt · Office of the Vault Keeper">
+      <p>
+        The Bead Reserve maintains <b>full physical collateralization</b> of
+        every outstanding BEADZ against a monitored reserve of glass seed beads,
+        held in a sealed jar and observed continuously by camera. Supply was
+        minted once at genesis and fixed permanently. One (1) BEADZ is entitled
+        to one (1)
+        bead.<sup class="note-ref"
+          ><a href="#note-1" aria-label="Note 1">1</a></sup
+        >
+      </p>
+      <p class="receipt-link">
+        <a href="/whitepaper.pdf" target="_blank" rel="noopener"
+          >The full terms are set out in the whitepaper&nbsp;↗</a
+        >
+      </p>
+    </ReceiptHeader>
+    <StatLedger
+      label="Reserve figures"
+      items={[
+        { label: "Physical Reserve", value: STATS.reserve },
+        { label: "Outstanding BEADZ", value: STATS.outstanding },
+        {
+          label: "Collateralization",
+          value: STATS.collateralization,
+          accent: true,
+        },
+      ]}
+    />
+    <Seal />
+    <CameraMonitor />
+    <ClaimPanel />
+    <RedeemPanel />
+    <Disclaimers />
+    {/* A very large pause after the Vault Keeper signs, before the
+       newsletter (owner call 2026-10-08): the receipt ends, then the
+       bridge back to the workshop. Scales down on phones. */}
+    <div class="subscribe-gap">
+      <SubscribeBand />
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .subscribe-gap { margin-top: clamp(96px, 14vw, 180px); }
+</style>

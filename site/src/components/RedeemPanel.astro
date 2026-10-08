@@ -1,0 +1,36 @@
+---
+import Meter from "@half-built/astro/components/Meter.astro";
+import { GENESIS_BEADS } from "../config";
+---
+
+{/* Stubbed like ClaimPanel. Redemption is the inverse of a claim:
+   entitlement leaving the system, supply shrinking. */}
+
+<section class="panel" aria-labelledby="redeem-heading">
+  <h2 id="redeem-heading">II. Redemption of Physical Beads</h2>
+  <p>
+    Burn one (1) BEADZ to redeem one (1) physical bead. Redemption is
+    irreversible: the token is destroyed and total supply shrinks; it is never
+    reminted. Physical delivery is by prepaid certified mail with signature, in
+    minimum lots, and costs far more than the beads are
+    worth.<sup class="note-ref"
+      ><a href="#note-1" aria-label="Note 1">1</a></sup
+    >
+  </p>
+  <div class="panel-meter-head micro-label">
+    <span>Beads redeemed to date</span><span>0 burned</span>
+  </div>
+  <Meter
+    label="Beads redeemed to date"
+    value={0}
+    max={GENESIS_BEADS}
+    valueText="0 burned"
+  />
+  <div class="panel-actions">
+    <button type="button" class="panel-button" disabled>Connect wallet</button>
+    <button type="button" class="panel-button" disabled>
+      Redeem for beads
+    </button>
+    <span class="panel-note">Redemption opens at launch</span>
+  </div>
+</section>
