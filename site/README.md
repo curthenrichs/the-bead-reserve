@@ -4,7 +4,8 @@
 design system (`@half-built/css`, `@half-built/astro`, `@half-built/tooling`,
 all pinned at 0.12.0). It presents the reserve as a single page: header, reserve
 ledger, a verified seal, a live camera monitor, a claim panel, a redemption
-panel, a newsletter signup, and disclaimers, plus a `/brand` page. There is no
+panel, a newsletter signup, and disclaimers. The other pages are `/brand`,
+`/policies`, `/privacy`, `/terms`, `/accessibility`, and the 404. There is no
 React. The camera monitor is the one script-driven piece, and it is plain
 TypeScript under `src/scripts`. No wallet connection, no chain reads, no new
 backend; this slice only renders. The backend it eventually talks to is
@@ -26,8 +27,9 @@ and `Footer`, and a page owns its own `<main>`. A new page gets the header,
 footer, and theme toggle for free and does not add its own.
 
 **Page titles read `The Bead Reserve : <Page>`,** with spaces around the colon.
-The page opens with the receipt `<h1>` (`ReceiptHeader.astro`), which says the
-same thing with `<em>` around `Reserve`.
+The home page and `/brand` open with the receipt `<h1>` (`ReceiptHeader.astro`),
+which says the same thing with `<em>` around `Reserve`. The policy pages and the
+404 use the `.policy` article heading instead.
 
 **Colors come only from @half-built tokens.** `test/no-hex.test.ts` fails on any
 hex literal in `src/`. Brand palette values live in `brand/palette.mjs`, outside
@@ -39,8 +41,9 @@ wordmark and the receipt heading. Everything else is a @half-built token.
 **Components.** Site-specific components stay in `src/components`. A generic
 component goes to `half-built-ui` first and arrives here by a version bump.
 
-**Dark elements get their own surface.** The camera monitor and the reserve seal
-are dark-grounded and sit on a dark panel in both themes.
+**Dark elements.** The camera monitor is a black screen in both themes. The seal
+carries its own black ground and sits on light or dark surfaces with no backing
+panel.
 
 **Copy register: dry and institutional.** State the thing and stop. No
 marketing language, no em dashes, no rule-of-three lists, and no sentence
@@ -78,6 +81,9 @@ falls back to it.
   panels, content, and head tags, plus suites that run a real `astro build` and
   read `dist/`: html-validate over every built page, the manifest, the token
   list, the whitepaper palette, and the hex guard over `src/`.
+  `npm test` builds with plain `astro build`, which copies whatever
+  `public/whitepaper.pdf` currently holds. To check the whitepaper, run
+  `npm run build` (which regenerates the PDF) before `npm run preview`.
 - **`npm run test:browser`**: headless Chrome against `astro preview` of the
   built `dist/` (ports 4351 and 4352). It checks layout, runs axe-core (WCAG
   2.2 A and AA) on each page in both themes and at phone width, and walks the

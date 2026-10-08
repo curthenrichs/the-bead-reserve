@@ -58,7 +58,11 @@ describe("camera monitor island", () => {
   });
 
   it("a failed fetch leaves the dark state and throws nothing", async () => {
-    document.body.innerHTML = MARKUP;
+    document.body.innerHTML = MARKUP.replace(
+      'data-status="dark"',
+      'data-status="fresh"',
+    );
+
     const fetchImpl = vi.fn(() => Promise.reject(new Error("network")));
     mountCameraMonitor(document, { pollMs: 0, fetchImpl });
 

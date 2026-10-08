@@ -182,7 +182,7 @@ describe("accessibility", () => {
     }, 60_000);
   }
 
-  /* Phones close the footer's Feeds and Ecosystem groups, so the pass
+  /* Phones close the footer's collapsible sitemap groups, so the pass
      opens every group first: a closed group's links are not audited. */
   for (const path of PHONE_PAGES) {
     it(`${path} has no WCAG 2.2 AA violations at phone width`, async () => {
@@ -204,12 +204,13 @@ describe("accessibility", () => {
      stop matches :focus-visible and must show the site ring (reset.css)
      or a box-shadow ring (the patterns.css vocabulary). Walks until the
      order wraps back to the document or the budget runs out; the home
-     page has the full chrome plus a card list, which is the whole
-     focusable vocabulary except the modals. */
+     page has the full chrome plus the seal, the monitor, and the forms,
+     which is the whole focusable vocabulary of this site. */
   it("every Tab stop on the home page shows a visible focus ring", async () => {
     const p = await open("/");
     const missing: string[] = [];
     const seen = new Set<string>();
+    let sawSeal = false;
 
     for (let i = 0; i < 120; i++) {
       await p.keyboard.press("Tab");
@@ -227,11 +228,16 @@ describe("accessibility", () => {
           (s.outlineStyle !== "none" && parseFloat(s.outlineWidth) > 0) ||
           s.boxShadow !== "none";
 
-        return { key: el.outerHTML.slice(0, 120), ringed };
+        return {
+          key: el.outerHTML.slice(0, 120),
+          ringed,
+          seal: !!el.closest(".seal"),
+        };
       });
 
       if (!stop || seen.has(stop.key)) break;
       seen.add(stop.key);
+      if (stop.seal) sawSeal = true;
       if (!stop.ringed) missing.push(stop.key);
     }
 
@@ -239,6 +245,8 @@ describe("accessibility", () => {
       seen.size,
       "the Tab walk never left the document body",
     ).toBeGreaterThan(5);
+
+    expect(sawSeal, "the seal was not among the Tab stops").toBe(true);
 
     expect(
       missing,

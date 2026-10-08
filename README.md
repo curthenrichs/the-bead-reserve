@@ -88,7 +88,7 @@ There is no `mint` in the surface. Fixed supply is confirmed by absence.
 
 ## Repository layout
 
-This repository has four independent parts:
+This repository has six independent parts:
 
 | Path | What it is | Status |
 |---|---|---|
@@ -96,6 +96,8 @@ This repository has four independent parts:
 | `camera/` | Physical attestation / webcam infrastructure | Reserved |
 | `cro-bench/` | Chief Reserve Officer prompt/grammar bench (SmolVLM experiment rig) | Built |
 | `whitepaper/` | Typst source for the whitepaper | Reserved |
+| `site/` | Static Astro site on the @half-built design system (claim office, `/brand`, policy pages) | Built |
+| `service/` | Cloudflare Worker backend for the site (reserve and frame endpoints) | Built |
 
 `Reserved` paths exist in the tree as placeholders; their contents land as each subsystem clears review.
 
@@ -112,7 +114,7 @@ bash script/local-rehearsal.sh                # deploy + full lifecycle on a dis
 ```
 
 The claim and proof-of-reserves front-end is hosted at
-[beadz.half-built-robots.com](https://beadz.half-built-robots.com) and is not part of this repository.
+[beadz.half-built-robots.com](https://beadz.half-built-robots.com) and is built from `site/` in this repository.
 
 ## Status
 

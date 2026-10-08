@@ -106,7 +106,7 @@ const ADDRESS_DECL_RE =
  * A plain-text regex rather than a real TypeScript import, because
  * config.ts uses TS type syntax (`: string | null`) that plain Node can't
  * parse, and this repo already treats source files as text-to-assert-on
- * elsewhere (test/layout.test.mjs's frontmatter/head splitting,
+ * elsewhere (test/head.test.ts splitting built pages,
  * brand/build.test.mjs reading .gitignore). Throws if the declaration's
  * shape has drifted, so a future refactor of config.ts fails loudly here
  * instead of this parser silently returning the wrong thing.

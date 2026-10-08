@@ -55,7 +55,7 @@ describe("layout head", () => {
 describe("layout chrome", () => {
   const doc = page("/");
 
-  it("uses the package header with the costume wordmark and the three nav links", () => {
+  it("uses the package header with the costume wordmark and the two nav links", () => {
     const header = doc.querySelector("header#masthead");
     expect(header).not.toBeNull();
     const mark = header?.querySelector(".beadz-wordmark");
