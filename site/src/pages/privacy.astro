@@ -48,9 +48,16 @@ import { LEGAL_HOLDER } from "../data/site";
 
         <h2>Cookies and browser storage</h2>
         <p>
-          The site sets no cookies of its own. It keeps two small values in the
-          browser's local storage. Neither is sent anywhere. Neither identifies
-          anyone.
+          The site sets no cookies of its own. Cloudflare runs bot protection in
+          front of the site, and that sets one cookie, <code>cf_clearance</code
+          >. It records that the browser has already passed Cloudflare's check,
+          so the browser is not challenged again. It lasts up to a year. Only
+          Cloudflare can read it. It is not used for advertising or for tracking
+          across sites.
+        </p>
+        <p>
+          The site also keeps two small values in the browser's local storage.
+          Neither is sent anywhere. Neither identifies anyone.
         </p>
         <ul>
           <li>
@@ -93,8 +100,8 @@ import { LEGAL_HOLDER } from "../data/site";
             consent until they unsubscribe.
           </li>
           <li>
-            <strong>Cloudflare's logs.</strong> Kept on Cloudflare's own
-            schedule under
+            <strong>Cloudflare's logs and bot protection.</strong> Kept on
+            Cloudflare's own schedule under
             <a href="https://www.cloudflare.com/privacypolicy/"
               >Cloudflare's privacy policy</a
             >.
