@@ -1,8 +1,9 @@
 /* The attestation record island on /fault-cam/. It does not poll: the
    camera monitor on the same page announces each reading
    (RESERVE_EVENT), and the record repaints from it. The markup is
-   server-rendered dark, so the page is honest without JavaScript. Each
-   frame is checked once, by counter. */
+   server-rendered dark, so the page is honest without JavaScript. A
+   frame with a settled verdict is checked once; an unsettled one is
+   checked again on the next poll. */
 import { DEVICE_PUBKEY } from "../config";
 import {
   checkReserve,
@@ -11,6 +12,12 @@ import {
   type Verdict,
 } from "./attestation";
 import { RESERVE_EVENT, type Reserve } from "./camera-state";
+
+const RECHECK: ReadonlySet<Verdict> = new Set<Verdict>([
+  "mismatch",
+  "unavailable",
+  "checking",
+]);
 
 export interface RecordOptions {
   check?: (r: Reserve) => Promise<Verdict>;
@@ -66,7 +73,12 @@ export function mountAttestationRecord(
     void check(r)
       .catch((): Verdict => "unavailable")
       .then((verdict) => {
-        if (checkedKey === key) set("verdict", VERDICT_TEXT[verdict]);
+        if (checkedKey !== key) return;
+        set("verdict", VERDICT_TEXT[verdict]);
+        /* An unsettled verdict (a mismatch, a failed fetch, a frame
+           that moved mid-check) is checked again on the next poll of
+           the same reading instead of standing until the next frame. */
+        if (RECHECK.has(verdict)) checkedKey = undefined;
       });
   };
 

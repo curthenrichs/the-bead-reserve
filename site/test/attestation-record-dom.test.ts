@@ -86,6 +86,57 @@ describe("attestation record island", () => {
     expect(calls).toBe(2);
   });
 
+  /* A false mismatch or a failed fetch must not stick until the next
+     frame (up to an hour): the same reading is checked again on the
+     next poll. A settled verdict stays deduped. */
+  it.each([
+    ["mismatch", "Hash mismatch"],
+    ["unavailable", "Not checked: the frame could not be retrieved"],
+    ["checking", "Checking in this browser"],
+  ] as const)(
+    "a %s verdict is rechecked on the next poll of the same reading",
+    async (verdict, text) => {
+      document.body.innerHTML = MARKUP;
+      let calls = 0;
+
+      handle = mountAttestationRecord(document, {
+        check: () => {
+          calls += 1;
+          return Promise.resolve<Verdict>(verdict);
+        },
+      });
+
+      announce(live);
+      await new Promise((r) => setTimeout(r, 0));
+      expect(field("verdict")).toBe(text);
+      expect(calls).toBe(1);
+      announce(live);
+      await new Promise((r) => setTimeout(r, 0));
+      expect(calls).toBe(2);
+    },
+  );
+
+  it.each(["verified", "invalid"] as const)(
+    "a %s verdict is not rechecked for the same reading",
+    async (verdict) => {
+      document.body.innerHTML = MARKUP;
+      let calls = 0;
+
+      handle = mountAttestationRecord(document, {
+        check: () => {
+          calls += 1;
+          return Promise.resolve<Verdict>(verdict);
+        },
+      });
+
+      announce(live);
+      await new Promise((r) => setTimeout(r, 0));
+      announce(live);
+      await new Promise((r) => setTimeout(r, 0));
+      expect(calls).toBe(1);
+    },
+  );
+
   it("an outage returns the record to the dark placeholders", async () => {
     document.body.innerHTML = MARKUP;
 

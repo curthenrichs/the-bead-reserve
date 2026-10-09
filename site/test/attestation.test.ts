@@ -167,14 +167,77 @@ describe("checkReserve", () => {
     expect(seen?.[1]?.cache).toBe("no-store");
   });
 
-  it("a different served frame is a hash mismatch", async () => {
+  /* A mismatch is rechecked against a fresh /api/reserve before it is
+     reported: KV is eventually consistent, so the record can name frame
+     N+1 while /latest still serves N, or the frame can move between the
+     two requests. */
+  const routed = (
+    frame: Uint8Array,
+    reserve: () => Promise<Response>,
+    seen: [string, RequestInit | undefined][] = [],
+  ) =>
+    ((url: string, init?: RequestInit) => {
+      seen.push([url, init]);
+      return url === "/api/reserve" ? reserve() : serve(frame)(url);
+    }) as unknown as typeof fetch;
+
+  const answer = (body: unknown) =>
+    Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve(body),
+    } as Response);
+
+  const OTHER = new TextEncoder().encode("another frame");
+
+  it("a mismatch the fresh record still names is reported, after an uncached recheck", async () => {
+    const seen: [string, RequestInit | undefined][] = [];
+
     expect(
       await checkReserve(live(), {
-        fetchImpl: serve(new TextEncoder().encode("another frame")),
+        fetchImpl: routed(OTHER, () => answer(live()), seen),
         subtle,
         pubHex,
       }),
     ).toBe("mismatch");
+
+    const recheck = seen.find(([u]) => u === "/api/reserve");
+    expect(recheck?.[1]?.cache).toBe("no-store");
+  });
+
+  it("a mismatch on a frame that moved under the check reads as checking", async () => {
+    expect(
+      await checkReserve(live(), {
+        fetchImpl: routed(OTHER, () =>
+          answer({ ...live(), counter: 10, sha256: "ef".repeat(32) }),
+        ),
+        subtle,
+        pubHex,
+      }),
+    ).toBe("checking");
+  });
+
+  it("a mismatch whose recheck fails reads as checking, not mismatch", async () => {
+    expect(
+      await checkReserve(live(), {
+        fetchImpl: routed(OTHER, () => Promise.reject(new Error("down"))),
+        subtle,
+        pubHex,
+      }),
+    ).toBe("checking");
+  });
+
+  it("a verified frame does not recheck the record", async () => {
+    const seen: [string, RequestInit | undefined][] = [];
+
+    expect(
+      await checkReserve(live(), {
+        fetchImpl: routed(FRAME, () => answer(live()), seen),
+        subtle,
+        pubHex,
+      }),
+    ).toBe("verified");
+
+    expect(seen.map(([u]) => u)).toEqual(["/api/frame/latest"]);
   });
 
   it("a record with no signature is not checked", async () => {

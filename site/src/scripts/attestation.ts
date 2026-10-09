@@ -4,7 +4,7 @@
    at ingest (service/src/crypto.ts): SHA-256 of the frame bytes must
    equal the published hash, and the Ed25519 signature is over the 32
    raw digest bytes, every value hex. */
-import type { Reserve, Status } from "./camera-state";
+import { parseReserve, type Reserve, type Status } from "./camera-state";
 
 export type Verdict =
   | "checking"
@@ -31,6 +31,7 @@ export const VERDICT_TEXT: Record<Verdict, string> = {
 export const NONE = "None";
 
 export const FRAME_URL = "/api/frame/latest";
+export const RESERVE_URL = "/api/reserve";
 
 export function hexToBytes(hex: string): Uint8Array<ArrayBuffer> {
   if (hex.length % 2 !== 0 || /[^0-9a-fA-F]/.test(hex)) {
@@ -144,7 +145,30 @@ export async function checkReserve(
     return "unavailable";
   }
 
-  return verifyFrame(bytes, r.sha256, r.sig, pubHex, subtle);
+  const verdict = await verifyFrame(bytes, r.sha256, r.sig, pubHex, subtle);
+  if (verdict !== "mismatch") return verdict;
+  return (await stillNames(r.sha256, fetchImpl)) ? "mismatch" : "checking";
+}
+
+/* A mismatch is confirmed before it is reported. The record and the
+   frame come from two requests, and the Worker's KV is eventually
+   consistent: the record can name frame N+1 while /latest still serves
+   N, or a new frame can land between the two. Only a fresh record that
+   still names the same hash makes the mismatch real; anything else
+   (a moved frame, a failed refetch) is left for the next poll. The
+   lasting fix is on the service side, a frame fetched by its counter. */
+async function stillNames(
+  sha256: string,
+  fetchImpl: typeof fetch,
+): Promise<boolean> {
+  try {
+    const res = await fetchImpl(RESERVE_URL, { cache: "no-store" });
+    if (!res.ok) return false;
+    const fresh = parseReserve(await res.json());
+    return fresh.sha256?.toLowerCase() === sha256.toLowerCase();
+  } catch {
+    return false;
+  }
 }
 
 export interface RecordView {
