@@ -54,24 +54,17 @@ describe("home page: the monitor is section III", () => {
           : el.tagName.toLowerCase(),
       );
 
-    expect(kids).toEqual(["h2", "p", "p", "monitor"]);
+    expect(kids).toEqual(["h2", "p", "monitor"]);
 
-    const ps = [...(iii?.querySelectorAll(":scope > p") ?? [])];
-    const intro = ps.at(0);
-    const linkLine = ps.at(1);
+    const para = iii?.querySelector(":scope > p");
+    expect(para?.className).toBe("");
 
-    expect(squash(intro?.textContent)).toBe(
-      "The reserve is held under continuous observation. One frame is captured each hour and signed on the device before it is shown here.",
+    expect(squash(para?.textContent)).toBe(
+      "The reserve is held under continuous observation. One frame is captured each hour and signed on the device before it is shown here. The attestation record for the current frame is kept at the Fault Cam.",
     );
 
-    expect(intro?.className).toBe("");
-    expect(linkLine?.className).toBe("");
-    const link = linkLine?.querySelector('a[href="/fault-cam/"]');
+    const link = para?.querySelector('a[href="/fault-cam/"]');
     expect(squash(link?.textContent)).toBe("the Fault Cam");
-
-    expect(squash(linkLine?.textContent)).toBe(
-      "The attestation record for the current frame is kept at the Fault Cam.",
-    );
   });
 });
 
