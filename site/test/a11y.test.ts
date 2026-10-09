@@ -228,6 +228,17 @@ describe("accessibility", () => {
     }, 60_000);
   }
 
+  /* The dark monitor popped out: the static and scanline behind the
+     placeholder must leave its contrast alone. */
+  it("the popped-out dark monitor has no WCAG 2.2 AA violations", async () => {
+    const p = await open("/");
+    const btn = await p.waitForSelector(".cm-enlarge");
+    await btn?.scrollIntoView();
+    await btn?.click();
+    await p.waitForSelector("dialog[open] [data-cm-placeholder]");
+    await bothThemes(p, "/ dark monitor pop-out");
+  }, 60_000);
+
   /* The Fault Cam record filled from a stubbed live reserve, with the
      in-browser check's verdict shown (stub-api.ts). */
   it("/fault-cam/ with a filled record has no WCAG 2.2 AA violations", async () => {
