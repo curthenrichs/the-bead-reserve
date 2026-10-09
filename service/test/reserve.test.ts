@@ -34,7 +34,11 @@ describe("GET /api/reserve", () => {
     expect(b.status).toBe("fresh");
     expect(b.counter).toBe(7);
     expect(b.croText).toBe("the reserve remains sealed");
-    expect(b.frameUrl).toBe("/api/frame/latest");
+    expect(b.frameUrl).toBe("/api/frame/7");
+  });
+  it("empty state -> frameUrl null", async () => {
+    const b = await (await get("/api/reserve")).json() as any;
+    expect(b.frameUrl).toBeNull();
   });
   it("age past FRESH_MAX_S but under STALE_MAX_S -> stale", async () => {
     await seed({ ts: Math.floor(Date.now() / 1000) - 3600 * 3 }); // 3h, FRESH=90m STALE=6h
@@ -59,5 +63,35 @@ describe("GET /api/frame/latest", () => {
     expect(res.status).toBe(200);
     expect(res.headers.get("Content-Type")).toBe("image/jpeg");
     expect(new Uint8Array(await res.arrayBuffer())).toEqual(new Uint8Array([1, 2, 3]));
+  });
+  it("keeps its short cache header", async () => {
+    await seed();
+    const res = await get("/api/frame/latest");
+    expect(res.headers.get("Cache-Control")).toBe("public, max-age=60");
+    await res.arrayBuffer(); // drain the R2 body or isolated storage fails
+  });
+});
+
+describe("GET /api/frame/{counter}", () => {
+  it("serves the numbered frame as an immutable jpeg", async () => {
+    await seed();
+    const res = await get("/api/frame/7");
+    expect(res.status).toBe(200);
+    expect(res.headers.get("Content-Type")).toBe("image/jpeg");
+    expect(res.headers.get("Cache-Control")).toBe("public, max-age=31536000, immutable");
+    expect(res.headers.get("X-Beadz-Api")).toBe("beadz-ingest/0.1.0");
+    expect(new Uint8Array(await res.arrayBuffer())).toEqual(new Uint8Array([1, 2, 3]));
+  });
+  it("serves an older frame that is no longer latest", async () => {
+    await seed({ counter: 8, r2Key: "frames/8.jpg" });
+    await env.FRAMES.put("frames/8.jpg", new Uint8Array([9]));
+    const res = await get("/api/frame/7");
+    expect(res.status).toBe(200);
+    expect(new Uint8Array(await res.arrayBuffer())).toEqual(new Uint8Array([1, 2, 3]));
+  });
+  it("missing frame -> 404 no_frame", async () => {
+    const res = await get("/api/frame/42");
+    expect(res.status).toBe(404);
+    expect((await res.json() as any).error).toBe("no_frame");
   });
 });

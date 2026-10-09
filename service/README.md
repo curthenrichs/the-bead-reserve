@@ -41,12 +41,25 @@ JSON: `{frameUrl, counter, ts, sha256, sig, croText, status, apiVersion}`.
 `status` is a three-state freshness read off `ts`: `fresh` / `stale` / `dark`
 (thresholds are the `FRESH_MAX_S` / `STALE_MAX_S` vars below). Nothing ever
 pushed yet is a valid state, not an error: `status: "dark"`, other fields
-`null`, HTTP `200`.
+`null`, HTTP `200`. When a frame exists, `frameUrl` is `/api/frame/{counter}`
+for that reading's counter, so the bytes a viewer fetches always match the
+`sha256` in the same response.
+
+### `GET /api/frame/{counter}`
+
+Streams frame `{counter}` out of R2 (`frames/{counter}.jpg`) as
+`Content-Type: image/jpeg` with `Cache-Control: public, max-age=31536000,
+immutable`, since a numbered frame never changes. `{counter}` must be a
+positive integer of at most 19 digits with no leading zero; any other path
+segment is `404 not_found`. A well-formed counter with no stored frame is
+`404 no_frame`.
 
 ### `GET /api/frame/latest`
 
-Streams the latest JPEG straight out of R2 (`Content-Type: image/jpeg`). No
-public bucket, no custom domain — the Worker is the only path to the bytes.
+Streams the latest JPEG straight out of R2 (`Content-Type: image/jpeg`,
+`Cache-Control: public, max-age=60`). Kept for older clients; `/api/reserve`
+now points at the numbered route instead. No public bucket, no custom domain:
+the Worker is the only path to the bytes.
 
 ## Local dev
 
