@@ -1,8 +1,8 @@
 // Theme for the BEADZ whitepaper: clean & typographic, with a palette that
 // follows the @half-built light theme (amber accent, Roboto Mono) while staying a
 // readable, printable light document.
-// Roboto Serif (body) + Roboto Mono (headings/labels/tables/identifiers) —
-// a single type family, matching the blog and reading cleanly at text sizes.
+// Roboto (sans body) + Roboto Mono (headings/labels/tables/identifiers) —
+// one type family; the body is sans because the serif was hard to read in print.
 
 #let ink        = rgb("#404040")  // system --ink (light theme)
 #let ink-soft   = rgb("#555555")  // system --ink-muted
@@ -10,7 +10,7 @@
 #let amber-dark = rgb("#A36300")  // system --accent-1-ink, amber text on light
 #let hairline   = rgb("#D9D9D9")  // system --hairline
 
-#let serif = "Roboto Serif"
+#let sans  = "Roboto"
 #let mono  = "Roboto Mono"
 
 // Mono uppercase tracked label (section eyebrows, metadata).
@@ -69,7 +69,7 @@
 
   // Strongly penalize "runts" (a last line holding a single short word) so
   // the justified line-breaker pulls the trailing word up onto the prior line.
-  set text(font: serif, size: 10.5pt, fill: ink, lang: "en", costs: (runt: 800%))
+  set text(font: sans, size: 10.5pt, fill: ink, lang: "en", costs: (runt: 800%))
   set par(justify: true, leading: 0.68em, spacing: 1.05em)
 
   // Literal section numbers live in the prose (matching the source), so
@@ -110,7 +110,7 @@
     })
     if subtitle != "" {
       v(7pt)
-      block(text(font: serif, size: 13pt, style: "italic", fill: amber-dark)[#subtitle])
+      block(text(font: sans, size: 13pt, style: "italic", fill: amber-dark)[#subtitle])
     }
     v(9pt)
     text(font: mono, size: 8pt, fill: ink-soft, tracking: 0.14em)[#upper(series)]
