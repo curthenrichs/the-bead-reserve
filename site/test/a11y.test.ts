@@ -34,6 +34,7 @@ const AXE = createRequire(import.meta.url).resolve("axe-core/axe.min.js");
    suite exists for, and the whole-site sweep stays with html-validate. */
 const PAGES = [
   "/",
+  "/fault-cam/",
   "/brand/",
   "/privacy/",
   "/accessibility/",
@@ -43,7 +44,7 @@ const PAGES = [
 
 /* The phone chrome is a different DOM (collapsed nav, footer details
    closed), so the two templates that change most get a second pass. */
-const PHONE_PAGES = ["/", "/brand/"];
+const PHONE_PAGES = ["/", "/fault-cam/", "/brand/"];
 
 /* WCAG 2.2 A and AA, which is the target the statement names.
    axe's best-practice rules are deliberately left out so a failure
@@ -212,18 +213,32 @@ describe("accessibility", () => {
     await bothThemes(p, "/#note-1");
   }, 60_000);
 
-  /* The camera frame's lightbox, open over a stubbed live reserve
-     (stub-api.ts), at desktop and phone width. */
+  /* The monitor popped out on the plate modal, over a stubbed live
+     reserve (stub-api.ts) so the frame is in the audit, at desktop and
+     phone width. */
   for (const phone of [false, true]) {
-    it(`the open frame lightbox has no WCAG 2.2 AA violations${phone ? " at phone width" : ""}`, async () => {
+    it(`the popped-out monitor has no WCAG 2.2 AA violations${phone ? " at phone width" : ""}`, async () => {
       const p = await open("/", phone, true);
-      const link = await p.waitForSelector("[data-cm-screen] a.lightbox-link");
-      await link?.scrollIntoView();
-      await link?.click();
-      await p.waitForSelector("dialog.lb-dialog[open] .lb-img");
-      await bothThemes(p, `/ lightbox${phone ? " @390" : ""}`);
+      await p.waitForSelector("[data-cm-screen] img.cm-frame");
+      const btn = await p.waitForSelector(".cm-enlarge");
+      await btn?.scrollIntoView();
+      await btn?.click();
+      await p.waitForSelector("dialog[open] [data-camera-monitor]");
+      await bothThemes(p, `/ monitor pop-out${phone ? " @390" : ""}`);
     }, 60_000);
   }
+
+  /* The Fault Cam record filled from a stubbed live reserve, with the
+     in-browser check's verdict shown (stub-api.ts). */
+  it("/fault-cam/ with a filled record has no WCAG 2.2 AA violations", async () => {
+    const p = await open("/fault-cam/", false, true);
+
+    await p.waitForFunction(
+      () => document.querySelector('[data-at="counter"]')?.textContent === "7",
+    );
+
+    await bothThemes(p, "/fault-cam/ live");
+  }, 60_000);
 
   /* axe cannot see focus rings. Tab is a real keyboard event, so every
      stop matches :focus-visible and must show the site ring (reset.css)
@@ -254,7 +269,7 @@ describe("accessibility", () => {
           s.boxShadow !== "none";
 
         return {
-          key: el.outerHTML.slice(0, 120),
+          key: `${el.outerHTML.slice(0, 120)}@${Math.round(el.getBoundingClientRect().top + window.scrollY)}`,
           ringed,
           seal: !!el.closest(".seal"),
         };

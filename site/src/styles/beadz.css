@@ -24,9 +24,11 @@
   color: var(--accent-1-ink);
 }
 
-/* The claim and redemption panels share one form (site-specific). */
+/* The claim and redemption panels share one form (site-specific).
+   The top margin is the even rhythm between sections I, II and III,
+   and gives the reserve ledger room above section I. */
 .panel {
-  margin-top: 38px;
+  margin-top: clamp(56px, 7vw, 80px);
 }
 
 .panel h2 {
@@ -50,12 +52,30 @@
   text-transform: uppercase;
 }
 
+/* The buttons centered on the column as a row (wrapping onto their own
+   lines on narrow phones, still centered), the launch note centered on
+   its own line beneath them (owner call 2026-10-08). */
 .panel-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 10px;
   align-items: center;
   margin-top: 16px;
+}
+
+/* Two equal columns, each as wide as the wider button, so the pair is
+   symmetric about the column's center. Stacked on phones. */
+.panel-buttons {
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  gap: 10px;
+}
+
+@media (--bp-phone) {
+  .panel-buttons {
+    grid-auto-flow: row;
+  }
 }
 
 .panel-button {
@@ -72,8 +92,10 @@
 }
 
 .panel-note {
+  margin: 0;
   color: var(--ink-muted);
   font-size: var(--font-size-xs);
+  text-align: center;
 }
 
 /* The fine print is note 1 (Disclaimers.astro), one hand-placed note;

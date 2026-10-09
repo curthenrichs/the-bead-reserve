@@ -5,7 +5,6 @@ import "@half-built/css";
 import "@half-built/css/patterns.css";
 import "@half-built/css/prose.css";
 import "@half-built/css/plate-modal.css";
-import "@half-built/css/lightbox.css";
 import "../styles/beadz.css";
 import Shell from "@half-built/astro/components/Shell.astro";
 import Masthead from "@half-built/astro/components/Masthead.astro";
@@ -16,6 +15,7 @@ import {
   TAGLINE,
   DESCRIPTION,
   NAV,
+  SOCIALS,
   LEGAL_HOLDER,
   FOOTER_SITEMAP,
   ECOSYSTEM,
@@ -78,7 +78,7 @@ const themeDark = prim("black-900");
     siteName={SITE_NAME}
     tagline={TAGLINE}
     nav={NAV}
-    socials={[]}
+    socials={SOCIALS}
     dateStr={formatHeaderDate(new Date())}
     searchAction={false}
   >

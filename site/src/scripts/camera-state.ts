@@ -9,15 +9,24 @@ export interface Reserve {
   counter: number | null;
   ts: number | null;
   sha256: string | null;
+  /* Ed25519 over the hash, hex. Kept for the attestation record on
+     /fault-cam/; the monitor itself does not read it. */
+  sig: string | null;
   croText: string | null;
   status: Status;
 }
+
+/* Fired on the document after every poll, with the parsed Reserve as
+   its detail, so the Fault Cam page's attestation record shares the
+   monitor's poll instead of running its own. */
+export const RESERVE_EVENT = "beadz:reserve";
 
 export const DARK: Reserve = {
   frameUrl: null,
   counter: null,
   ts: null,
   sha256: null,
+  sig: null,
   croText: null,
   status: "dark",
 };
@@ -66,6 +75,7 @@ export function parseReserve(body: unknown): Reserve {
     !nullable(b.counter, "number") ||
     !nullable(b.ts, "number") ||
     !nullable(b.sha256, "string") ||
+    !nullable(b.sig, "string") ||
     !nullable(b.croText, "string")
   ) {
     return DARK;
@@ -76,6 +86,7 @@ export function parseReserve(body: unknown): Reserve {
     counter: b.counter as number | null,
     ts: b.ts as number | null,
     sha256: b.sha256 as string | null,
+    sig: b.sig as string | null,
     croText: b.croText as string | null,
     status: b.status as Status,
   };

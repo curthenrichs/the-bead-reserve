@@ -1,6 +1,9 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { mountCameraMonitor } from "../src/scripts/camera-monitor";
+import {
+  mountCameraMonitor,
+  RESERVE_EVENT,
+} from "../src/scripts/camera-monitor";
 
 const MARKUP = `
   <div data-camera-monitor data-status="dark">
@@ -16,6 +19,7 @@ const fresh = {
   counter: 7,
   ts: 1,
   sha256: null,
+  sig: null,
   croText: "sealed tight",
   status: "fresh",
 };
@@ -45,6 +49,7 @@ describe("camera monitor island", () => {
     const frame = $("[data-cm-screen] img");
     expect(frame?.getAttribute("src")).toBe("/api/frame/latest");
     expect(frame?.getAttribute("alt")).toBe("Camera view of the reserve jar");
+    expect(frame?.parentElement?.hasAttribute("data-cm-screen")).toBe(true);
     expect($("[data-cm-placeholder]")).toBeNull();
     expect($("[data-cm-badge]")?.textContent).toBe("● LIVE");
 
@@ -55,65 +60,6 @@ describe("camera monitor island", () => {
     expect($("[data-cm-mood]")?.getAttribute("src")).toBe(
       "/henry-cro-broadcasting.svg",
     );
-  });
-
-  it("a fresh frame opens in the package lightbox: the LightboxLink anchor wraps it", async () => {
-    document.body.innerHTML = MARKUP;
-    const fetchImpl = vi.fn(() => ok(fresh));
-    mountCameraMonitor(document, { pollMs: 0, fetchImpl });
-
-    await vi.waitFor(() => {
-      expect($("[data-cm-screen] a.lightbox-link")).not.toBeNull();
-    });
-
-    const link = $("[data-cm-screen] a.lightbox-link");
-    expect(link?.getAttribute("href")).toBe("/api/frame/latest");
-    expect(Number(link?.getAttribute("data-lb-w"))).toBeGreaterThan(0);
-    expect(Number(link?.getAttribute("data-lb-h"))).toBeGreaterThan(0);
-
-    expect(link?.getAttribute("data-lb-caption")).toBe(
-      "Camera view of the reserve jar",
-    );
-
-    expect(link?.getAttribute("aria-label")).toBe(
-      "View full-size image: Camera view of the reserve jar",
-    );
-
-    expect(link?.querySelector("img.cm-frame")).not.toBeNull();
-    expect(link?.hasAttribute("data-island-lightbox")).toBe(true);
-  });
-
-  it("the dark state has no lightbox link: nothing to open", async () => {
-    document.body.innerHTML = MARKUP;
-    const fetchImpl = vi.fn(() => Promise.reject(new Error("network")));
-    mountCameraMonitor(document, { pollMs: 0, fetchImpl });
-
-    await vi.waitFor(() => {
-      expect(fetchImpl).toHaveBeenCalled();
-    });
-
-    expect($("a.lightbox-link")).toBeNull();
-  });
-
-  it("a frame recovered after an outage is wired to the lightbox again", async () => {
-    vi.useFakeTimers();
-    document.body.innerHTML = MARKUP;
-
-    const fetchImpl = vi
-      .fn()
-      .mockImplementationOnce(() => ok(fresh))
-      .mockImplementationOnce(() => Promise.reject(new Error("down")))
-      .mockImplementation(() => ok(fresh));
-
-    const handle = mountCameraMonitor(document, { pollMs: 1000, fetchImpl });
-    await vi.advanceTimersByTimeAsync(0);
-    expect($("a.lightbox-link")).not.toBeNull();
-    await vi.advanceTimersByTimeAsync(1000);
-    expect($("a.lightbox-link")).toBeNull();
-    await vi.advanceTimersByTimeAsync(1000);
-    const link = $("a.lightbox-link");
-    expect(link?.hasAttribute("data-island-lightbox")).toBe(true);
-    handle.destroy();
   });
 
   it("a failed fetch leaves the dark state and throws nothing", async () => {
@@ -185,6 +131,24 @@ describe("camera monitor island", () => {
     const calls = fetchImpl.mock.calls.length;
     await vi.advanceTimersByTimeAsync(5000);
     expect(fetchImpl.mock.calls.length).toBe(calls);
+  });
+
+  it("announces every reading to the page for the attestation record", async () => {
+    document.body.innerHTML = MARKUP;
+    const seen: unknown[] = [];
+
+    document.addEventListener(RESERVE_EVENT, (e) => {
+      seen.push((e as CustomEvent).detail);
+    });
+
+    const fetchImpl = vi.fn(() => ok({ ...fresh, sig: "ef" }));
+    mountCameraMonitor(document, { pollMs: 0, fetchImpl });
+
+    await vi.waitFor(() => {
+      expect(seen).toHaveLength(1);
+    });
+
+    expect(seen[0]).toMatchObject({ status: "fresh", counter: 7, sig: "ef" });
   });
 
   it("does nothing on a page without the monitor", () => {

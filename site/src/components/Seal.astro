@@ -23,21 +23,15 @@ import { STATS, GENESIS_BEADS } from "../config";
 </div>
 
 <style>
-  /* A pinned wax-seal stamp that flips on hover or focus to show the
-     token on its reverse. It holds the lower left corner (owner call
-     2026-10-08), leaving the lower right to the package scroll-to-top
-     button, and reserves its height under the footer through
-     --dock-bottom (the bottom-docked rule). Hidden on phones, where a
-     fixed corner element would cover content. The focus ring is the
-     system's; never outline: none. */
+  /* A wax-seal stamp that flips on hover or focus to show the token on
+     its reverse. Inline by default, left-aligned under the signature.
+     The focus ring is the system's; never outline: none. Wide
+     placement is in the media query at the end. */
   .seal {
-    position: fixed;
-    right: auto;
-    bottom: 30px;
-    left: 30px;
-    z-index: var(--z-scroll-top);
+    position: relative;
     width: 132px;
     height: 132px;
+    margin-top: clamp(32px, 5vw, 56px);
     perspective: 700px;
     border-radius: 50%;
   }
@@ -84,16 +78,39 @@ import { STATS, GENESIS_BEADS } from "../config";
   .seal-tiny { margin-top: 4px; font-size: 7px; letter-spacing: 0.1em; }
   .seal-muted { color: var(--ink-muted); }
 
-  @media (--bp-phone) {
-    .seal { display: none; }
+  /* 1380 shell + 2 x (30 offset + 132 seal + 30 air) = 1764; 1780 adds
+     margin. Only here does the seal leave the flow and pin to the left
+     gutter, where it covers no content or footer link, so nothing
+     reserves room for it. */
+  @media (min-width: 1780px) {
+    .seal {
+      position: fixed;
+      bottom: 30px;
+      left: 30px;
+      z-index: var(--z-scroll-top);
+      margin-top: 0;
+    }
+
+    /* The seal travels down the gutter with the page: just under the
+       header (its box ends near 241px at 1920 wide) at the top of the
+       scroll, at the 30px bottom inset at the end, linear between. A
+       scroll timeline, so no script. Without one, or with reduced
+       motion, it keeps the static bottom placement above. The end
+       never rises above the start on a short window. */
+    @supports (animation-timeline: scroll()) {
+      .seal {
+        animation: beadz-seal-travel linear both;
+        animation-timeline: scroll(root block);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .seal { animation: none; }
+    }
   }
 
-  /* 30 (bottom offset) + 132 (seal) + 16 (clearance) = 178. The same
-     reserve is the scroll padding, so focus-driven scrolling stops above
-     the seal and never parks a focused link under it (WCAG 2.2 SC
-     2.4.11). */
-  @media (--bp-phone-up) {
-    :global(:root) { --dock-bottom: 178px; }
-    :global(html) { scroll-padding-bottom: var(--dock-bottom); }
+  @keyframes beadz-seal-travel {
+    from { top: 272px; }
+    to { top: max(272px, calc(100% - 30px - 132px)); }
   }
 </style>

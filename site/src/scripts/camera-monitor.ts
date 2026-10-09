@@ -2,53 +2,29 @@
    server-rendered markup. The markup already shows the dark state, so
    with JavaScript off, or before the first answer, the page is honest.
    A failed or malformed answer goes dark; the next good one recovers. */
-import { mountLightbox } from "@half-built/astro/scripts/lightbox.ts";
-import { DARK, parseReserve, viewFor, type MonitorView } from "./camera-state";
+import {
+  buildPlateModal,
+  type PlateModalRefs,
+} from "@half-built/astro/scripts/plate-modal.ts";
+import {
+  DARK,
+  RESERVE_EVENT,
+  parseReserve,
+  viewFor,
+  type MonitorView,
+} from "./camera-state";
+
+export { RESERVE_EVENT };
 
 const FRAME_SRC = "/api/frame/latest";
 const FRAME_ALT = "Camera view of the reserve jar";
 
-/* The size the lightbox is told before the frame loads: the monitor's
-   16:10. The real natural size replaces it on load. */
-const FALLBACK_W = 1600;
-const FALLBACK_H = 1000;
-
-/* One lightbox mount per monitor. The frame link is made at runtime and
-   replaced after an outage, so each new link remounts: destroy drops the
-   old link's claim and its dialog, and the fresh mount claims the new
-   one. */
-const lightboxes = new WeakMap<HTMLElement, { destroy(): void }>();
-
-function unmountLightbox(root: HTMLElement): void {
-  lightboxes.get(root)?.destroy();
-  lightboxes.delete(root);
-}
-
-/* The anchor LightboxLink renders, built here because the frame only
-   exists at runtime. */
-function frameLink(): HTMLAnchorElement {
-  const link = document.createElement("a");
-  link.className = "lightbox-link cm-frame-link";
-  link.href = FRAME_SRC;
-  link.dataset.lbW = String(FALLBACK_W);
-  link.dataset.lbH = String(FALLBACK_H);
-  link.dataset.lbCaption = FRAME_ALT;
-  link.setAttribute("aria-label", `View full-size image: ${FRAME_ALT}`);
-
+function frame(): HTMLImageElement {
   const img = document.createElement("img");
   img.src = FRAME_SRC;
   img.alt = FRAME_ALT;
   img.className = "cm-frame";
-
-  img.addEventListener("load", () => {
-    if (img.naturalWidth > 0 && img.naturalHeight > 0) {
-      link.dataset.lbW = String(img.naturalWidth);
-      link.dataset.lbH = String(img.naturalHeight);
-    }
-  });
-
-  link.append(img);
-  return link;
+  return img;
 }
 
 export function renderMonitor(root: HTMLElement, v: MonitorView): void {
@@ -73,19 +49,83 @@ export function renderMonitor(root: HTMLElement, v: MonitorView): void {
 
   if (v.showFrame) {
     if (!screen.querySelector("img")) {
-      screen.replaceChildren(frameLink());
-      unmountLightbox(root);
-      lightboxes.set(root, mountLightbox(root));
+      screen.replaceChildren(frame());
     }
   } else if (!screen.querySelector("[data-cm-placeholder]")) {
-    /* Intended: when the feed drops, an open lightbox closes with it. */
-    unmountLightbox(root);
     const span = document.createElement("span");
     span.dataset.cmPlaceholder = "";
     span.className = "cm-placeholder";
     span.textContent = v.placeholder;
     screen.replaceChildren(span);
   }
+}
+
+/* Enlarge pops the whole monitor out onto the package plate modal, the
+   way the path player's box comes out. The live element moves into the
+   plate, so polling keeps repainting it there, and a slot of the same
+   height holds its place in the page. Every way out (close box, veil,
+   Escape) fires the dialog's close event, which moves it back. The
+   plate is built on first use and kept. */
+function mountPopout(el: HTMLElement): { destroy(): void } {
+  const btn = el.querySelector(".cm-enlarge");
+
+  if (!(btn instanceof HTMLButtonElement)) {
+    return {
+      destroy() {
+        /* no button, nothing mounted */
+      },
+    };
+  }
+
+  const doc = el.ownerDocument;
+  let pm: PlateModalRefs | undefined;
+  let slot: HTMLElement | undefined;
+
+  const putBack = (): void => {
+    if (!slot) return;
+    slot.replaceWith(el);
+    slot = undefined;
+    el.classList.remove("is-popped");
+    /* The package returns focus before the monitor is back, while the
+       button is still hidden in the plate, so focus it again here. */
+    btn.focus();
+  };
+
+  const plate = (): PlateModalRefs => {
+    if (pm) return pm;
+    pm = buildPlateModal(doc, { ariaLabel: "Reserve monitor" });
+    pm.zone.classList.add("cm-zone");
+    pm.plate.classList.add("cm-plate");
+    pm.dialog.addEventListener("close", putBack);
+    return pm;
+  };
+
+  const onClick = (): void => {
+    if (slot) return;
+    const refs = plate();
+    slot = doc.createElement("div");
+    slot.dataset.cmSlot = "";
+    slot.className = "cm-slot";
+    /* The slot takes the monitor's size modifier along with its height. */
+    slot.classList.toggle("cm-wide", el.classList.contains("cm-wide"));
+    slot.style.height = `${el.getBoundingClientRect().height}px`;
+    el.before(slot);
+    el.classList.add("is-popped");
+    refs.plate.append(el);
+    refs.open(btn);
+  };
+
+  btn.addEventListener("click", onClick);
+
+  return {
+    destroy(): void {
+      btn.removeEventListener("click", onClick);
+      if (pm?.isOpen()) pm.close();
+      putBack();
+      pm?.dialog.remove();
+      pm = undefined;
+    },
+  };
 }
 
 export function mountCameraMonitor(
@@ -104,6 +144,7 @@ export function mountCameraMonitor(
   }
 
   let alive = true;
+  const popout = mountPopout(el);
 
   const poll = async (): Promise<void> => {
     let reserve = DARK;
@@ -115,7 +156,12 @@ export function mountCameraMonitor(
       reserve = DARK;
     }
 
-    if (alive) renderMonitor(el, viewFor(reserve));
+    if (!alive) return;
+    renderMonitor(el, viewFor(reserve));
+
+    el.ownerDocument.dispatchEvent(
+      new CustomEvent(RESERVE_EVENT, { detail: reserve }),
+    );
   };
 
   void poll();
@@ -125,7 +171,7 @@ export function mountCameraMonitor(
     destroy(): void {
       alive = false;
       if (timer !== undefined) clearInterval(timer);
-      unmountLightbox(el);
+      popout.destroy();
     },
   };
 }

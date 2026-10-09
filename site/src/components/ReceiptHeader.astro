@@ -18,7 +18,9 @@ const { eyebrow, page } = Astro.props;
 </header>
 
 <style>
-  .receipt { margin: 0 0 30px; }
+  /* Room above the eyebrow so it does not start flush under the site
+     header (owner call 2026-10-08). */
+  .receipt { margin: clamp(24px, 4vw, 48px) 0 clamp(40px, 5vw, 64px); }
 
   .receipt-eyebrow {
     margin: 0 0 8px;
@@ -26,10 +28,11 @@ const { eyebrow, page } = Astro.props;
     text-transform: uppercase;
   }
 
+  /* One step under the header wordmark (xl), which it repeats. */
   .receipt-title {
     margin: 0 0 12px;
     font-family: var(--beadz-font-display);
-    font-size: var(--font-size-xxl);
+    font-size: var(--font-size-lg);
     font-weight: 600;
     line-height: 1.05;
   }

@@ -1,18 +1,34 @@
 ---
+import Icon from "@half-built/astro/components/Icon.astro";
 import { DARK, viewFor } from "../scripts/camera-state";
 
+interface Props {
+  wide?: boolean;
+}
+
+const { wide = false } = Astro.props;
 const v = viewFor(DARK);
 ---
 
+{/* wide: the Fault Cam page shows the monitor larger, up to 960px. */}
+
 <section
-  class="camera-monitor"
+  class:list={["camera-monitor", { "cm-wide": wide }]}
   data-camera-monitor
   data-status={v.status}
   aria-label="Reserve monitor"
 >
+  {/* Pops the whole monitor out on the plate modal (camera-monitor.ts).
+     An icon box on the monitor's corner, like the plate's own close. */}
+  <button type="button" class="cm-enlarge icon-box" aria-haspopup="dialog">
+    <Icon name="maximize-2" size={16} />
+    <span class="screen-reader-text">Enlarge the reserve monitor</span>
+  </button>
   <div class="cm-bar">
     <span>Reserve Monitoring: Fault Cam 01</span>
-    <span class="cm-badge" data-cm-badge>{v.badge}</span>
+    <span class="cm-bar-end">
+      <span class="cm-badge" data-cm-badge>{v.badge}</span>
+    </span>
   </div>
   <div class="cm-cro">
     <img data-cm-mood src={v.mood} alt={v.moodAlt} width="44" height="44" />
@@ -32,11 +48,21 @@ const v = viewFor(DARK);
 <style>
   /* A black screen in both themes (spec section 3), the way the code
      island keeps its dark block by day. Sized like an image, not prose
-     (owner call 2026-10-08): at most 480px, centered in the column, and
+     (owner call 2026-10-08): at most 640px, centered in the column, and
      the full column on phones narrower than that. */
+  .camera-monitor,
+  :global(.cm-slot) {
+    max-width: 640px;
+    margin: clamp(40px, 5vw, 64px) auto;
+  }
+
+  .camera-monitor.cm-wide,
+  :global(.cm-slot.cm-wide) {
+    max-width: 960px;
+  }
+
   .camera-monitor {
-    max-width: 480px;
-    margin: 24px auto;
+    position: relative;
     background: var(--black-900);
     border: var(--stroke-3) solid var(--rule);
     color: var(--parchment);
@@ -50,11 +76,69 @@ const v = viewFor(DARK);
     border-bottom: var(--stroke) solid var(--gray-750);
   }
 
+  /* The right padding keeps the badge clear of the corner box. */
   .cm-bar {
+    padding-right: 22px;
     display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
     justify-content: space-between;
+    align-items: center;
     letter-spacing: 0.12em;
     text-transform: uppercase;
+  }
+
+  .cm-bar-end {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-left: auto;
+  }
+
+  /* The package .icon-box, straddling the monitor's top-right corner
+     with the plate close box's offset (plate-modal.css .pm-close),
+     measured from the outside of the monitor's frame. */
+  .cm-enlarge {
+    position: absolute;
+    top: calc(-17px - var(--stroke-3));
+    right: calc(-17px - var(--stroke-3));
+    z-index: 1;
+  }
+
+  .cm-enlarge:focus-visible { outline-offset: 2px; }
+
+  /* Popped out: the plate has its own close, and the monitor fills the
+     plate instead of the 640px cap. */
+  .camera-monitor.is-popped {
+    max-width: none;
+    margin: 0;
+  }
+
+  .is-popped .cm-enlarge { display: none; }
+
+  /* The plate (built in camera-monitor.ts) sizes the monitor. Desktop:
+     wide, and short enough that the 16:10 screen plus the monitor's
+     chrome (about 230px with the plate and zone padding) fits the
+     window. Phones: the full width, which the zone must also be told,
+     since a 16:10 box has no intrinsic width to fill it with. The top
+     padding clears the straddling close box. */
+  :global(.cm-plate) {
+    width: min(88vw, 1100px, max(640px, calc((100dvh - 230px) * 1.6 + 54px)));
+    padding: 24px;
+  }
+
+  @media (--bp-phone) {
+    :global(.cm-zone),
+    :global(.cm-plate) {
+      width: 100%;
+    }
+
+    :global(.cm-plate) { padding: 28px 9px 9px; }
+
+    /* Phones: the column has no room to straddle, so the box tucks
+       inside the corner and the bar makes room for it. */
+    .cm-enlarge { right: 9px; }
+    .cm-bar { padding-right: 48px; }
   }
 
   .camera-monitor.is-live .cm-badge { color: var(--accent-1); }
@@ -73,14 +157,6 @@ const v = viewFor(DARK);
     align-items: center;
     justify-content: center;
     aspect-ratio: 16 / 10;
-  }
-
-  /* The frame's lightbox link (camera-monitor.ts) fills the screen so
-     the frame looks the same linked or not. Package lightbox.css gives
-     it display: block and the zoom cursor. */
-  .cm-screen :global(.cm-frame-link) {
-    width: 100%;
-    height: 100%;
   }
 
   .cm-screen :global(.cm-frame) {

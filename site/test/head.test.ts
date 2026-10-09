@@ -55,7 +55,49 @@ describe("layout head", () => {
 describe("layout chrome", () => {
   const doc = page("/");
 
-  it("uses the package header with the costume wordmark and the two nav links", () => {
+  it("carries the two header icons: the source and the workshop", () => {
+    const icons = [
+      ...doc.querySelectorAll("header#masthead .social-links a"),
+    ].map((a) => ({
+      href: a.getAttribute("href"),
+      name: a.querySelector(".screen-reader-text")?.textContent.trim(),
+      svg: !!a.querySelector('svg[aria-hidden="true"]'),
+    }));
+
+    expect(icons).toEqual([
+      {
+        href: "https://github.com/curthenrichs/the-bead-reserve",
+        name: "Source on GitHub",
+        svg: true,
+      },
+      {
+        href: "https://half-built-robots.com/",
+        name: "Half-Built Robots",
+        svg: true,
+      },
+    ]);
+  });
+
+  it("lists the Fault Cam and the source in the footer's Site group", () => {
+    const site = [...doc.querySelectorAll("footer .footer-sitemap-group")].find(
+      (g) => g.querySelector("h2")?.textContent.trim() === "Site",
+    );
+
+    const links = [...(site?.querySelectorAll("a") ?? [])].map((a) => [
+      a.firstChild?.textContent?.trim(),
+      a.getAttribute("href"),
+    ]);
+
+    expect(links).toEqual([
+      ["The Bead Reserve", "/"],
+      ["Fault Cam", "/fault-cam/"],
+      ["Read the whitepaper", "/whitepaper.pdf"],
+      ["Brand assets", "/brand/"],
+      ["Source on GitHub", "https://github.com/curthenrichs/the-bead-reserve"],
+    ]);
+  });
+
+  it("uses the package header with the costume wordmark and the three nav links", () => {
     const header = doc.querySelector("header#masthead");
     expect(header).not.toBeNull();
     const mark = header?.querySelector(".site-title a .beadz-wordmark");
@@ -72,13 +114,64 @@ describe("layout chrome", () => {
       a.getAttribute("href"),
     );
 
-    expect(hrefs).toEqual(["/", "/whitepaper.pdf"]);
+    expect(hrefs).toEqual(["/", "/fault-cam/", "/whitepaper.pdf"]);
+
+    const labels = [...doc.querySelectorAll(".masthead-nav a")].map((a) =>
+      a.firstChild?.textContent?.trim(),
+    );
+
+    expect(labels).toEqual(["Reserve", "Fault Cam", "Whitepaper"]);
 
     const footer = [...doc.querySelectorAll("footer a")].map((a) =>
       a.getAttribute("href"),
     );
 
     expect(footer).toContain("/brand/");
+  });
+
+  /* The whitepaper is a PDF; both links to it open a new tab and say
+     so to screen readers (0.14.0 newTab). Nothing else does. */
+  it("opens the whitepaper in a new tab from the nav and the footer", () => {
+    const newTab = (sel: string) =>
+      [...doc.querySelectorAll(sel)]
+        .filter((a) => a.getAttribute("target") === "_blank")
+        .map((a) => ({
+          href: a.getAttribute("href"),
+          rel: a.getAttribute("rel"),
+          hint: a.querySelector(".screen-reader-text")?.textContent.trim(),
+        }));
+
+    const want = [
+      {
+        href: "/whitepaper.pdf",
+        rel: "noopener",
+        hint: "(opens in a new tab)",
+      },
+    ];
+
+    expect(newTab(".masthead-nav a")).toEqual(want);
+
+    const site = [...doc.querySelectorAll("footer .footer-sitemap-group")].find(
+      (g) => g.querySelector("h2, summary")?.textContent.trim() === "Site",
+    );
+
+    expect(site, "footer Site group").toBeDefined();
+    const inSite = [...(site?.querySelectorAll("a") ?? [])];
+
+    const paper = inSite.find(
+      (a) => a.getAttribute("href") === "/whitepaper.pdf",
+    );
+
+    expect(paper?.getAttribute("target")).toBe("_blank");
+    expect(paper?.getAttribute("rel")).toBe("noopener");
+
+    expect(
+      paper?.querySelector(".screen-reader-text")?.textContent.trim(),
+    ).toBe("(opens in a new tab)");
+
+    expect(
+      inSite.filter((a) => a.getAttribute("target") === "_blank"),
+    ).toHaveLength(1);
   });
 
   it("drops the package search: the site has no search page", () => {

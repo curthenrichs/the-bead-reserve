@@ -2,7 +2,7 @@
 
 **Subsystem A, no-chain slice.** A static Astro 5 site on the @half-built
 design system (`@half-built/css`, `@half-built/astro`, `@half-built/tooling`,
-all pinned at 0.13.0). It presents the reserve as a single page: header, reserve
+all pinned at 0.14.0). It presents the reserve as a single page: header, reserve
 ledger, a verified seal, a live camera monitor, a claim panel, a redemption
 panel, a newsletter signup, and disclaimers. The other pages are `/brand`,
 `/privacy`, `/terms`, `/accessibility`, and the 404. There is no
