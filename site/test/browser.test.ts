@@ -210,7 +210,29 @@ describe("layout in a real browser", () => {
           b.getAttribute("aria-haspopup"),
           b.textContent.trim(),
         ]),
-      ).toEqual(["button", "dialog", "Enlarge"]);
+      ).toEqual(["button", "dialog", "Enlarge the reserve monitor"]);
+
+      /* An icon box at the monitor's top-right corner: straddling it on
+         desktop, the way the plate's close box straddles the plate, and
+         tucked inside the corner on phones. */
+      const corner = await box(p, "[data-camera-monitor] .cm-enlarge");
+
+      expect(corner.bottom - corner.top).toBeCloseTo(30, 0);
+
+      if (phone) {
+        expect(corner.right).toBeLessThanOrEqual(before.right);
+        expect(before.right - corner.right).toBeLessThanOrEqual(20);
+      } else {
+        expect(Math.abs(corner.right - before.right - 17)).toBeLessThanOrEqual(
+          1,
+        );
+      }
+
+      expect(Math.abs(corner.top - before.top + 17)).toBeLessThanOrEqual(1);
+
+      /* The bar's badge stays clear of the corner box. */
+      const badge = await box(p, "[data-cm-badge]");
+      expect(intersects(badge, corner)).toBe(false);
 
       await btn?.scrollIntoView();
       await btn?.click();

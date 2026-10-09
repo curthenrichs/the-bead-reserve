@@ -84,6 +84,22 @@ describe("/fault-cam/", () => {
     expect(m?.querySelector(".cm-enlarge")).not.toBeNull();
   });
 
+  /* The Enlarge control is an icon box in the monitor's corner, named
+     for screen readers only (0.14.0's maximize-2 glyph). */
+  it("makes Enlarge an icon box named for screen readers", () => {
+    const btn = doc.querySelector("main [data-camera-monitor] .cm-enlarge");
+    expect(btn?.classList.contains("icon-box")).toBe(true);
+    expect(btn?.getAttribute("aria-haspopup")).toBe("dialog");
+    expect(btn?.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
+
+    expect(btn?.querySelector(".screen-reader-text")?.textContent.trim()).toBe(
+      "Enlarge the reserve monitor",
+    );
+
+    expect(btn?.textContent.trim()).toBe("Enlarge the reserve monitor");
+    expect(btn?.closest(".cm-bar")).toBeNull();
+  });
+
   it("server-renders the record dark: None everywhere, the key, no frame to check", () => {
     const rec = doc.querySelector("[data-attestation]");
     expect(rec?.getAttribute("data-status")).toBe("dark");
