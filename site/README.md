@@ -52,6 +52,11 @@ humor comes from playing the reserve-bank bit straight, so anything that reads
 as enthusiasm undercuts it. This matters most on outward-facing pages like
 `/brand`, which press and listing venues read.
 
+The policy pages (`/privacy`, `/terms`, `/accessibility`) are the exception.
+They speak as Curt Henrichs LLC in the plain first person of the Half-Built
+Robots blog's policies, and follow that wording wherever the facts allow. The
+other rules above still apply to them.
+
 ## Local dev
 
 ```bash

@@ -15,163 +15,168 @@ import { LEGAL_HOLDER } from "../data/site";
       <div class="prose">
         <p>Last updated: October 8, 2026</p>
         <p>
-          This policy covers the website of The Bead Reserve, operated by
-          {LEGAL_HOLDER}. The site has no accounts. It collects very little.
+          This policy describes what information The Bead Reserve website, owned
+          by {LEGAL_HOLDER} (a California LLC), collects and what happens to it.
+          The site has no accounts. It collects very little.
         </p>
 
-        <h2>What the site collects</h2>
+        <h2>What this site collects</h2>
         <p>
           The site is hosted by
           <a href="https://www.cloudflare.com/">Cloudflare</a>. Like nearly
-          every host, Cloudflare may keep standard request logs as part of
-          serving the site. A log entry includes the requesting IP address and
-          the page requested.
+          every host, Cloudflare may keep standard request logs (your IP address
+          and the pages you request) as part of serving the site.
         </p>
         <p>
           The camera frames and reserve status on the home page are served by
-          the Reserve's own Worker, at <code>/api/</code> on this domain.
-          Requests for them are ordinary requests to this site and are covered
-          by the paragraph above.
+          the reserve's own Worker, at <code>/api/</code> on this domain.
+          Requests for them are ordinary requests to this site, and the
+          paragraph above covers them.
         </p>
         <p>
-          The site uses
+          This site uses
           <a href="https://developers.cloudflare.com/web-analytics/"
             >Cloudflare Web Analytics</a
           >
           to count page views. Cloudflare adds a small script to each page for
-          this. It sets no cookies, stores nothing in the browser, and does not
-          follow a visitor to other sites. It produces a tally of which pages
-          were read.
+          this. It sets no cookies, stores nothing in your browser, and does not
+          follow you to other sites. It produces a tally of which pages were
+          read.
         </p>
         <p>
-          The typefaces are served from this site. No font is requested from a
-          third party.
+          The typefaces are served from this site. Your browser requests no font
+          from a third party.
         </p>
         <p>
           Claiming and redeeming BEADZ connect a wallet to the site. The site
-          reads the wallet's public address to show its holdings and to submit
-          the transaction the holder approves. The site does not store the
-          address. Transactions on Base are public and permanent. The Reserve
-          can neither hide nor remove them.
+          reads your wallet's public address to show its holdings and to submit
+          the transaction you approve. I do not store the address. Transactions
+          on Base are public and permanent. I can neither hide nor remove them.
         </p>
         <p>
           A redemption is delivered by certified mail, which requires a name and
-          a postal address. These are collected at redemption, used to address
-          that shipment and nothing else, and deleted once delivery is
+          a postal address. I collect these at redemption, use them to address
+          that shipment and nothing else, and delete them once delivery is
           confirmed.
         </p>
 
-        <h2>Cookies and browser storage</h2>
+        <h2 id="cookies-and-browser-storage">Cookies and browser storage</h2>
         <p>
           The site sets no cookies of its own. Cloudflare runs bot protection in
           front of the site, and that sets one cookie, <code>cf_clearance</code
-          >. It records that the browser has already passed Cloudflare's check,
-          so the browser is not challenged again. It lasts up to a year. Only
-          Cloudflare can read it. It is not used for advertising or for tracking
-          across sites.
+          >. It tells Cloudflare your browser already passed its check, so you
+          don't get challenged again. It lasts up to a year and only Cloudflare
+          can read it. It isn't used for ads or to follow you around the web.
         </p>
         <p>
-          The site also keeps two small values in the browser's local storage.
-          Neither is sent anywhere. Neither identifies anyone.
+          The site also keeps two small values in your browser's local storage.
+          Neither is sent anywhere and neither identifies you.
         </p>
         <ul>
           <li>
-            <code>{THEME_STORAGE_KEY}</code>: the light or dark theme choice,
-            saved when the theme toggle is used.
+            <code>{THEME_STORAGE_KEY}</code>: your light or dark theme choice,
+            saved when you use the toggle.
           </li>
           <li>
-            <code>half-built-ecosystem</code>: a copy of the footer's list of
-            related sites, kept for a day so it is not fetched on every page.
-            The list comes from ecosystem.half-built-robots.com, which is also
-            operated by {LEGAL_HOLDER} on Cloudflare.
+            <code>half-built-ecosystem</code>: a copy of the list of my other
+            sites shown in the footer, kept for a day so it isn't fetched on
+            every page. The list comes from ecosystem.half-built-robots.com,
+            which is also mine and also on Cloudflare.
           </li>
         </ul>
-        <p>Clearing the browser's data for this site removes both.</p>
+        <p>Clearing your browser's data for this site removes both.</p>
 
         <h2>Do Not Track</h2>
         <p>
-          Nothing on this site tracks visitors across other sites. The site
-          behaves the same with or without a Do Not Track or Global Privacy
-          Control signal. There is nothing for the signal to turn off.
+          Nothing on this site tracks you across other sites, so it behaves the
+          same whether or not your browser sends a Do Not Track or Global
+          Privacy Control signal. There is nothing for the signal to turn off.
         </p>
 
-        <h2>Correspondence</h2>
+        <h2>Mailing list</h2>
         <p>
-          The subscription form on the home page enrolls an address in the
-          Half-Built Robots mailing list. It is the same list the blog runs. The
-          address goes to <a href="https://buttondown.com/">Buttondown</a>,
-          which stores it and sends the mail. It is used for that list and
-          nothing else. Enrollment is double opt-in, and every dispatch carries
-          an unsubscribe link. The full terms are in the blog's
+          The signup form on the home page subscribes you to the Half-Built
+          Robots mailing list, the same list the blog runs. If you subscribe,
+          the email address you provide is used to send you the newsletter and
+          nothing else. It is not sold or shared. Addresses are stored and mail
+          is sent by <a href="https://buttondown.com/">Buttondown</a>. Signup is
+          double opt-in. You can leave at any time using the unsubscribe link at
+          the bottom of every email, or by asking using the contact information
+          below. The details are in the blog's
           <a href="https://www.half-built-robots.com/policies/mailing-list/"
             >mailing list policy</a
           >.
         </p>
 
-        <h2>Retention</h2>
+        <h2>Why it's kept and for how long</h2>
         <ul>
           <li>
-            <strong>Mailing list address.</strong> Held on the subscriber's
-            consent until they unsubscribe.
+            <strong>Mailing list address.</strong> You signed up and confirmed
+            by email, so it's held on your consent. It's kept until you
+            unsubscribe.
           </li>
           <li>
             <strong>Redemption shipping details.</strong> Held until delivery is
             confirmed, then deleted.
           </li>
           <li>
-            <strong>Cloudflare's logs and bot protection.</strong> Kept on
-            Cloudflare's own schedule under
+            <strong>Cloudflare's logs, analytics, and bot protection.</strong>
+            These keep the site running and protected. Cloudflare keeps them on
+            its own schedule under
             <a href="https://www.cloudflare.com/privacypolicy/"
               >Cloudflare's privacy policy</a
             >.
           </li>
           <li>
-            <strong>Mail sent to the contact address.</strong> Used to answer
-            the sender. Kept unless the sender asks for it to be deleted.
+            <strong>Email you send me.</strong> It's used to answer you, and it
+            stays in my inbox unless you ask me to delete it.
           </li>
         </ul>
 
-        <h2>Where it is processed</h2>
+        <h2>Where it's processed</h2>
         <p>
-          The services named on this page are United States companies. Anything
-          they hold for this site is processed in the US. Cloudflare takes part
-          in the EU-US Data Privacy Framework.
+          Cloudflare, Buttondown, and Google are United States companies, so
+          anything they hold for this site is processed in the US. Cloudflare
+          takes part in the EU-US Data Privacy Framework.
         </p>
 
         <h2>Links to other sites</h2>
         <p>
           The site links to the Half-Built Robots blog and to other sites. Their
-          privacy practices are their own. This policy covers this site only.
+          privacy practices are their own. This policy covers only this site.
         </p>
 
         <h2>Children</h2>
         <p>
-          This site is not directed at children under 13. It does not knowingly
+          This site is not directed at children under 13, and I do not knowingly
           collect personal information from anyone under 13.
         </p>
 
         <h2>Your data</h2>
         <p>
-          Anyone, wherever they live, may ask what this site holds about them.
-          They may also ask for it to be corrected or deleted. Write to the
-          contact address below. In nearly every case the site holds nothing.
-          The records it can hold are a mailing list address and, while a
-          redemption is in transit, a shipping address. The unsubscribe link in
-          any dispatch removes the first.
+          Wherever you live, you can ask what this site holds about you. You can
+          also ask to have it corrected or deleted. Write to the contact address
+          below. In nearly every case the site holds nothing. The records it can
+          hold are a mailing list address and, while a redemption is in transit,
+          a shipping address. The unsubscribe link in any email removes the
+          first.
         </p>
         <p>
-          Anyone who believes a request was mishandled may complain to the data
-          protection authority where they live.
+          If you think a request was handled badly, you can complain to the data
+          protection authority where you live.
         </p>
 
         <h2>Changes</h2>
-        <p>Revisions are posted on this page with a new date at the top.</p>
+        <p>
+          Updates to this policy are posted on this page with a new date at the
+          top.
+        </p>
 
         <h2>Contact</h2>
         <PolicyContact />
         <p>
-          The email address is a Gmail account. Mail sent to it is also handled
-          by Google under
+          The email address is a Gmail account, so mail sent to it is also
+          handled by Google under
           <a href="https://policies.google.com/privacy"
             >Google's privacy policy</a
           >.

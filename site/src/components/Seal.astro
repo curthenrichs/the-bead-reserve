@@ -24,14 +24,14 @@ import { STATS, GENESIS_BEADS } from "../config";
 
 <style>
   /* A wax-seal stamp that flips on hover or focus to show the token on
-     its reverse. Inline by default, left-aligned under the signature.
-     The focus ring is the system's; never outline: none. Wide
-     placement is in the media query at the end. */
+     its reverse. Always inline, centered in the column under the
+     signature, at every width (owner call 2026-10-08).
+     The focus ring is the system's; never outline: none. */
   .seal {
     position: relative;
     width: 132px;
     height: 132px;
-    margin-top: clamp(32px, 5vw, 56px);
+    margin: clamp(32px, 5vw, 56px) auto 0;
     perspective: 700px;
     border-radius: 50%;
   }
@@ -77,41 +77,4 @@ import { STATS, GENESIS_BEADS } from "../config";
   .seal-small { margin-top: 4px; font-size: 8px; letter-spacing: 0.16em; }
   .seal-tiny { margin-top: 4px; font-size: 7px; letter-spacing: 0.1em; }
   .seal-muted { color: var(--ink-muted); }
-
-  /* 1380 shell + 2 x (30 offset + 132 seal + 30 air) = 1764; 1780 adds
-     margin. Only here does the seal leave the flow and pin to the left
-     gutter, where it covers no content or footer link, so nothing
-     reserves room for it. */
-  @media (min-width: 1780px) {
-    .seal {
-      position: fixed;
-      bottom: 30px;
-      left: 30px;
-      z-index: var(--z-scroll-top);
-      margin-top: 0;
-    }
-
-    /* The seal travels down the gutter with the page: from the top-left
-       corner (30px inset) at the top of the scroll to the 30px bottom
-       inset at the end, linear between. The gutter sits outside the
-       shell, so it clears the header's frame at any height. A
-       scroll timeline, so no script. Without one, or with reduced
-       motion, it keeps the static bottom placement above. The end
-       never rises above the start on a short window. */
-    @supports (animation-timeline: scroll()) {
-      .seal {
-        animation: beadz-seal-travel linear both;
-        animation-timeline: scroll(root block);
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .seal { animation: none; }
-    }
-  }
-
-  @keyframes beadz-seal-travel {
-    from { top: 30px; }
-    to { top: max(30px, calc(100% - 30px - 132px)); }
-  }
 </style>

@@ -65,7 +65,7 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           if ! git diff --exit-code -- site/public; then
-            echo "::error::site/public differs from 'npm run brand:build' output. The committed favicon/OG/token images are stale — regenerate with 'npm run brand:build' inside site/ and commit the result." >&2
+            echo "::error::site/public differs from 'npm run brand:build' output. The committed favicon/OG/token images are stale. Regenerate with 'npm run brand:build' inside site/ and commit the result." >&2
             exit 1
           fi
 

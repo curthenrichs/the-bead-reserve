@@ -83,24 +83,6 @@ describe("layout in a real browser", () => {
     a.top < b.bottom &&
     b.top < a.bottom;
 
-  /* The page sets scroll-behavior: smooth, so a plain scrollTo is still
-     in flight when the boxes are read. Jump instantly, then let a frame
-     land. */
-  async function scrollToEnd(p: Page): Promise<void> {
-    await p.evaluate(async () => {
-      window.scrollTo({
-        top: document.documentElement.scrollHeight,
-        behavior: "instant",
-      });
-
-      await new Promise((r) =>
-        requestAnimationFrame(() => {
-          r(null);
-        }),
-      );
-    });
-  }
-
   async function sized(width: number, height: number, phone = false) {
     const p = await open("/", { phone });
     if (!phone) await p.setViewport({ width, height });
@@ -131,104 +113,24 @@ describe("layout in a real browser", () => {
       };
     });
 
-  it("wide screens: the seal floats in the left gutter, clear of content and footer links", async () => {
+  it("wide screens: the seal stays inline, centered under the signature", async () => {
     const p = await sized(1920, 1080);
-    expect((await sealState(p))?.position).toBe("fixed");
-    await scrollToEnd(p);
+    const state = await sealState(p);
+    expect(["static", "relative"]).toContain(state?.position);
     const seal = await box(p, ".seal");
+    const sig = await box(p, ".signature");
+    const gap = await box(p, ".subscribe-gap");
     const main = await box(p, "main");
-
-    expect(seal.right, JSON.stringify({ seal, main })).toBeLessThanOrEqual(
-      main.left,
-    );
-
-    expect(seal.left).toBeGreaterThanOrEqual(0);
-
-    const links = await p.evaluate(() =>
-      [...document.querySelectorAll("footer a")].map((a) => {
-        const r = a.getBoundingClientRect();
-        return { top: r.top, bottom: r.bottom, left: r.left, right: r.right };
-      }),
-    );
-
-    expect(links.length).toBeGreaterThan(0);
-    for (const l of links) expect(intersects(seal, l)).toBe(false);
-  });
-
-  /* Wide screens: the floating seal travels down the gutter with the
-     scroll, from under the header at the top of the page to its 30px
-     bottom inset at the end (a CSS scroll timeline, owner call
-     2026-10-08). */
-  async function scrollToFraction(p: Page, f: number): Promise<void> {
-    await p.evaluate(async (frac) => {
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-
-      window.scrollTo({ top: max * frac, behavior: "instant" });
-
-      await new Promise((r) =>
-        requestAnimationFrame(() =>
-          requestAnimationFrame(() => {
-            r(null);
-          }),
-        ),
-      );
-    }, f);
-  }
-
-  const SEAL_START = 30;
-  const SEAL_INSET = 30;
-
-  it("wide screens: the seal travels from the top-left corner to the bottom as the page scrolls", async () => {
-    const p = await sized(1920, 1080);
-    const vh = 1080;
-
-    await scrollToFraction(p, 0);
-    const top = await box(p, ".seal");
-    const header = await box(p, "header#masthead .site-header-wrapper");
+    expect(seal.top).toBeGreaterThan(sig.bottom);
+    expect(seal.bottom).toBeLessThan(gap.top);
 
     expect(
-      Math.abs(top.top - SEAL_START),
-      JSON.stringify(top),
+      Math.abs((seal.left + seal.right) / 2 - (main.left + main.right) / 2),
     ).toBeLessThanOrEqual(2);
-
-    expect(intersects(top, header), JSON.stringify({ top, header })).toBe(
-      false,
-    );
-
-    expect(intersects(top, await box(p, "main"))).toBe(false);
-
-    await scrollToFraction(p, 0.5);
-    const mid = await box(p, ".seal");
-    expect(mid.top).toBeGreaterThan(SEAL_START + 20);
-    expect(mid.bottom).toBeLessThan(vh - SEAL_INSET - 20);
-    expect(intersects(mid, await box(p, "main"))).toBe(false);
-
-    await scrollToFraction(p, 1);
-    const end = await box(p, ".seal");
-
-    expect(
-      Math.abs(vh - end.bottom - SEAL_INSET),
-      JSON.stringify(end),
-    ).toBeLessThanOrEqual(2);
-
-    expect(intersects(end, await box(p, "main"))).toBe(false);
   });
 
-  it("wide screens, reduced motion: the seal stays at the bottom", async () => {
-    const p = await sized(1920, 1080);
-
-    await p.emulateMediaFeatures([
-      { name: "prefers-reduced-motion", value: "reduce" },
-    ]);
-
-    await scrollToFraction(p, 0);
-    const seal = await box(p, ".seal");
-    expect(Math.abs(1080 - seal.bottom - SEAL_INSET)).toBeLessThanOrEqual(2);
-  });
-
-  it("wide screens: the traveling seal still flips on focus, with the focus ring", async () => {
-    const p = await sized(1920, 1080);
-    await scrollToFraction(p, 0.5);
+  it("the seal still flips on focus, with the focus ring", async () => {
+    const p = await sized(1280, 900);
     await p.focus(".seal");
 
     const state = await p.evaluate(
@@ -262,6 +164,11 @@ describe("layout in a real browser", () => {
     const gap = await box(p, ".subscribe-gap");
     expect(seal.top).toBeGreaterThan(sig.bottom);
     expect(seal.bottom).toBeLessThan(gap.top);
+    const main = await box(p, "main");
+
+    expect(
+      Math.abs((seal.left + seal.right) / 2 - (main.left + main.right) / 2),
+    ).toBeLessThanOrEqual(2);
   });
 
   it("phones: the seal is shown inline in the same place", async () => {
@@ -274,6 +181,11 @@ describe("layout in a real browser", () => {
     const gap = await box(p, ".subscribe-gap");
     expect(seal.top).toBeGreaterThan(sig.bottom);
     expect(seal.bottom).toBeLessThan(gap.top);
+    const main = await box(p, "main");
+
+    expect(
+      Math.abs((seal.left + seal.right) / 2 - (main.left + main.right) / 2),
+    ).toBeLessThanOrEqual(2);
   });
 
   /* The cap and the centering hold for the framed box as a whole. */
@@ -703,6 +615,25 @@ describe("layout in a real browser", () => {
     });
 
     expect(spill).toBe(false);
+  });
+
+  /* Owner call 2026-10-08: the certificate sizes to its content and
+     centers instead of spanning the column. */
+  it("/fault-cam/ desktop: the certificate is sized to its content and centered", async () => {
+    const p = await open("/fault-cam/", { attested: true });
+
+    await p.waitForFunction(
+      () => document.querySelector('[data-at="counter"]')?.textContent === "8",
+    );
+
+    const main = await box(p, "main");
+    const card = await box(p, "[data-attestation]");
+
+    expect(card.right - card.left).toBeLessThan(main.right - main.left - 40);
+
+    expect(
+      Math.abs(card.left - main.left - (main.right - card.right)),
+    ).toBeLessThanOrEqual(2);
   });
 
   const mid = (b: Box) => (b.left + b.right) / 2;
