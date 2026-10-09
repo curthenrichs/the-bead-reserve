@@ -16,12 +16,11 @@ import {
 
 export { RESERVE_EVENT };
 
-const FRAME_SRC = "/api/frame/latest";
 const FRAME_ALT = "Camera view of the reserve jar";
 
-function frame(): HTMLImageElement {
+function frame(src: string): HTMLImageElement {
   const img = document.createElement("img");
-  img.src = FRAME_SRC;
+  img.src = src;
   img.alt = FRAME_ALT;
   img.className = "cm-frame";
   return img;
@@ -47,9 +46,15 @@ export function renderMonitor(root: HTMLElement, v: MonitorView): void {
   if (caption) caption.textContent = v.caption;
   if (!screen) return;
 
-  if (v.showFrame) {
-    if (!screen.querySelector("img")) {
-      screen.replaceChildren(frame());
+  if (v.showFrame && v.frame) {
+    /* Each reading names its frame by counter, so a new frame is a new
+       URL and the image refreshes; the same frame is left alone. */
+    const img = screen.querySelector("img");
+
+    if (!img) {
+      screen.replaceChildren(frame(v.frame));
+    } else if (img.getAttribute("src") !== v.frame) {
+      img.src = v.frame;
     }
   } else if (!screen.querySelector("[data-cm-placeholder]")) {
     const span = document.createElement("span");

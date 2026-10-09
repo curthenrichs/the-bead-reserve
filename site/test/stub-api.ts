@@ -1,7 +1,8 @@
 /* The preview server has no Worker behind /api, so the monitor reads
-   dark there. The browser suites that need a live frame stub the two
+   dark there. The browser suites that need a live frame stub the
    endpoints the island calls: a fresh reserve and a small PNG as the
-   frame (the token art, any real image will do). Call before goto. */
+   frame it names by counter (the token art, any real image will do).
+   Call before goto. */
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -12,7 +13,7 @@ const FRAME = readFileSync(
 );
 
 const FRESH = {
-  frameUrl: "/api/frame/latest",
+  frameUrl: "/api/frame/7",
   counter: 7,
   ts: 1,
   sha256: null,
@@ -29,10 +30,18 @@ const FRESH = {
 const ATTESTED = {
   ...FRESH,
   counter: 8,
+  frameUrl: "/api/frame/8",
   ts: 1_790_000_000,
   sha256: createHash("sha256").update(FRAME).digest("hex"),
   sig: "00".repeat(64),
 };
+
+/* The frame each stubbed reading names, plus /latest for the fallback. */
+const FRAME_PATHS = new Set([
+  FRESH.frameUrl,
+  ATTESTED.frameUrl,
+  "/api/frame/latest",
+]);
 
 export async function stubLiveReserve(
   page: Page,
@@ -49,7 +58,7 @@ export async function stubLiveReserve(
         contentType: "application/json",
         body: JSON.stringify(attested ? ATTESTED : FRESH),
       });
-    } else if (pathname === "/api/frame/latest") {
+    } else if (FRAME_PATHS.has(pathname)) {
       void req.respond({ status: 200, contentType: "image/png", body: FRAME });
     } else {
       void req.continue();

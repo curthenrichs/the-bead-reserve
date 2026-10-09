@@ -64,7 +64,8 @@ npm install
 npm run dev        # astro dev, prints a localhost URL
 ```
 
-The camera monitor polls `/api/reserve` and renders `/api/frame/latest`.
+The camera monitor polls `/api/reserve` and renders the frame it names,
+`/api/frame/{counter}`.
 In dev, `astro.config.mjs` proxies `/api/*` to `http://localhost:8787`, so to see
 a live feed instead of the placeholder, open a **second terminal** and run the
 Worker alongside the site:
@@ -142,13 +143,20 @@ broken features; the copy and behavior are what a visitor should see today.
 
 ## API integration
 
-The site never talks to the chain and holds no secrets. It calls two read-only
+The site never talks to the chain and holds no secrets. It calls read-only
 endpoints served by the separate `../service` Worker:
 
 - `GET /api/reserve`: the current reserve status (`fresh` / `stale` / `dark`,
-  frame counter, timestamp, hash, Chief Reserve Officer caption text).
-- `GET /api/frame/latest`: the latest camera frame, streamed straight from
-  the Worker's storage.
+  frame counter, timestamp, hash, Chief Reserve Officer caption text) and
+  `frameUrl`, the path of that reading's frame (`/api/frame/{counter}`).
+- `GET /api/frame/{counter}`: one numbered camera frame, streamed straight
+  from the Worker's storage and cached as immutable. The monitor's image
+  and the Fault Cam's in-browser check both load the frame the reading
+  names, so the bytes always match its hash and the image refreshes when a
+  new frame lands. The site only follows a same-origin `/api/frame/` path
+  out of the API body; anything else falls back to `/api/frame/latest`.
+- `GET /api/frame/latest`: the latest camera frame. Kept as the fallback
+  for a reading that names no frame.
 
 In production these are same-origin: a Cloudflare route sends `/api/*` on the
 site's domain to the Worker, so the browser never sees a second origin and

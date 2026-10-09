@@ -18,10 +18,25 @@ export async function handleReserve(_request: Request, env: Env): Promise<Respon
   const m = JSON.parse(rawMeta);
   const age = Math.floor(Date.now() / 1000) - m.ts;
   return json({
-    frameUrl: "/api/frame/latest",
+    frameUrl: `/api/frame/${m.counter}`,
     counter: m.counter, ts: m.ts, sha256: m.sha256, sig: m.sig,
     croText: m.croText, status: freshness(age, env), apiVersion: env.API_VERSION,
   }, 200, env);
+}
+
+// `counter` arrives pre-validated by the router (digits only, no leading zero).
+// A numbered frame never changes, so it caches forever.
+export async function handleFrameByCounter(counter: string, env: Env): Promise<Response> {
+  const obj = await env.FRAMES.get(`frames/${counter}.jpg`);
+  if (!obj) return json({ error: "no_frame" }, 404, env);
+  return new Response(obj.body, {
+    status: 200,
+    headers: {
+      "Content-Type": "image/jpeg",
+      "Cache-Control": "public, max-age=31536000, immutable",
+      "X-Beadz-Api": `beadz-ingest/${env.API_VERSION}`,
+    },
+  });
 }
 
 export async function handleFrameLatest(_request: Request, env: Env): Promise<Response> {

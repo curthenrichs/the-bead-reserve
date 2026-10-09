@@ -16,6 +16,10 @@ export function json(body: unknown, status: number, env: Env, extra?: HeadersIni
   return new Response(JSON.stringify(body), { status, headers });
 }
 
+// A positive integer with no leading zero, at most 19 digits (ingest caps
+// counters below 2^63). Anything else falls through to not_found.
+const FRAME_BY_COUNTER = /^\/api\/frame\/([1-9][0-9]{0,18})$/;
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
@@ -35,6 +39,12 @@ export default {
       if (method !== "GET") return json({ error: "method_not_allowed" }, 405, env);
       const { handleFrameLatest } = await import("./reserve");
       return handleFrameLatest(request, env);
+    }
+    const frame = FRAME_BY_COUNTER.exec(url.pathname);
+    if (frame) {
+      if (method !== "GET") return json({ error: "method_not_allowed" }, 405, env);
+      const { handleFrameByCounter } = await import("./reserve");
+      return handleFrameByCounter(frame[1], env);
     }
     return json({ error: "not_found" }, 404, env);
   },

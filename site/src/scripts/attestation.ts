@@ -4,7 +4,12 @@
    at ingest (service/src/crypto.ts): SHA-256 of the frame bytes must
    equal the published hash, and the Ed25519 signature is over the 32
    raw digest bytes, every value hex. */
-import { parseReserve, type Reserve, type Status } from "./camera-state";
+import {
+  frameSrc,
+  parseReserve,
+  type Reserve,
+  type Status,
+} from "./camera-state";
 
 export type Verdict =
   | "checking"
@@ -57,7 +62,6 @@ export const VERDICT_TONE: Record<Verdict, VerdictTone> = {
 /* The record's placeholder when there is nothing to show. */
 export const NONE = "None";
 
-export const FRAME_URL = "/api/frame/latest";
 export const RESERVE_URL = "/api/reserve";
 
 export function hexToBytes(hex: string): Uint8Array<ArrayBuffer> {
@@ -148,9 +152,10 @@ export interface CheckOptions {
   pubHex: string;
 }
 
-/* The whole check for one reading. The frame is fetched uncached so the
-   bytes are the ones the Worker serves now, not a copy the monitor's
-   image already pulled. */
+/* The whole check for one reading. The frame fetched is the one the
+   reading names by counter (frameSrc keeps it to a same-origin
+   /api/frame/ path, else /latest), uncached so the bytes are the ones
+   the Worker serves now. */
 export async function checkReserve(
   r: Reserve,
   { fetchImpl, subtle, pubHex }: CheckOptions,
@@ -165,7 +170,7 @@ export async function checkReserve(
   let bytes: Uint8Array<ArrayBuffer>;
 
   try {
-    const res = await fetchImpl(FRAME_URL, { cache: "no-store" });
+    const res = await fetchImpl(frameSrc(r), { cache: "no-store" });
     if (!res.ok) return "unavailable";
     bytes = new Uint8Array(await res.arrayBuffer());
   } catch {
@@ -177,13 +182,12 @@ export async function checkReserve(
   return (await stillNames(r.sha256, fetchImpl)) ? "mismatch" : "checking";
 }
 
-/* A mismatch is confirmed before it is reported. The record and the
-   frame come from two requests, and the Worker's KV is eventually
-   consistent: the record can name frame N+1 while /latest still serves
-   N, or a new frame can land between the two. Only a fresh record that
-   still names the same hash makes the mismatch real; anything else
-   (a moved frame, a failed refetch) is left for the next poll. The
-   lasting fix is on the service side, a frame fetched by its counter. */
+/* A mismatch is confirmed before it is reported. Fetching the frame by
+   its counter removes the race where the record named frame N+1 while
+   /latest still served N, but the /latest fallback can still meet it.
+   Only a fresh record that still names the same hash makes the
+   mismatch real; anything else (a moved frame, a failed refetch) is
+   left for the next poll. */
 async function stillNames(
   sha256: string,
   fetchImpl: typeof fetch,

@@ -61,6 +61,20 @@ const STATUSES: readonly string[] = ["fresh", "stale", "dark"];
 const nullable = (v: unknown, type: "string" | "number"): boolean =>
   v === null || typeof v === type;
 
+/* The Worker's back-compat frame route, used when a live reading names
+   no frame of its own. */
+export const FRAME_LATEST = "/api/frame/latest";
+
+/* The only frameUrl the page will load or fetch: a same-origin path
+   under /api/frame/ with one plain segment (a counter, or "latest").
+   No scheme, no host, no traversal, no query. Never an arbitrary URL
+   out of the API body. */
+const FRAME_PATH = /^\/api\/frame\/[0-9A-Za-z]+$/;
+
+export function isFrameUrl(v: unknown): v is string {
+  return typeof v === "string" && FRAME_PATH.test(v);
+}
+
 export function parseReserve(body: unknown): Reserve {
   if (typeof body !== "object" || body === null || Array.isArray(body)) {
     return DARK;
@@ -81,8 +95,10 @@ export function parseReserve(body: unknown): Reserve {
     return DARK;
   }
 
+  /* A foreign frameUrl drops to null rather than darkening the reading:
+     the frame then comes from /latest, and the record still shows. */
   return {
-    frameUrl: b.frameUrl as string | null,
+    frameUrl: isFrameUrl(b.frameUrl) ? b.frameUrl : null,
     counter: b.counter as number | null,
     ts: b.ts as number | null,
     sha256: b.sha256 as string | null,
@@ -90,6 +106,12 @@ export function parseReserve(body: unknown): Reserve {
     croText: b.croText as string | null,
     status: b.status as Status,
   };
+}
+
+/* The frame a reading names, checked again here because a Reserve can
+   be built by hand as well as parsed; /latest when it names none. */
+export function frameSrc(r: Reserve): string {
+  return isFrameUrl(r.frameUrl) ? r.frameUrl : FRAME_LATEST;
 }
 
 export interface MonitorView {
@@ -100,6 +122,8 @@ export interface MonitorView {
   moodAlt: string;
   moodCaption: string;
   showFrame: boolean;
+  /* The image source while a frame shows, null otherwise. */
+  frame: string | null;
   placeholder: string | null;
   caption: string;
 }
@@ -123,6 +147,7 @@ export function viewFor(r: Reserve): MonitorView {
     moodAlt: CRO_ALT[r.status],
     moodCaption: CRO_CAPTION[r.status],
     showFrame,
+    frame: showFrame ? frameSrc(r) : null,
     placeholder: showFrame ? null : COPY.dark,
     caption,
   };
