@@ -1,11 +1,14 @@
 # The Bead Reserve
 
-**A bead-collateralized token on Base with a webcam proof-of-reserves oracle. Fully reserved. Worth nothing.**
+**A bead-collateralized token for Base with a webcam proof-of-reserves oracle, specified in full and never issued. Fully reserved. Worth nothing.**
 
 BEADZ is a fixed-supply novelty ERC-20 on [Base](https://base.org), "fully reserved" by a physical jar
 of glass seed beads in a cardboard box under a webcam. It is a deadpan parody of a reserve-backed
 stablecoin: real proof-of-reserves plumbing, real redemption mechanics, and a real institutional-style
 whitepaper, all wrapped around an asset that is worth nothing, on purpose.
+
+Its authors have chosen never to deploy it. This repository is the method, published to be read
+rather than launched: the contract, the camera, the service, the site, and the whitepaper.
 
 > BEADZ has no monetary value, targets no monetary value, and is issued solely for amusement.
 > It is **not a stablecoin**, not pegged to any national currency, and not redeemable for cash.
@@ -31,7 +34,7 @@ The terminal state of the whole system is an empty jar in a box.
 - **Fixed supply, no mint path.** The entire supply is minted once in the constructor. There is no
   `mint` function afterward. The supply cap is enforced by absence, which is stronger than any
   renounce ceremony.
-- **Airdrop-only claim, no liquidity pool.** Supply is distributed by claim — one per address,
+- **Airdrop-only claim, no liquidity pool.** Supply is distributed by claim, one per address,
   metered globally at one bead per 432 seconds (200/day, one day's allotment cap, faucet starts
   empty), so a thousand wallets still share one trickle. The project seeds no market and
   endorses none.
@@ -118,19 +121,19 @@ The claim and proof-of-reserves front-end is hosted at
 
 ## Status
 
-**Pre-deploy.** The contract compiles cleanly and ships with a Foundry unit + fuzz/invariant test
-suite and a Slither static-analysis gate; see "Verifying the contract" above to run them yourself.
-Deployed contract addresses will be added here after the contract is deployed to Base and its source
-is verified on Basescan.
+**Never deployed, by choice.** The contract compiles cleanly and ships with a Foundry unit +
+fuzz/invariant test suite and a Slither static-analysis gate; see "Verifying the contract" above to
+run them yourself. It has never been deployed to Base or any public chain, and its authors will not
+deploy it. The whitepaper is published as the Unissued Edition.
 
 ### Canonicity
 
-**No BEADZ has been deployed to any chain.** When the canonical contract exists, its address will
-appear here and at [beadz.half-built-robots.com](https://beadz.half-built-robots.com) — nowhere
-else. Until then, any token wearing this name or ticker is not this project and holds no claim on
-the jar. One tell is definitive: the genuine BEADZ seeds no liquidity pool and never will, so any
-"BEADZ" you can buy is, by construction, a counterfeit bead reserve. The counterfeit is also worth
-nothing, but less honestly.
+**No BEADZ has been deployed to any chain, and none will be by its authors.** Any token, NFT,
+liquidity pool, or claim site wearing this name or ticker was not made by Curt Henrichs LLC or
+anyone affiliated with it, is not endorsed, and holds no claim on the jar. The name, the seal, and
+the mascot are reserved under this repository's LICENSE, so a fork that deploys must take its own
+name. One tell is definitive: any "BEADZ" you can buy is, by construction, a counterfeit bead
+reserve. The counterfeit is also worth nothing, but less honestly.
 
 ## Reserve facts
 
@@ -158,7 +161,7 @@ These are statements of design intent, made in earnest, and are not legal, finan
 
 MIT. Fork it, deploy your own vault, reserve your own beads. Henry the mascot
 and the other brand marks (the reserve seal, favicons, token art, OG image)
-are carved out of that grant — see the BRAND ASSETS EXCEPTION in
+are carved out of that grant; see the BRAND ASSETS EXCEPTION in
 [`LICENSE`](./LICENSE) before reusing them.
 
 ---
