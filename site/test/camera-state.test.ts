@@ -26,6 +26,12 @@ describe("parseReserve", () => {
     });
   });
 
+  it("keeps the frame signature for the attestation record", () => {
+    expect(parseReserve(fresh).sig).toBe("cd".repeat(64));
+    expect(parseReserve({ ...fresh, sig: null }).sig).toBeNull();
+    expect(DARK.sig).toBeNull();
+  });
+
   it("treats the empty Worker state as dark", () => {
     expect(
       parseReserve({
@@ -34,6 +40,7 @@ describe("parseReserve", () => {
         counter: null,
         ts: null,
         sha256: null,
+        sig: null,
         croText: null,
         status: "dark",
       }).status,
@@ -47,6 +54,7 @@ describe("parseReserve", () => {
     ["an unknown status", { ...fresh, status: "glowing" }],
     ["a string counter", { ...fresh, counter: "7" }],
     ["a numeric croText", { ...fresh, croText: 5 }],
+    ["a numeric sig", { ...fresh, sig: 5 }],
   ])("falls back to DARK for %s", (_name, body) => {
     expect(parseReserve(body)).toEqual(DARK);
   });

@@ -16,3 +16,9 @@ export const STATS = {
   outstanding: `${GENESIS_BEADS.toLocaleString("en-US")} BEADZ`,
   collateralization: "100.0%",
 } as const;
+
+// Fault Cam 01's Ed25519 public key, published by design: it is how
+// anyone verifies a frame. The source of truth is ED25519_PUBKEY in
+// service/wrangler.toml; change both together on a key rotation.
+export const DEVICE_PUBKEY =
+  "de649d130c8c7d559b424f1fbd7150b1dc18ffb00c33addaf8b171a2db049dfc";

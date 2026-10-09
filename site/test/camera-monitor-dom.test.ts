@@ -1,6 +1,9 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { mountCameraMonitor } from "../src/scripts/camera-monitor";
+import {
+  mountCameraMonitor,
+  RESERVE_EVENT,
+} from "../src/scripts/camera-monitor";
 
 const MARKUP = `
   <div data-camera-monitor data-status="dark">
@@ -16,6 +19,7 @@ const fresh = {
   counter: 7,
   ts: 1,
   sha256: null,
+  sig: null,
   croText: "sealed tight",
   status: "fresh",
 };
@@ -127,6 +131,24 @@ describe("camera monitor island", () => {
     const calls = fetchImpl.mock.calls.length;
     await vi.advanceTimersByTimeAsync(5000);
     expect(fetchImpl.mock.calls.length).toBe(calls);
+  });
+
+  it("announces every reading to the page for the attestation record", async () => {
+    document.body.innerHTML = MARKUP;
+    const seen: unknown[] = [];
+
+    document.addEventListener(RESERVE_EVENT, (e) => {
+      seen.push((e as CustomEvent).detail);
+    });
+
+    const fetchImpl = vi.fn(() => ok({ ...fresh, sig: "ef" }));
+    mountCameraMonitor(document, { pollMs: 0, fetchImpl });
+
+    await vi.waitFor(() => {
+      expect(seen).toHaveLength(1);
+    });
+
+    expect(seen[0]).toMatchObject({ status: "fresh", counter: 7, sig: "ef" });
   });
 
   it("does nothing on a page without the monitor", () => {

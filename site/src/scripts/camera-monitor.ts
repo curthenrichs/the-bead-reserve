@@ -6,7 +6,15 @@ import {
   buildPlateModal,
   type PlateModalRefs,
 } from "@half-built/astro/scripts/plate-modal.ts";
-import { DARK, parseReserve, viewFor, type MonitorView } from "./camera-state";
+import {
+  DARK,
+  RESERVE_EVENT,
+  parseReserve,
+  viewFor,
+  type MonitorView,
+} from "./camera-state";
+
+export { RESERVE_EVENT };
 
 const FRAME_SRC = "/api/frame/latest";
 const FRAME_ALT = "Camera view of the reserve jar";
@@ -146,7 +154,12 @@ export function mountCameraMonitor(
       reserve = DARK;
     }
 
-    if (alive) renderMonitor(el, viewFor(reserve));
+    if (!alive) return;
+    renderMonitor(el, viewFor(reserve));
+
+    el.ownerDocument.dispatchEvent(
+      new CustomEvent(RESERVE_EVENT, { detail: reserve }),
+    );
   };
 
   void poll();
