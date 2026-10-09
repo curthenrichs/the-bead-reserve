@@ -85,6 +85,92 @@ describe("/privacy/ as released", () => {
   });
 });
 
+/* The accessibility statement follows the blog's, section by section
+   (Curt 2026-10-08); only this site's facts differ. */
+describe("/accessibility/ in the blog's language", () => {
+  const doc = page("/accessibility/");
+
+  const squash = (s: string | null | undefined) =>
+    s?.replace(/\s+/g, " ").trim();
+
+  const paras = [...doc.querySelectorAll("main .prose p")].map((p) =>
+    squash(p.textContent),
+  );
+
+  it("opens as a statement from the LLC for this website", () => {
+    expect(paras[0]).toBe(
+      "This is an accessibility statement from Curt Henrichs LLC for The Bead Reserve website.",
+    );
+  });
+
+  it("carries the blog's sections in order", () => {
+    const heads = [...doc.querySelectorAll("main .prose h2")].map((h) =>
+      squash(h.textContent),
+    );
+
+    expect(heads).toEqual([
+      "Conformance status",
+      "Feedback",
+      "Technical specifications",
+      "Limitations and alternatives",
+      "Assessment approach",
+      "Date",
+    ]);
+  });
+
+  it("states partial conformance with WCAG 2.2 AA in the blog's words", () => {
+    expect(paras).toContain(
+      "The Web Content Accessibility Guidelines (WCAG) define requirements for designers and developers to improve accessibility for people with disabilities. They define three levels of conformance: Level A, Level AA, and Level AAA. The Bead Reserve is partially conformant with WCAG 2.2 Level AA. Partially conformant means that some parts of the content do not fully conform to the accessibility standard.",
+    );
+  });
+
+  it("lists the contacts and the response line", () => {
+    expect(paras).toContain(
+      "If you encounter an accessibility barrier on this site, please let me know:",
+    );
+
+    expect(paras).toContain(
+      "I try to respond to feedback as quickly as possible.",
+    );
+
+    expect(
+      doc.querySelector('main a[href="mailto:curthenrichs@gmail.com"]'),
+    ).not.toBeNull();
+  });
+
+  it("lists the technologies", () => {
+    const items = [...doc.querySelectorAll("main .prose ul li")].map((li) =>
+      squash(li.textContent),
+    );
+
+    expect(items).toEqual(
+      expect.arrayContaining(["HTML", "CSS", "JavaScript"]),
+    );
+  });
+
+  it("numbers the two known limitations", () => {
+    expect(doc.querySelectorAll("main .prose ol li")).toHaveLength(2);
+
+    expect(paras).toContain(
+      "Please contact me if you observe an issue not listed above.",
+    );
+  });
+
+  it("describes the assessment and dates the revision", () => {
+    expect(
+      paras.some((p) =>
+        p?.startsWith(
+          "Curt Henrichs assessed the accessibility of this site by self-evaluation.",
+        ),
+      ),
+    ).toBe(true);
+
+    expect(paras).toContain(
+      "This statement was created on 7 October 2026 and revised on 8 October 2026.",
+    );
+  });
+});
+
 describe("policies in the footer", () => {
   it("every page's footer carries the Rules group, the policy pages themselves", () => {
     const hrefs = [...page("/").querySelectorAll("footer a")].map((a) =>
