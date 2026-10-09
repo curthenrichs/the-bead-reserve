@@ -117,7 +117,7 @@ describe("ed25519Supported", () => {
 
 describe("checkReserve", () => {
   const live = (): Reserve => ({
-    frameUrl: "/api/frame/latest",
+    frameUrl: "/api/frame/9",
     counter: 9,
     ts: 1_790_000_000,
     sha256: sha,
@@ -154,7 +154,7 @@ describe("checkReserve", () => {
     ).toBe("verified");
   });
 
-  it("fetches the latest frame uncached", async () => {
+  it("fetches the frame the reading names, uncached", async () => {
     let seen: [unknown, RequestInit | undefined] | undefined;
 
     const fetchImpl = ((url: string, init?: RequestInit) => {
@@ -163,8 +163,29 @@ describe("checkReserve", () => {
     }) as unknown as typeof fetch;
 
     await checkReserve(live(), { fetchImpl, subtle, pubHex });
-    expect(seen?.[0]).toBe("/api/frame/latest");
+    expect(seen?.[0]).toBe("/api/frame/9");
     expect(seen?.[1]?.cache).toBe("no-store");
+  });
+
+  /* Only a same-origin /api/frame/ path from the API body is fetched;
+     anything else falls back to /latest. */
+  it.each([
+    ["no frameUrl", null],
+    ["an absolute foreign URL", "https://evil.example/api/frame/9"],
+    ["a protocol-relative URL", "//evil.example/api/frame/9"],
+    ["a path outside /api/frame/", "/api/reserve"],
+    ["a traversal", "/api/frame/../../admin"],
+    ["an embedded scheme", "/api/frame/9?u=https://evil.example"],
+  ])("fetches /api/frame/latest for %s", async (_name, frameUrl) => {
+    const seen: unknown[] = [];
+
+    const fetchImpl = ((url: string) => {
+      seen.push(url);
+      return serve(FRAME)(url);
+    }) as unknown as typeof fetch;
+
+    await checkReserve({ ...live(), frameUrl }, { fetchImpl, subtle, pubHex });
+    expect(seen[0]).toBe("/api/frame/latest");
   });
 
   /* A mismatch is rechecked against a fresh /api/reserve before it is
@@ -237,7 +258,7 @@ describe("checkReserve", () => {
       }),
     ).toBe("verified");
 
-    expect(seen.map(([u]) => u)).toEqual(["/api/frame/latest"]);
+    expect(seen.map(([u]) => u)).toEqual(["/api/frame/9"]);
   });
 
   it("a record with no signature is not checked", async () => {
@@ -292,7 +313,7 @@ describe("recordFor", () => {
   it("a live record: the counter, the capture time in UTC, the hex as sent", () => {
     expect(
       recordFor({
-        frameUrl: "/api/frame/latest",
+        frameUrl: "/api/frame/1204",
         counter: 1204,
         ts: 1_790_000_000,
         sha256: "ab".repeat(32),

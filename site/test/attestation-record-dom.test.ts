@@ -31,7 +31,7 @@ const tone = () =>
   document.querySelector<HTMLElement>("[data-attestation]")?.dataset.tone;
 
 const live: Reserve = {
-  frameUrl: "/api/frame/latest",
+  frameUrl: "/api/frame/12",
   counter: 12,
   ts: 1_790_000_000,
   sha256: "ab".repeat(32),

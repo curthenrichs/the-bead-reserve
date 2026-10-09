@@ -4,10 +4,11 @@ import {
   viewFor,
   DARK,
   CRO_MOOD,
+  isFrameUrl,
 } from "../src/scripts/camera-state";
 
 const fresh = {
-  frameUrl: "/api/frame/latest",
+  frameUrl: "/api/frame/7",
   counter: 7,
   ts: 1_790_000_000,
   sha256: "ab".repeat(32),
@@ -57,6 +58,61 @@ describe("parseReserve", () => {
     ["a numeric sig", { ...fresh, sig: 5 }],
   ])("falls back to DARK for %s", (_name, body) => {
     expect(parseReserve(body)).toEqual(DARK);
+  });
+});
+
+describe("isFrameUrl", () => {
+  it.each(["/api/frame/7", "/api/frame/latest"])("accepts %s", (u) => {
+    expect(isFrameUrl(u)).toBe(true);
+  });
+
+  it.each([
+    null,
+    7,
+    "",
+    "/api/frame/",
+    "https://evil.example/api/frame/7",
+    "//evil.example/api/frame/7",
+    "/api/reserve",
+    "api/frame/7",
+    "/api/frame/../reserve",
+    "/api/frame/7?next=https://evil.example",
+    "/api/frame/7\\..\\x",
+  ])("rejects %s", (u) => {
+    expect(isFrameUrl(u)).toBe(false);
+  });
+});
+
+describe("parseReserve frameUrl", () => {
+  it("keeps a same-origin frame path", () => {
+    expect(parseReserve(fresh).frameUrl).toBe("/api/frame/7");
+  });
+
+  it("drops a foreign frameUrl to null but keeps the reading", () => {
+    const r = parseReserve({
+      ...fresh,
+      frameUrl: "https://evil.example/x.jpg",
+    });
+
+    expect(r.frameUrl).toBeNull();
+    expect(r.status).toBe("fresh");
+    expect(r.counter).toBe(7);
+  });
+});
+
+describe("viewFor frame", () => {
+  it("shows the frame the reading names", () => {
+    expect(viewFor(parseReserve(fresh)).frame).toBe("/api/frame/7");
+  });
+
+  it("falls back to /latest when a live reading names no frame", () => {
+    expect(viewFor(parseReserve({ ...fresh, frameUrl: null })).frame).toBe(
+      "/api/frame/latest",
+    );
+  });
+
+  it("dark has no frame", () => {
+    expect(viewFor(DARK).frame).toBeNull();
   });
 });
 

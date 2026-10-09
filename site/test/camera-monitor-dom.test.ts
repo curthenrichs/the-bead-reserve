@@ -15,7 +15,7 @@ const MARKUP = `
   </div>`;
 
 const fresh = {
-  frameUrl: "/api/frame/latest",
+  frameUrl: "/api/frame/7",
   counter: 7,
   ts: 1,
   sha256: null,
@@ -47,7 +47,7 @@ describe("camera monitor island", () => {
     });
 
     const frame = $("[data-cm-screen] img");
-    expect(frame?.getAttribute("src")).toBe("/api/frame/latest");
+    expect(frame?.getAttribute("src")).toBe("/api/frame/7");
     expect(frame?.getAttribute("alt")).toBe("Camera view of the reserve jar");
     expect(frame?.parentElement?.hasAttribute("data-cm-screen")).toBe(true);
     expect($("[data-cm-placeholder]")).toBeNull();
@@ -60,6 +60,44 @@ describe("camera monitor island", () => {
     expect($("[data-cm-mood]")?.getAttribute("src")).toBe(
       "/henry-cro-broadcasting.svg",
     );
+  });
+
+  it("the frame follows each reading's frameUrl, so a new frame refreshes the image", async () => {
+    vi.useFakeTimers();
+    document.body.innerHTML = MARKUP;
+
+    const fetchImpl = vi
+      .fn()
+      .mockImplementationOnce(() => ok(fresh))
+      .mockImplementation(() =>
+        ok({ ...fresh, counter: 8, frameUrl: "/api/frame/8" }),
+      );
+
+    const handle = mountCameraMonitor(document, { pollMs: 1000, fetchImpl });
+    const src = () => $("[data-cm-screen] img")?.getAttribute("src");
+
+    await vi.advanceTimersByTimeAsync(0);
+    expect(src()).toBe("/api/frame/7");
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(src()).toBe("/api/frame/8");
+    expect(document.querySelectorAll("[data-cm-screen] img")).toHaveLength(1);
+    handle.destroy();
+  });
+
+  it("a foreign frameUrl is never used as the image source", async () => {
+    document.body.innerHTML = MARKUP;
+
+    const fetchImpl = vi.fn(() =>
+      ok({ ...fresh, frameUrl: "https://evil.example/x.jpg" }),
+    );
+
+    mountCameraMonitor(document, { pollMs: 0, fetchImpl });
+
+    await vi.waitFor(() => {
+      expect($("[data-cm-screen] img")?.getAttribute("src")).toBe(
+        "/api/frame/latest",
+      );
+    });
   });
 
   it("a failed fetch leaves the dark state and throws nothing", async () => {
