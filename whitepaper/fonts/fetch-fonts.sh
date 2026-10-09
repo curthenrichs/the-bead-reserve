@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Re-download the bundled brand fonts from fontsource (jsDelivr CDN).
-# Roboto is Apache-2.0 (see LICENSE-Roboto.txt) and so is Roboto Mono (see
+# Roboto and Roboto Mono are both SIL OFL 1.1 (see LICENSE-Roboto.txt and
 # LICENSE-Roboto-Mono.txt). Both permit redistribution. The license files are
 # tracked, not fetched (the CDN does not serve them).
 # Run from the fonts/ directory: ./fetch-fonts.sh

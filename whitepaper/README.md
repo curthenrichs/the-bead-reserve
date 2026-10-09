@@ -26,8 +26,8 @@ rebuilds. The build uses `--font-path fonts`, so no font installation is needed.
 
 Bundled fonts are third-party assets; both licenses permit redistribution:
 
-- **Roboto** (body: regular, italic, medium, medium italic, bold) — Google — Apache-2.0 (`fonts/LICENSE-Roboto.txt`)
-- **Roboto Mono** (headings, labels, tables) — Google — Apache-2.0 (`fonts/LICENSE-Roboto-Mono.txt`)
+- **Roboto** (body: regular, italic, medium, medium italic, bold) — Google — SIL OFL 1.1 (`fonts/LICENSE-Roboto.txt`)
+- **Roboto Mono** (headings, labels, tables) — Google — SIL OFL 1.1 (`fonts/LICENSE-Roboto-Mono.txt`)
 
 Both are from the Roboto family; Roboto Mono matches the blog, which is set in
 Roboto Mono. The body was Roboto Serif until 2026-10-08 and moved to Roboto
