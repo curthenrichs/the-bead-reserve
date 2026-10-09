@@ -1,0 +1,100 @@
+name: site-smoke
+# Invariants the unit suite cannot see: _headers only acts on the
+# deployed host, the /api/* Worker route lives in zone settings, and
+# zone-level settings can drift with no commit at all. Runs after every
+# site workflow on main, weekly, and on demand against production or a
+# pages.dev preview. The automatic runs wait for the repo variable
+# BEADZ_LIVE=true so nothing probes an undeployed host; a manual run
+# always goes.
+on:
+  workflow_run:
+    workflows: [site]
+    types: [completed]
+    branches: [main]
+  schedule:
+    - cron: "41 11 * * 1"
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "production, or a pages.dev base URL (https://<hash>.<project>.pages.dev)"
+        type: string
+        default: production
+permissions:
+  contents: read
+jobs:
+  smoke:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (vars.BEADZ_LIVE == 'true' &&
+        (github.event_name == 'schedule' ||
+          (github.event.workflow_run.event == 'push' &&
+            github.event.workflow_run.conclusion == 'success')))
+    runs-on: ubuntu-latest
+    steps:
+      - name: let the deploy settle
+        if: github.event_name == 'workflow_run'
+        run: sleep 60
+      # The kind tells the probes what differs per host: production owns
+      # the /api/* Worker route and must be indexable; a pages.dev host
+      # must carry noindex (Cloudflare's own on previews, _headers on
+      # the production alias).
+      - name: resolve target
+        id: target
+        env:
+          TARGET: ${{ inputs.target || 'production' }}
+        run: |
+          case "$TARGET" in
+            production) base=https://beadz.half-built-robots.com; kind=production ;;
+            https://*.pages.dev|https://*.pages.dev/) base=${TARGET%/}; kind=pages-dev ;;
+            *) echo "unknown target: $TARGET"; exit 1 ;;
+          esac
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+          echo "kind=$kind" >> "$GITHUB_OUTPUT"
+          echo "probing $base ($kind)"
+      - name: probe deployment invariants
+        env:
+          BASE: ${{ steps.target.outputs.base }}
+          KIND: ${{ steps.target.outputs.kind }}
+        run: |
+          set -u
+          base=$BASE
+          canonical=https://beadz.half-built-robots.com
+          fail=0
+          expect() { # expect <code> <url>
+            local want=$1 url=$2 got
+            got=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$url")
+            if [ "$got" != "$want" ]; then echo "FAIL $url: got $got, want $want"; fail=1; return; fi
+            echo "ok   $got $url"
+          }
+          for path in / /fault-cam/ /brand/ /privacy/ /terms/ /accessibility/ \
+            /whitepaper.pdf /robots.txt /sitemap-index.xml /.well-known/security.txt; do
+            expect 200 "$base$path"
+          done
+          expect 404 "$base/nope/"
+          # The Worker route serves /api/* on the custom domain only.
+          if [ "$KIND" = production ]; then
+            expect 200 "$base/api/reserve"
+            if ! curl -s --max-time 20 "$base/api/reserve" | grep -q '"status"'; then
+              echo "FAIL /api/reserve: body has no \"status\" field"; fail=1
+            else
+              echo "ok   /api/reserve carries a status"
+            fi
+          fi
+          # Every host names the canonical sitemap: the pages.dev copies
+          # serve the same build, and a crawler must never be handed a
+          # pages.dev sitemap.
+          if ! curl -s --max-time 20 "$base/robots.txt" | grep -q "Sitemap: $canonical/sitemap-index.xml"; then
+            echo "FAIL robots.txt: canonical Sitemap line missing"; fail=1
+          else
+            echo "ok   robots.txt carries the canonical Sitemap line"
+          fi
+          robots_hdr=$(curl -s -o /dev/null -D - --max-time 20 "$base/" | grep -i '^x-robots-tag:' || true)
+          case "$KIND" in
+            production)
+              if [ -n "$robots_hdr" ]; then echo "FAIL production carries $robots_hdr"; fail=1
+              else echo "ok   production has no x-robots-tag"; fi ;;
+            pages-dev)
+              if ! printf '%s' "$robots_hdr" | grep -qi noindex; then echo "FAIL pages.dev is missing x-robots-tag: noindex"; fail=1
+              else echo "ok   pages.dev carries noindex"; fi ;;
+          esac
+          exit $fail

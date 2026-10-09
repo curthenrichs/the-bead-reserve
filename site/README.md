@@ -156,8 +156,48 @@ in for that route, forwarding `/api/*` to a locally running `wrangler dev`
 `.github/workflows/site.yml` runs on pushes/PRs touching `site/**`,
 `whitepaper/**`, or the workflow file itself, on `ubuntu-latest` with Node 22:
 installs Typst, `npm ci`, `npm run check`, `npm run lint`, `npm test`, the
-brand-drift check, `npm run build`, and `npm run test:browser`. Test-only; it
-doesn't deploy.
+brand-drift check, `npm run build`, and `npm run test:browser`. The built
+`dist/` is uploaded as an artifact.
+
+A `deploy` job then publishes that artifact to Cloudflare Pages with
+`wrangler pages deploy`. It runs on pushes only, never on pull requests.
+A push to `main` deploys production; a push to any other branch gets a
+Pages preview URL. Pushes that touch only `contract/` or `camera/` do not
+run the workflow. The deploy runs in Actions rather than in Pages' own git
+builds because the whitepaper prebuild needs Typst, which the Pages
+builder does not have. The job is skipped while the repo variable
+`CF_PAGES_PROJECT` is unset.
+
+`.github/workflows/site-smoke.yml` probes the deployed host for what the
+unit suite cannot see: every page, the whitepaper, `robots.txt`, the
+sitemap, and `security.txt` return 200; an unknown path returns 404;
+`/api/reserve` returns a status from the Worker; `robots.txt` names the
+canonical sitemap; and production carries no `noindex` header. It runs
+after the site workflow completes on `main`, weekly, and on demand against
+production or a pages.dev preview URL. The automatic runs are skipped
+while the repo variable `BEADZ_LIVE` is not `true`; a manual run always
+goes.
+
+## Launch checklist
+
+One-time setup on Cloudflare and GitHub before the first deploy.
+
+1. A Cloudflare Pages project, created as a direct-upload project with git
+   builds off and production branch `main`. Pages decides production by
+   the deploy's branch name; with any other production branch, pushes to
+   `main` only make previews.
+2. Repo variable `CF_PAGES_PROJECT` set to that project's name.
+3. Repo secrets `CLOUDFLARE_API_TOKEN` (Pages edit permission) and
+   `CLOUDFLARE_ACCOUNT_ID`.
+4. Custom domain `beadz.half-built-robots.com` on the Pages project.
+5. Deploy the Worker (`../service/README.md`, Deploy), then add the
+   `/api/*` route on `beadz.half-built-robots.com`.
+6. Cloudflare Web Analytics enabled on the Pages project. The privacy
+   policy discloses it.
+7. Repo variable `BEADZ_LIVE=true`, which turns on the automatic smoke
+   runs.
+8. Bot Fight Mode stays off on the zone, as in the blog's runbook. With it
+   on, the smoke probes get 403s.
 
 ## Opsec
 

@@ -1,0 +1,10 @@
+# Cloudflare, as the host, can add its own rules to this file (a
+# Content Signals block, AI-crawler rules) from zone settings. The owner
+# controls those settings; everything below is the repo's own.
+# Crawlers are welcome, AI training included.
+
+User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+Sitemap: https://beadz.half-built-robots.com/sitemap-index.xml

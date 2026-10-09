@@ -1,7 +1,16 @@
 name: site
 
+# Builds and tests the site on every push and PR that touches it, then
+# deploys pushes to Cloudflare Pages: main to production, any other
+# branch to a Pages preview URL. The deploy runs here rather than in
+# Pages' own git builds because the whitepaper prebuild needs Typst,
+# which the Pages builder does not have. The deploy job is skipped until
+# the repo variable CF_PAGES_PROJECT is set (site/README.md, Launch
+# checklist).
 on:
   push:
+    # Branches only: a tag push neither builds nor deploys.
+    branches: ["**"]
     paths:
       - "site/**"
       - "whitepaper/**"
@@ -15,6 +24,11 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: site-${{ github.ref }}
+  # A main deploy is never cancelled mid-flight; other refs supersede.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   build-test:
     runs-on: ubuntu-latest
@@ -22,9 +36,9 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: "22"
           cache: "npm"
@@ -58,5 +72,43 @@ jobs:
       - name: Build (runs whitepaper prebuild + astro build)
         run: npm run build
 
+      - name: Upload the built site
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-dist
+          path: site/dist
+          include-hidden-files: true
+          if-no-files-found: error
+
       - name: Browser suites (axe both themes, layout)
         run: npm run test:browser
+
+  deploy:
+    needs: build-test
+    if: github.event_name == 'push' && vars.CF_PAGES_PROJECT != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+
+      - name: Download the built site
+        uses: actions/download-artifact@v4
+        with:
+          name: site-dist
+          path: dist
+
+      # Pages calls a deploy production when --branch matches the
+      # project's production branch (main). Wrangler is pinned to the
+      # version ../service uses. The job has no checkout, so the commit
+      # is passed explicitly.
+      - name: Deploy to Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          PAGES_PROJECT: ${{ vars.CF_PAGES_PROJECT }}
+          BRANCH: ${{ github.ref_name }}
+          COMMIT: ${{ github.sha }}
+        run: npx wrangler@3.114.17 pages deploy dist --project-name "$PAGES_PROJECT" --branch "$BRANCH" --commit-hash "$COMMIT"

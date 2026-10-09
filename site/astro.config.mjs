@@ -1,10 +1,17 @@
 import { defineConfig } from "astro/config";
+import sitemap from "@astrojs/sitemap";
 
 // Static site (Cloudflare Pages). The API is a separate Worker reached at
 // /api/*: same-origin in prod via a Cloudflare route, proxied in dev.
 export default defineConfig({
   site: "https://beadz.half-built-robots.com",
   output: "static",
+  integrations: [
+    sitemap({
+      // The 404 is noindex; crawlers are not handed it.
+      filter: (page) => !/\/404\/?$/.test(page),
+    }),
+  ],
   vite: {
     server: {
       proxy: {
