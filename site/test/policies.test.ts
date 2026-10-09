@@ -64,6 +64,10 @@ describe("/privacy/ as released", () => {
     expect(items).toContain(
       "Redemption shipping details. Held until delivery is confirmed, then deleted.",
     );
+
+    expect(items).toContain(
+      "Cloudflare's logs, analytics, and bot protection. These keep the site running and protected. Cloudflare keeps them on its own schedule under Cloudflare's privacy policy.",
+    );
   });
 
   it("names both records the site can hold", () => {
@@ -181,11 +185,17 @@ describe("/terms/ as released", () => {
     );
 
     expect(using).toContain(
-      "The site's words, the whitepaper's text, the artwork (including Henry, the robot mascot, and the reserve seal), and the site design are copyright Curt Henrichs LLC, all rights reserved.",
+      "The site's words, the whitepaper's text, and the artwork (including Henry the robot mascot and the reserve seal) are copyright Curt Henrichs LLC, all rights reserved.",
     );
 
     expect(using).toContain(
       "Quoting a short passage with attribution and a link back is fine.",
+    );
+
+    expect(using).not.toContain("site design");
+
+    expect(paras).toContain(
+      "Third-party names such as Base and Ethereum belong to their owners.",
     );
 
     expect(paras).toContain(
