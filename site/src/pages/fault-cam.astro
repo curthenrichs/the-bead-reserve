@@ -1,0 +1,110 @@
+---
+import Layout from "../layouts/Layout.astro";
+import ReceiptHeader from "../components/ReceiptHeader.astro";
+import CameraMonitor from "../components/CameraMonitor.astro";
+import { DEVICE_PUBKEY } from "../config";
+import { recordFor, VERDICT_TEXT } from "../scripts/attestation";
+import { DARK } from "../scripts/camera-state";
+
+const rec = recordFor(DARK);
+---
+
+<Layout
+  title="The Bead Reserve : Fault Cam"
+  description="The reserve under camera observation, with the attestation record for the latest frame and a signature check that runs in the visitor's browser."
+>
+  {/* The record is server-rendered dark, like the monitor, so with no
+     Worker or no JavaScript the page is honest. attestation-record.ts
+     repaints it from the monitor's poll. */}
+  <main>
+    <ReceiptHeader eyebrow="Reserve Monitoring · Fault Cam 01" page="Fault Cam">
+      <p>
+        Fault Cam 01 keeps the reserve under observation and files one signed
+        still per hour. The latest frame is shown below with its attestation
+        record. Any party may check the record against the published device key.
+      </p>
+    </ReceiptHeader>
+
+    <CameraMonitor wide />
+
+    <section class="fc-section" aria-labelledby="record-heading">
+      <h2 id="record-heading" class="fc-heading micro-label">
+        Attestation record
+      </h2>
+      {/* Sized to its content, not a prose measure: the labels take
+         what they need and the hex wraps in the rest of the column. */}
+      <dl class="fc-record" data-attestation data-status={rec.status}>
+        <dt>Frame number</dt>
+        <dd data-at="counter">{rec.counter}</dd>
+        <dt>Captured (UTC)</dt>
+        <dd data-at="captured">{rec.captured}</dd>
+        <dt>SHA-256</dt>
+        <dd class="fc-hex" data-at="sha256">{rec.sha256}</dd>
+        <dt>Signature</dt>
+        <dd class="fc-hex" data-at="sig">{rec.sig}</dd>
+        <dt>Device key (Ed25519)</dt>
+        <dd class="fc-hex">{DEVICE_PUBKEY}</dd>
+        <dt>Status</dt>
+        <dd data-at="status">{rec.status}</dd>
+        <dt>Verification</dt>
+        <dd data-at="verdict" aria-live="polite">{VERDICT_TEXT.dark}</dd>
+      </dl>
+    </section>
+
+    <section class="fc-section" aria-labelledby="signing-heading">
+      <h2 id="signing-heading" class="fc-heading micro-label">
+        How frames are signed
+      </h2>
+      <p>
+        Once an hour the camera device takes a still of the reserve. The device
+        strips the EXIF metadata and crops the image to the jar before anything
+        else is done with it. It then computes the SHA-256 hash of the image and
+        signs that hash with an Ed25519 key that does not leave the device. The
+        signed frame goes to the reserve's ingest server, which checks the hash
+        and the signature against the published key and does not store a frame
+        that fails. Anyone holding the device key above can repeat the check.
+        This page repeats it in your browser where the browser supports Ed25519.
+      </p>
+    </section>
+  </main>
+</Layout>
+
+<script>
+  import { mountAttestationRecord } from "../scripts/attestation-record";
+  mountAttestationRecord(document);
+</script>
+
+<style>
+  .fc-section { margin: 0 0 40px; }
+
+  .fc-heading {
+    margin: 0 0 12px;
+    font-size: var(--font-size-xs);
+    color: var(--ink-muted);
+    text-transform: uppercase;
+  }
+
+  .fc-record {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 8px 20px;
+    margin: 0;
+    font-size: var(--font-size-xs);
+  }
+
+  .fc-record dt {
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .fc-record dd { margin: 0; }
+  .fc-hex { overflow-wrap: anywhere; }
+
+  .fc-record dd[data-at="verdict"] { color: var(--accent-1-ink); }
+
+  @media (--bp-phone) {
+    .fc-record { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+    .fc-record dd { margin-bottom: 10px; }
+  }
+</style>

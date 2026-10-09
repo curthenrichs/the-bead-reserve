@@ -106,6 +106,8 @@ function mountPopout(el: HTMLElement): { destroy(): void } {
     slot = doc.createElement("div");
     slot.dataset.cmSlot = "";
     slot.className = "cm-slot";
+    /* The slot takes the monitor's size modifier along with its height. */
+    slot.classList.toggle("cm-wide", el.classList.contains("cm-wide"));
     slot.style.height = `${el.getBoundingClientRect().height}px`;
     el.before(slot);
     el.classList.add("is-popped");

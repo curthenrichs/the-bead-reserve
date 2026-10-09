@@ -55,7 +55,49 @@ describe("layout head", () => {
 describe("layout chrome", () => {
   const doc = page("/");
 
-  it("uses the package header with the costume wordmark and the two nav links", () => {
+  it("carries the two header icons: the source and the workshop", () => {
+    const icons = [
+      ...doc.querySelectorAll("header#masthead .social-links a"),
+    ].map((a) => ({
+      href: a.getAttribute("href"),
+      name: a.querySelector(".screen-reader-text")?.textContent.trim(),
+      svg: !!a.querySelector('svg[aria-hidden="true"]'),
+    }));
+
+    expect(icons).toEqual([
+      {
+        href: "https://github.com/curthenrichs/the-bead-reserve",
+        name: "Source on GitHub",
+        svg: true,
+      },
+      {
+        href: "https://half-built-robots.com/",
+        name: "Half-Built Robots",
+        svg: true,
+      },
+    ]);
+  });
+
+  it("lists the Fault Cam and the source in the footer's Site group", () => {
+    const site = [...doc.querySelectorAll("footer .footer-sitemap-group")].find(
+      (g) => g.querySelector("h2")?.textContent.trim() === "Site",
+    );
+
+    const links = [...(site?.querySelectorAll("a") ?? [])].map((a) => [
+      a.textContent.trim(),
+      a.getAttribute("href"),
+    ]);
+
+    expect(links).toEqual([
+      ["The Bead Reserve", "/"],
+      ["Fault Cam", "/fault-cam/"],
+      ["Read the whitepaper", "/whitepaper.pdf"],
+      ["Brand assets", "/brand/"],
+      ["Source on GitHub", "https://github.com/curthenrichs/the-bead-reserve"],
+    ]);
+  });
+
+  it("uses the package header with the costume wordmark and the three nav links", () => {
     const header = doc.querySelector("header#masthead");
     expect(header).not.toBeNull();
     const mark = header?.querySelector(".site-title a .beadz-wordmark");
@@ -72,7 +114,13 @@ describe("layout chrome", () => {
       a.getAttribute("href"),
     );
 
-    expect(hrefs).toEqual(["/", "/whitepaper.pdf"]);
+    expect(hrefs).toEqual(["/", "/fault-cam/", "/whitepaper.pdf"]);
+
+    const labels = [...doc.querySelectorAll(".masthead-nav a")].map((a) =>
+      a.textContent.trim(),
+    );
+
+    expect(labels).toEqual(["Reserve", "Fault Cam", "Whitepaper"]);
 
     const footer = [...doc.querySelectorAll("footer a")].map((a) =>
       a.getAttribute("href"),

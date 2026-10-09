@@ -40,11 +40,11 @@ describe("layout in a real browser", () => {
 
   async function open(
     path = "/",
-    { phone = false, live = false } = {},
+    { phone = false, live = false, attested = false } = {},
   ): Promise<Page> {
     if (!browser) throw new Error("no browser (beforeAll failed)");
     page = phone ? await phonePage(browser) : await desktopPage(browser);
-    if (live) await stubLiveReserve(page);
+    if (live || attested) await stubLiveReserve(page, { attested });
     await page.goto(`${ORIGIN}${path}`, { waitUntil: "networkidle0" });
     return page;
   }
@@ -181,13 +181,25 @@ describe("layout in a real browser", () => {
      into the package plate modal and back. The preview has no Worker,
      so the plain runs are the dark state; stub-api.ts stands in for a
      live reserve in the third. */
-  for (const { phone, live } of [
-    { phone: false, live: false },
-    { phone: true, live: false },
-    { phone: false, live: true },
+  for (const { path, phone, live } of [
+    { path: "/", phone: false, live: false },
+    { path: "/", phone: true, live: false },
+    { path: "/", phone: false, live: true },
+    { path: "/fault-cam/", phone: false, live: true },
+    { path: "/fault-cam/", phone: true, live: false },
   ]) {
-    it(`Enlarge pops the whole monitor out and Escape puts it back${phone ? " (phone)" : ""}${live ? " (live)" : " (dark)"}`, async () => {
-      const p = await open("/", { phone, live });
+    it(`${path}: Enlarge pops the whole monitor out and Escape puts it back${phone ? " (phone)" : ""}${live ? " (live)" : " (dark)"}`, async () => {
+      const p = await open(path, { phone, live });
+
+      /* Where the monitor lives in the page, to check it comes back
+         there: section III on the home page, main on /fault-cam/. */
+      const home = await p.$eval(
+        "[data-camera-monitor]",
+        (m) =>
+          m.parentElement?.getAttribute("aria-labelledby") ??
+          m.parentElement?.tagName,
+      );
+
       if (live) await p.waitForSelector("[data-cm-screen] img.cm-frame");
       const before = await box(p, "[data-camera-monitor]");
       const btn = await p.waitForSelector("[data-camera-monitor] .cm-enlarge");
@@ -262,7 +274,9 @@ describe("layout in a real browser", () => {
         const m = document.querySelector("[data-camera-monitor]");
         const b = m?.querySelector(".cm-enlarge");
         return {
-          parent: m?.parentElement?.tagName,
+          parent:
+            m?.parentElement?.getAttribute("aria-labelledby") ??
+            m?.parentElement?.tagName,
           slot: !!document.querySelector("[data-cm-slot]"),
           focused: document.activeElement?.classList.contains("cm-enlarge"),
           enlargeShown: !!b && getComputedStyle(b).display !== "none",
@@ -270,14 +284,179 @@ describe("layout in a real browser", () => {
       });
 
       expect(after).toEqual({
-        parent: "MAIN",
+        parent: home,
         slot: false,
         focused: true,
         enlargeShown: true,
       });
 
       const back = await box(p, "[data-camera-monitor]");
-      expect(back.right - back.left).toBeLessThanOrEqual(640);
+
+      expect(
+        Math.abs(back.right - back.left - (before.right - before.left)),
+      ).toBeLessThanOrEqual(1);
     });
+  }
+
+  it("the home monitor sits in section III", async () => {
+    const p = await open();
+
+    expect(
+      await p.$eval("[data-camera-monitor]", (m) =>
+        m.closest("section.panel")?.getAttribute("aria-labelledby"),
+      ),
+    ).toBe("observation-heading");
+  });
+
+  it("/fault-cam/: the monitor is wider than the home page's, at most 960px, centered", async () => {
+    const p = await open("/fault-cam/");
+    const m = await box(p, "[data-camera-monitor]");
+    const main = await box(p, "main");
+    const w = m.right - m.left;
+    expect(w, JSON.stringify({ m, main })).toBeGreaterThan(640);
+    expect(w).toBeLessThanOrEqual(960);
+
+    expect(
+      Math.abs(m.left - main.left - (main.right - m.right)),
+    ).toBeLessThanOrEqual(1);
+  });
+
+  const sideways = (p: Page) =>
+    p.evaluate(
+      () =>
+        document.documentElement.scrollWidth -
+        document.documentElement.clientWidth,
+    );
+
+  /* stub-api.ts serves a real hash with a signature of zeros, so the
+     in-browser check runs end to end (Ed25519 in this Chrome) and
+     must refuse it. */
+  it("/fault-cam/: the record fills from the poll and the browser check runs", async () => {
+    const p = await open("/fault-cam/", { attested: true });
+
+    await p.waitForFunction(
+      () =>
+        document.querySelector('[data-at="verdict"]')?.textContent ===
+        "Signature invalid",
+      { timeout: 10_000 },
+    );
+
+    const rec = await p.evaluate(() => {
+      const out: Record<string, string> = {};
+
+      for (const d of document.querySelectorAll("[data-at]")) {
+        out[d.getAttribute("data-at") ?? ""] = d.textContent.trim();
+      }
+
+      return out;
+    });
+
+    expect(rec).toMatchObject({
+      counter: "8",
+      captured: "2026-09-21T14:13:20Z",
+      status: "fresh",
+      sig: "00".repeat(64),
+    });
+
+    expect(rec.sha256).toMatch(/^[0-9a-f]{64}$/);
+    expect(await sideways(p)).toBeLessThanOrEqual(0);
+  });
+
+  it("/fault-cam/ at phone width: the hex wraps, no sideways scroll", async () => {
+    const p = await open("/fault-cam/", { phone: true, attested: true });
+
+    await p.waitForFunction(
+      () => document.querySelector('[data-at="counter"]')?.textContent === "8",
+    );
+
+    expect(await sideways(p)).toBeLessThanOrEqual(0);
+  });
+
+  const mid = (b: Box) => (b.left + b.right) / 2;
+
+  /* Owner call 2026-10-08: the two buttons centered on the column, the
+     launch note centered on its own line beneath them. */
+  it("panel actions: buttons centered on the column, the note centered below them", async () => {
+    const p = await open();
+    const center = mid(await box(p, "main"));
+
+    const groups = await p.$$eval(".panel-actions", (els) =>
+      els.map((g) => {
+        const r = (e: Element) => {
+          const b = e.getBoundingClientRect();
+          return { top: b.top, bottom: b.bottom, left: b.left, right: b.right };
+        };
+
+        return {
+          buttons: [...g.querySelectorAll(".panel-button")].map(r),
+          note: r(g.querySelector(".panel-note") ?? g),
+        };
+      }),
+    );
+
+    expect(groups).toHaveLength(2);
+
+    for (const { buttons, note } of groups) {
+      expect(buttons).toHaveLength(2);
+      const [a, b] = buttons;
+      expect(Math.abs((mid(a) + mid(b)) / 2 - center)).toBeLessThanOrEqual(2);
+      expect(note.top).toBeGreaterThanOrEqual(Math.max(a.bottom, b.bottom));
+      expect(Math.abs(mid(note) - center)).toBeLessThanOrEqual(2);
+    }
+  });
+
+  it("panel actions on phones: still centered, button by button when they wrap", async () => {
+    const p = await open("/", { phone: true });
+    const center = mid(await box(p, "main"));
+
+    const rows = await p.$$eval(".panel-actions", (els) =>
+      els.map((g) =>
+        [...g.querySelectorAll(".panel-button, .panel-note")].map((e) => {
+          const b = e.getBoundingClientRect();
+          return { top: b.top, bottom: b.bottom, left: b.left, right: b.right };
+        }),
+      ),
+    );
+
+    for (const [a, b, note] of rows) {
+      if (Math.abs(a.top - b.top) > 1) {
+        expect(Math.abs(mid(a) - center)).toBeLessThanOrEqual(2);
+        expect(Math.abs(mid(b) - center)).toBeLessThanOrEqual(2);
+      } else {
+        expect(Math.abs((mid(a) + mid(b)) / 2 - center)).toBeLessThanOrEqual(2);
+      }
+
+      expect(Math.abs(mid(note) - center)).toBeLessThanOrEqual(2);
+    }
+  });
+
+  /* Owner call 2026-10-08: room above the eyebrow, and the receipt h1
+     one step under the header wordmark it repeats. */
+  for (const path of ["/", "/fault-cam/", "/brand/"]) {
+    for (const phone of [false, true]) {
+      it(`${path}: the receipt clears the header and its h1 sits under the wordmark${phone ? " (phone)" : ""}`, async () => {
+        const p = await open(path, { phone });
+
+        const r = await p.evaluate(() => {
+          const px = (sel: string, prop: "marginTop" | "fontSize") => {
+            const e = document.querySelector(sel);
+            return e ? parseFloat(getComputedStyle(e)[prop]) : NaN;
+          };
+
+          const h1 = document.querySelector(".receipt-title");
+
+          return {
+            marginTop: px(".receipt", "marginTop"),
+            h1: px(".receipt-title", "fontSize"),
+            mark: px(".beadz-wordmark", "fontSize"),
+            h1Overflow: h1 ? h1.scrollWidth - h1.clientWidth : NaN,
+          };
+        });
+
+        expect(r.marginTop).toBeGreaterThanOrEqual(24);
+        expect(r.h1).toBeLessThan(r.mark);
+        expect(r.h1Overflow).toBeLessThanOrEqual(0);
+      });
+    }
   }
 });

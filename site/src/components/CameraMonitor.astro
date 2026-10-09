@@ -1,11 +1,18 @@
 ---
 import { DARK, viewFor } from "../scripts/camera-state";
 
+interface Props {
+  wide?: boolean;
+}
+
+const { wide = false } = Astro.props;
 const v = viewFor(DARK);
 ---
 
+{/* wide: the Fault Cam page shows the monitor larger, up to 960px. */}
+
 <section
-  class="camera-monitor"
+  class:list={["camera-monitor", { "cm-wide": wide }]}
   data-camera-monitor
   data-status={v.status}
   aria-label="Reserve monitor"
@@ -44,6 +51,11 @@ const v = viewFor(DARK);
   :global(.cm-slot) {
     max-width: 640px;
     margin: clamp(40px, 5vw, 64px) auto;
+  }
+
+  .camera-monitor.cm-wide,
+  :global(.cm-slot.cm-wide) {
+    max-width: 960px;
   }
 
   .camera-monitor {

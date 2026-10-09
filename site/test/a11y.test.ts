@@ -34,6 +34,7 @@ const AXE = createRequire(import.meta.url).resolve("axe-core/axe.min.js");
    suite exists for, and the whole-site sweep stays with html-validate. */
 const PAGES = [
   "/",
+  "/fault-cam/",
   "/brand/",
   "/privacy/",
   "/accessibility/",
@@ -43,7 +44,7 @@ const PAGES = [
 
 /* The phone chrome is a different DOM (collapsed nav, footer details
    closed), so the two templates that change most get a second pass. */
-const PHONE_PAGES = ["/", "/brand/"];
+const PHONE_PAGES = ["/", "/fault-cam/", "/brand/"];
 
 /* WCAG 2.2 A and AA, which is the target the statement names.
    axe's best-practice rules are deliberately left out so a failure
@@ -226,6 +227,18 @@ describe("accessibility", () => {
       await bothThemes(p, `/ monitor pop-out${phone ? " @390" : ""}`);
     }, 60_000);
   }
+
+  /* The Fault Cam record filled from a stubbed live reserve, with the
+     in-browser check's verdict shown (stub-api.ts). */
+  it("/fault-cam/ with a filled record has no WCAG 2.2 AA violations", async () => {
+    const p = await open("/fault-cam/", false, true);
+
+    await p.waitForFunction(
+      () => document.querySelector('[data-at="counter"]')?.textContent === "7",
+    );
+
+    await bothThemes(p, "/fault-cam/ live");
+  }, 60_000);
 
   /* axe cannot see focus rings. Tab is a real keyboard event, so every
      stop matches :focus-visible and must show the site ring (reset.css)

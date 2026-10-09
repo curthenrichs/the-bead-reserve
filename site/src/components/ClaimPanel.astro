@@ -27,8 +27,14 @@ const total = GENESIS_BEADS.toLocaleString("en-US");
     valueText={`0 of ${total} claimed`}
   />
   <div class="panel-actions">
-    <button type="button" class="panel-button" disabled>Connect wallet</button>
-    <button type="button" class="panel-button" disabled>Claim your bead</button>
-    <span class="panel-note">Claim opens at launch</span>
+    <div class="panel-buttons">
+      <button type="button" class="panel-button" disabled>
+        Connect wallet
+      </button>
+      <button type="button" class="panel-button" disabled>
+        Claim your bead
+      </button>
+    </div>
+    <p class="panel-note">Claim opens at launch</p>
   </div>
 </section>

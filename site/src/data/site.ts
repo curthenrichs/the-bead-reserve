@@ -2,8 +2,10 @@ import type {
   NavItem,
   SitemapGroup,
   EcosystemEntry,
+  SocialItem,
 } from "@half-built/astro/components/models.ts";
 import { ECOSYSTEM_SELF_KEY } from "../lib/keys";
+import { SOCIAL_ICONS } from "../../brand/social-icons.mjs";
 
 export const SITE_NAME = "The Bead Reserve";
 export const SITE_URL = "https://beadz.half-built-robots.com";
@@ -13,7 +15,21 @@ export const DESCRIPTION =
 
 export const NAV: NavItem[] = [
   { label: "Reserve", href: "/" },
+  { label: "Fault Cam", href: "/fault-cam/" },
   { label: "Whitepaper", href: "/whitepaper.pdf" },
+];
+
+export const SOURCE_URL = "https://github.com/curthenrichs/the-bead-reserve";
+
+/* The header icons. The glyph markup lives in brand/ (it carries hex
+   in SVG attributes, which src/ does not admit). */
+export const SOCIALS: SocialItem[] = [
+  { label: "Source on GitHub", href: SOURCE_URL, icon: SOCIAL_ICONS.github },
+  {
+    label: "Half-Built Robots",
+    href: "https://half-built-robots.com/",
+    icon: SOCIAL_ICONS.henry,
+  },
 ];
 
 /* Must match the holder named in the repository LICENSE (spec
@@ -27,8 +43,10 @@ export const FOOTER_SITEMAP: SitemapGroup[] = [
     phoneOpen: true,
     links: [
       { label: "The Bead Reserve", href: "/" },
+      { label: "Fault Cam", href: "/fault-cam/" },
       { label: "Read the whitepaper", href: "/whitepaper.pdf" },
       { label: "Brand assets", href: "/brand/" },
+      { label: "Source on GitHub", href: SOURCE_URL },
     ],
   },
   {

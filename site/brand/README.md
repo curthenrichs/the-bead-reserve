@@ -18,6 +18,7 @@ in `seal.mjs` and regenerate.
 | `henry.mjs` | vendored character geometry + the bead tip. Knows Henry, not the seal. |
 | `seal.mjs` | composes both, owns the copy and the palette. |
 | `build.mjs` | rasterizes and verifies into `site/public/`. |
+| `social-icons.mjs` | the header's GitHub and line-art Henry glyphs, copied verbatim from the blog's registry. The Henry glyph is the blog's tracked exception to the vendoring rule below, mirrored here until henry-mascot ships a line-glyph form. |
 | `vendor/` | the Henry master SVG and third-party font files, copied verbatim. Not the only vendored Henry assets in this repo — see "The CRO illustrations" below. |
 
 ## The vendoring rule
