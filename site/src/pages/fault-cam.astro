@@ -3,7 +3,12 @@ import Layout from "../layouts/Layout.astro";
 import ReceiptHeader from "../components/ReceiptHeader.astro";
 import CameraMonitor from "../components/CameraMonitor.astro";
 import { DEVICE_PUBKEY } from "../config";
-import { recordFor, VERDICT_TEXT } from "../scripts/attestation";
+import {
+  recordFor,
+  VERDICT_TAG,
+  VERDICT_TEXT,
+  VERDICT_TONE,
+} from "../scripts/attestation";
 import { DARK } from "../scripts/camera-state";
 
 const rec = recordFor(DARK);
@@ -27,28 +32,74 @@ const rec = recordFor(DARK);
 
     <CameraMonitor wide />
 
-    <section class="fc-section" aria-labelledby="record-heading">
-      <h2 id="record-heading" class="fc-heading micro-label">
-        Attestation record
+    {/* The record as a certificate card: the package bracket frame,
+       the title in the display serif, the fields as a receipt table
+       with the verdict stamped under its closing rule. data-tone picks
+       the stamp's ink; attestation-record.ts keeps it in step. */}
+    <section
+      class="fc-section fc-cert bracket-frame"
+      aria-labelledby="record-heading"
+      data-attestation
+      data-status={rec.status}
+      data-tone={VERDICT_TONE.dark}
+    >
+      <h2 id="record-heading" class="fc-cert-title">
+        Certificate of Attestation
       </h2>
-      {/* Sized to its content, not a prose measure: the labels take
-         what they need and the hex wraps in the rest of the column. */}
-      <dl class="fc-record" data-attestation data-status={rec.status}>
-        <dt>Frame number</dt>
-        <dd data-at="counter">{rec.counter}</dd>
-        <dt>Captured (UTC)</dt>
-        <dd data-at="captured">{rec.captured}</dd>
-        <dt>SHA-256</dt>
-        <dd class="fc-hex" data-at="sha256">{rec.sha256}</dd>
-        <dt>Signature</dt>
-        <dd class="fc-hex" data-at="sig">{rec.sig}</dd>
-        <dt>Device key (Ed25519)</dt>
-        <dd class="fc-hex">{DEVICE_PUBKEY}</dd>
-        <dt>Status</dt>
-        <dd data-at="status">{rec.status}</dd>
-        <dt>Verification</dt>
-        <dd data-at="verdict" aria-live="polite">{VERDICT_TEXT.dark}</dd>
-      </dl>
+      <table class="fc-record" aria-labelledby="record-heading">
+        <tbody>
+          <tr>
+            <th scope="row">Frame number</th>
+            <td data-at="counter">{rec.counter}</td>
+          </tr>
+          <tr>
+            <th scope="row">Captured (UTC)</th>
+            <td data-at="captured">{rec.captured}</td>
+          </tr>
+          <tr>
+            <th scope="row">SHA-256</th>
+            <td data-at="sha256">{rec.sha256}</td>
+          </tr>
+          <tr>
+            <th scope="row">Signature</th>
+            <td data-at="sig">{rec.sig}</td>
+          </tr>
+          <tr>
+            <th scope="row">Device key (Ed25519)</th>
+            <td>{DEVICE_PUBKEY}</td>
+          </tr>
+          <tr>
+            <th scope="row">Status</th>
+            <td>
+              <span
+                class="fc-tag fc-status boxed-label micro-label"
+                data-at="status"
+              >
+                {rec.status}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <th scope="row">Verification</th>
+            <td>
+              {/* The stamp is the short form for the eye; the sentence
+                 beside it is the live region, so a screen reader hears
+                 what it heard before the card. */}
+              <span
+                class="fc-tag fc-stamp boxed-label micro-label"
+                data-at="verdict-tag"
+                aria-hidden="true"
+                >{VERDICT_TAG.dark}</span
+              >
+              <span class="fc-verdict" data-at="verdict" aria-live="polite"
+                >{VERDICT_TEXT.dark}</span
+              >
+            </td>
+          </tr>
+        </tfoot>
+      </table>
     </section>
 
     <section class="fc-section" aria-labelledby="signing-heading">
@@ -84,27 +135,81 @@ const rec = recordFor(DARK);
     text-transform: uppercase;
   }
 
+  /* The receipt heading's serif, one step smaller than the h1's. */
+  .fc-cert-title {
+    margin: 0 0 16px;
+    font-family: var(--beadz-font-display);
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    line-height: 1.1;
+  }
+
+  /* A small data table sized to the card, not a prose measure. Values
+     wrap anywhere so the hex never widens the page at phone width. */
   .fc-record {
-    display: grid;
-    grid-template-columns: max-content minmax(0, 1fr);
-    gap: 8px 20px;
-    margin: 0;
-    font-size: var(--font-size-xs);
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--font-size-sm);
   }
 
-  .fc-record dt {
+  .fc-record th,
+  .fc-record td {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--hairline);
+    vertical-align: baseline;
+  }
+
+  .fc-record th {
+    width: 1%;
+    padding-right: 20px;
     color: var(--ink-muted);
-    text-transform: uppercase;
+    font-size: var(--font-size-xs);
+    font-weight: 700;
     letter-spacing: 0.08em;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
   }
 
-  .fc-record dd { margin: 0; }
-  .fc-hex { overflow-wrap: anywhere; }
+  .fc-record td {
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
 
-  .fc-record dd[data-at="verdict"] { color: var(--accent-1-ink); }
+  .fc-record tbody tr:last-child > * { border-bottom: 0; }
+
+  /* The verdict sits under a full-width rule, like a receipt's total. */
+  .fc-record tfoot th,
+  .fc-record tfoot td {
+    padding-top: 16px;
+    border-top: var(--stroke) solid var(--rule);
+    border-bottom: 0;
+  }
+
+  .fc-tag {
+    display: inline-block;
+    text-transform: uppercase;
+    line-height: 1.4;
+  }
+
+  .fc-status { padding: 0 6px; }
+
+  .fc-stamp {
+    padding: 4px 10px;
+    font-size: var(--font-size-sm);
+    color: var(--ink-muted);
+    border-color: currentcolor;
+  }
+
+  .fc-cert[data-tone="verified"] .fc-stamp { color: var(--accent-1-ink); }
+  .fc-cert[data-tone="failed"] .fc-stamp { color: var(--error-ink); }
+
+  .fc-verdict {
+    display: block;
+    margin-top: 8px;
+  }
 
   @media (--bp-phone) {
-    .fc-record { grid-template-columns: minmax(0, 1fr); gap: 2px; }
-    .fc-record dd { margin-bottom: 10px; }
+    .fc-record th { white-space: normal; padding-right: 12px; }
   }
 </style>

@@ -27,6 +27,33 @@ export const VERDICT_TEXT: Record<Verdict, string> = {
   dark: "No frame to check",
 };
 
+/* The certificate's stamp: the short form of each verdict, and the ink
+   it is stamped in (owner brief 2026-10-08). The full sentence above
+   stays the one screen readers hear. */
+export const VERDICT_TAG: Record<Verdict, string> = {
+  checking: "CHECKING",
+  verified: "VERIFIED",
+  mismatch: "HASH MISMATCH",
+  invalid: "SIGNATURE INVALID",
+  unsupported: "NOT CHECKED",
+  incomplete: "NOT CHECKED",
+  unavailable: "NOT CHECKED",
+  dark: "NO FRAME",
+};
+
+export type VerdictTone = "verified" | "failed" | "neutral";
+
+export const VERDICT_TONE: Record<Verdict, VerdictTone> = {
+  checking: "neutral",
+  verified: "verified",
+  mismatch: "failed",
+  invalid: "failed",
+  unsupported: "neutral",
+  incomplete: "neutral",
+  unavailable: "neutral",
+  dark: "neutral",
+};
+
 /* The record's placeholder when there is nothing to show. */
 export const NONE = "None";
 

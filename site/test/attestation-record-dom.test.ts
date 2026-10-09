@@ -9,14 +9,26 @@ import type { Reserve } from "../src/scripts/camera-state";
 import type { Verdict } from "../src/scripts/attestation";
 
 const MARKUP = `
-  <dl data-attestation>
-    <dd data-at="counter">None</dd>
-    <dd data-at="captured">None</dd>
-    <dd data-at="sha256">None</dd>
-    <dd data-at="sig">None</dd>
-    <dd data-at="status">dark</dd>
-    <dd data-at="verdict">No frame to check</dd>
-  </dl>`;
+  <section data-attestation data-status="dark" data-tone="neutral">
+    <table>
+      <tbody>
+        <tr><th scope="row">Frame number</th><td data-at="counter">None</td></tr>
+        <tr><th scope="row">Captured (UTC)</th><td data-at="captured">None</td></tr>
+        <tr><th scope="row">SHA-256</th><td data-at="sha256">None</td></tr>
+        <tr><th scope="row">Signature</th><td data-at="sig">None</td></tr>
+        <tr><th scope="row">Status</th><td><span data-at="status">dark</span></td></tr>
+      </tbody>
+      <tfoot>
+        <tr><th scope="row">Verification</th><td>
+          <span data-at="verdict-tag" aria-hidden="true">NO FRAME</span>
+          <span data-at="verdict" aria-live="polite">No frame to check</span>
+        </td></tr>
+      </tfoot>
+    </table>
+  </section>`;
+
+const tone = () =>
+  document.querySelector<HTMLElement>("[data-attestation]")?.dataset.tone;
 
 const live: Reserve = {
   frameUrl: "/api/frame/latest",
@@ -64,6 +76,62 @@ describe("attestation record island", () => {
     await new Promise((r) => setTimeout(r, 0));
     expect(field("verdict")).toBe("Verified in this browser");
     expect(checked).toHaveLength(1);
+  });
+
+  /* The certificate's stamp: the short form per verdict, its tone for
+     the ink, and the full sentence in the live region unchanged. */
+  it.each([
+    ["verified", "VERIFIED", "verified", "Verified in this browser"],
+    ["mismatch", "HASH MISMATCH", "failed", "Hash mismatch"],
+    ["invalid", "SIGNATURE INVALID", "failed", "Signature invalid"],
+    [
+      "unsupported",
+      "NOT CHECKED",
+      "neutral",
+      "Not checked: this browser does not support Ed25519",
+    ],
+    [
+      "incomplete",
+      "NOT CHECKED",
+      "neutral",
+      "Not checked: no signature is on file for this frame",
+    ],
+    [
+      "unavailable",
+      "NOT CHECKED",
+      "neutral",
+      "Not checked: the frame could not be retrieved",
+    ],
+    ["dark", "NO FRAME", "neutral", "No frame to check"],
+    ["checking", "CHECKING", "neutral", "Checking in this browser"],
+  ] as const)(
+    "stamps a %s verdict as %s",
+    async (verdict, stamp, ink, sentence) => {
+      document.body.innerHTML = MARKUP;
+
+      handle = mountAttestationRecord(document, {
+        check: () => Promise.resolve<Verdict>(verdict),
+      });
+
+      announce(live);
+      await new Promise((r) => setTimeout(r, 0));
+      expect(field("verdict-tag")).toBe(stamp);
+      expect(tone()).toBe(ink);
+      expect(field("verdict")).toBe(sentence);
+    },
+  );
+
+  it("stamps CHECKING while the check for a new frame runs", () => {
+    document.body.innerHTML = MARKUP;
+
+    handle = mountAttestationRecord(document, {
+      check: () => new Promise<Verdict>(() => undefined),
+    });
+
+    announce(live);
+    expect(field("verdict-tag")).toBe("CHECKING");
+    expect(tone()).toBe("neutral");
+    expect(field("verdict")).toBe("Checking in this browser");
   });
 
   it("checks a frame once, not on every poll of the same frame", async () => {

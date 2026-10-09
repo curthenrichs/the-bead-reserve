@@ -8,7 +8,9 @@ import { DEVICE_PUBKEY } from "../config";
 import {
   checkReserve,
   recordFor,
+  VERDICT_TAG,
   VERDICT_TEXT,
+  VERDICT_TONE,
   type Verdict,
 } from "./attestation";
 import { RESERVE_EVENT, type Reserve } from "./camera-state";
@@ -50,6 +52,13 @@ export function mountAttestationRecord(
     if (f) f.textContent = text;
   };
 
+  /* The stamp, its ink, and the full sentence move together. */
+  const verdictIs = (v: Verdict): void => {
+    set("verdict-tag", VERDICT_TAG[v]);
+    set("verdict", VERDICT_TEXT[v]);
+    el.dataset.tone = VERDICT_TONE[v];
+  };
+
   /* The reading the shown verdict belongs to, so a slow check for an
      older frame never overwrites a newer one. */
   let checkedKey: string | undefined;
@@ -68,13 +77,13 @@ export function mountAttestationRecord(
     if (key === checkedKey) return;
     checkedKey = key;
 
-    if (r.status !== "dark") set("verdict", VERDICT_TEXT.checking);
+    if (r.status !== "dark") verdictIs("checking");
 
     void check(r)
       .catch((): Verdict => "unavailable")
       .then((verdict) => {
         if (checkedKey !== key) return;
-        set("verdict", VERDICT_TEXT[verdict]);
+        verdictIs(verdict);
         /* An unsettled verdict (a mismatch, a failed fetch, a frame
            that moved mid-check) is checked again on the next poll of
            the same reading instead of standing until the next frame. */

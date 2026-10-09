@@ -13,7 +13,7 @@ import { LEGAL_HOLDER } from "../data/site";
     <article class="policy bracket-frame">
       <h1>Privacy</h1>
       <div class="prose">
-        <p>Last updated: October 7, 2026</p>
+        <p>Last updated: October 8, 2026</p>
         <p>
           This policy covers the website of The Bead Reserve, operated by
           {LEGAL_HOLDER}. The site has no accounts. It collects very little.
@@ -34,16 +34,31 @@ import { LEGAL_HOLDER } from "../data/site";
           by the paragraph above.
         </p>
         <p>
-          The site runs no analytics. No page views are counted. This section
-          will be revised when beadz.half-built-robots.com is put into service.
+          The site uses
+          <a href="https://developers.cloudflare.com/web-analytics/"
+            >Cloudflare Web Analytics</a
+          >
+          to count page views. Cloudflare adds a small script to each page for
+          this. It sets no cookies, stores nothing in the browser, and does not
+          follow a visitor to other sites. It produces a tally of which pages
+          were read.
         </p>
         <p>
           The typefaces are served from this site. No font is requested from a
           third party.
         </p>
         <p>
-          The site does not yet connect to a wallet. Claims open at launch, and
-          this policy will be revised before they do.
+          Claiming and redeeming BEADZ connect a wallet to the site. The site
+          reads the wallet's public address to show its holdings and to submit
+          the transaction the holder approves. The site does not store the
+          address. Transactions on Base are public and permanent. The Reserve
+          can neither hide nor remove them.
+        </p>
+        <p>
+          A redemption is delivered by certified mail, which requires a name and
+          a postal address. These are collected at redemption, used to address
+          that shipment and nothing else, and deleted once delivery is
+          confirmed.
         </p>
 
         <h2>Cookies and browser storage</h2>
@@ -100,6 +115,10 @@ import { LEGAL_HOLDER } from "../data/site";
             consent until they unsubscribe.
           </li>
           <li>
+            <strong>Redemption shipping details.</strong> Held until delivery is
+            confirmed, then deleted.
+          </li>
+          <li>
             <strong>Cloudflare's logs and bot protection.</strong> Kept on
             Cloudflare's own schedule under
             <a href="https://www.cloudflare.com/privacypolicy/"
@@ -136,8 +155,9 @@ import { LEGAL_HOLDER } from "../data/site";
           Anyone, wherever they live, may ask what this site holds about them.
           They may also ask for it to be corrected or deleted. Write to the
           contact address below. In nearly every case the site holds nothing.
-          The only record it can hold is a mailing list address, and the
-          unsubscribe link in any dispatch removes it.
+          The records it can hold are a mailing list address and, while a
+          redemption is in transit, a shipping address. The unsubscribe link in
+          any dispatch removes the first.
         </p>
         <p>
           Anyone who believes a request was mishandled may complain to the data
