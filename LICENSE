@@ -73,3 +73,22 @@ No other file in site/brand/vendor/ is a font, and none is governed by the
 OFL. In particular, site/brand/vendor/henry-master.svg is Henry's canonical
 master artwork, covered by the BRAND ASSETS EXCEPTION above like every other
 Henry asset, all rights reserved.
+
+CONTENT EXCEPTION
+
+The MIT License above applies to the software in this repository. It does NOT
+apply to the written content listed below, which is excluded from that grant:
+
+  - the prose text content of the site, meaning the words a reader sees on
+    the pages built from site/src/pages/ and site/src/components/
+  - the prose of the whitepaper in whitepaper/*.typ, and the whitepaper PDF
+    built from it wherever it is published (including /whitepaper.pdf on
+    the site)
+
+That content is Copyright (c) Curt Henrichs LLC, all rights reserved. Quoting
+a short passage with attribution and a link back is permitted.
+
+The code in those same files remains under the MIT License. That includes the
+markup, component logic, scripts, styles, and the Typst layout and template
+code. A fork may keep all of it and is expected to replace the prose with its
+own.
