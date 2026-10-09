@@ -509,6 +509,100 @@ describe("layout in a real browser", () => {
     });
   }
 
+  /* The dead signal (owner call 2026-10-08): analog static on the dark
+     screen, its grain on ::before and a rolling scanline on ::after,
+     both frozen under reduced motion with the grain still shown, and
+     gone once a frame shows. The placeholder sits on a solid band above
+     them. */
+  const staticLayer = (p: Page, sel = "[data-cm-screen]") =>
+    p.$eval(sel, (s) => {
+      const layer = (pseudo: string) => {
+        const cs = getComputedStyle(s, pseudo);
+        return {
+          content: cs.content,
+          image: `${cs.backgroundImage} ${cs.maskImage}`,
+          animation: cs.animationName,
+          playing: cs.animationPlayState,
+        };
+      };
+
+      const ph = s.querySelector("[data-cm-placeholder]");
+
+      return {
+        grain: layer("::before"),
+        scan: layer("::after"),
+        band: ph ? getComputedStyle(ph).backgroundColor : null,
+        monitor: getComputedStyle(s.closest("[data-camera-monitor]") ?? s)
+          .backgroundColor,
+      };
+    });
+
+  const present = (l: { content: string; image: string }) =>
+    l.content !== "none" && l.content !== "normal" && l.image.includes("url(");
+
+  for (const path of ["/", "/fault-cam/"]) {
+    it(`${path}: the dark monitor shows animated static and a rolling scanline`, async () => {
+      const p = await open(path);
+
+      expect(
+        await p.$eval("[data-camera-monitor]", (m) =>
+          m.getAttribute("data-status"),
+        ),
+      ).toBe("dark");
+
+      const s = await staticLayer(p);
+      expect(present(s.grain), JSON.stringify(s)).toBe(true);
+      expect(s.grain.animation).not.toBe("none");
+      expect(s.scan.content).not.toBe("none");
+      expect(s.scan.image).toMatch(/gradient/);
+      expect(s.scan.animation).not.toBe("none");
+
+      /* The placeholder reads on the screen's own black. */
+      expect(s.band).toBe(s.monitor);
+
+      expect(
+        await p.$eval("[data-cm-placeholder]", (e) => e.textContent.trim()),
+      ).toBe("signal interrupted, reserve remains sealed");
+    });
+  }
+
+  it("reduced motion: the static is frozen but still shown", async () => {
+    if (!browser) throw new Error("no browser (beforeAll failed)");
+    page = await desktopPage(browser);
+
+    await page.emulateMediaFeatures([
+      { name: "prefers-reduced-motion", value: "reduce" },
+    ]);
+
+    await page.goto(`${ORIGIN}/`, { waitUntil: "networkidle0" });
+    const s = await staticLayer(page);
+    expect(present(s.grain), JSON.stringify(s)).toBe(true);
+
+    for (const l of [s.grain, s.scan]) {
+      expect(l.animation === "none" || l.playing === "paused").toBe(true);
+    }
+  });
+
+  it("a fresh frame: no static on the screen", async () => {
+    const p = await open("/", { live: true });
+    await p.waitForSelector("[data-cm-screen] img.cm-frame");
+    const s = await staticLayer(p);
+    expect(present(s.grain), JSON.stringify(s)).toBe(false);
+    expect(s.scan.image).not.toMatch(/gradient/);
+  });
+
+  it("the popped-out dark monitor keeps its static", async () => {
+    const p = await open();
+    const btn = await p.waitForSelector(".cm-enlarge");
+    await btn?.scrollIntoView();
+    await btn?.click();
+    await p.waitForSelector("dialog[open] [data-camera-monitor]");
+    const s = await staticLayer(p, "dialog[open] [data-cm-screen]");
+    expect(present(s.grain), JSON.stringify(s)).toBe(true);
+    expect(s.grain.animation).not.toBe("none");
+    expect(s.scan.animation).not.toBe("none");
+  });
+
   it("the home monitor sits in section III", async () => {
     const p = await open();
 

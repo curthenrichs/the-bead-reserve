@@ -161,6 +161,76 @@ const v = viewFor(DARK);
 
   .cm-placeholder { padding: 16px; text-align: center; }
 
+  /* The dead signal (owner call 2026-10-08): analog static with a slow
+     rolling scanline, on the dark screen only. The grain is SVG noise
+     used as a mask over a token fill, so its color comes from a token,
+     kept faint so it reads as texture. It steps between four offsets at
+     2.5 changes a second; the noise's mean luminance is the same in
+     every frame, so nothing flashes (WCAG 2.3.1). The placeholder sits
+     on a band of the screen's own black above both layers. */
+  [data-status="dark"] .cm-screen {
+    position: relative;
+    overflow: hidden;
+  }
+
+  [data-status="dark"] .cm-screen::before,
+  [data-status="dark"] .cm-screen::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+  }
+
+  [data-status="dark"] .cm-screen::before {
+    inset: -64px;
+    background-color: var(--parchment);
+    opacity: 0.16;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mask-size: 160px 160px;
+    animation: cm-grain 1.6s steps(1) infinite;
+  }
+
+  [data-status="dark"] .cm-screen::after {
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        transparent,
+        var(--white-a10),
+        transparent
+      )
+      no-repeat;
+    background-size: 100% 24px;
+    background-position: 0 -24px;
+    animation: cm-scan 6s linear infinite;
+  }
+
+  [data-status="dark"] .cm-placeholder {
+    position: relative;
+    z-index: 1;
+    background: var(--black-900);
+  }
+
+  @keyframes cm-grain {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(-37px, 23px); }
+    50% { transform: translate(29px, -41px); }
+    75% { transform: translate(-19px, -13px); }
+  }
+
+  @keyframes cm-scan {
+    from { background-position: 0 -24px; }
+    to { background-position: 0 calc(100% + 24px); }
+  }
+
+  /* The package reset stops animation on elements, not on pseudo-
+     elements, so the static freezes here: one still frame of grain,
+     and no roll. */
+  @media (prefers-reduced-motion: reduce) {
+    [data-status="dark"] .cm-screen::before,
+    [data-status="dark"] .cm-screen::after {
+      animation: none;
+    }
+  }
+
   .cm-caption {
     margin: 0;
     border-top: var(--stroke) solid var(--gray-750);
