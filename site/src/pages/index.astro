@@ -71,11 +71,9 @@ import SubscribeBand from "../components/SubscribeBand.astro";
 </Layout>
 
 <style>
-  /* Under the section's text the monitor sits closer than its own
-     default margins, the way the panels' contents do, with room above
-     for the Enlarge box that straddles its corner. */
-  .observation :global(.camera-monitor),
-  .observation :global(.cm-slot) {
+  /* Under the section's text the framed monitor sits closer than its
+     own default margins, the way the panels' contents do. */
+  .observation :global(.cm-box) {
     margin: 28px auto 16px;
   }
 

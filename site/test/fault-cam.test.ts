@@ -30,7 +30,10 @@ describe("home page: the monitor is section III", () => {
 
     expect(iii?.querySelector("[data-camera-monitor]")).not.toBeNull();
     expect(doc.querySelectorAll("[data-camera-monitor]")).toHaveLength(1);
-    expect(iii?.querySelector(".cm-enlarge")).not.toBeNull();
+
+    expect(
+      iii?.querySelector(".plate-frame > .plate-frame-plate > .cm-enlarge"),
+    ).not.toBeNull();
 
     const redeem = doc.querySelector('[aria-labelledby="redeem-heading"]');
     const fine = doc.querySelector(".fine-print");
@@ -49,7 +52,7 @@ describe("home page: the monitor is section III", () => {
     const kids = [...(iii?.children ?? [])]
       .filter((el) => el.tagName !== "SCRIPT")
       .map((el) =>
-        el.matches("[data-camera-monitor]")
+        el.matches(".plate-frame") && el.querySelector("[data-camera-monitor]")
           ? "monitor"
           : el.tagName.toLowerCase(),
       );
@@ -97,14 +100,30 @@ describe("/fault-cam/", () => {
 
   it("shows the monitor at the wide size, with its Enlarge", () => {
     const m = doc.querySelector("main [data-camera-monitor]");
-    expect(m?.classList.contains("cm-wide")).toBe(true);
-    expect(m?.querySelector(".cm-enlarge")).not.toBeNull();
+    const frame = m?.closest(".plate-frame");
+    expect(frame?.classList.contains("cm-wide")).toBe(true);
+    expect(frame?.querySelector(".cm-enlarge")).not.toBeNull();
+  });
+
+  /* The monitor sits in the package plate frame (0.15.0), the plate
+     modal's frame inline, so the inline monitor echoes its pop-out. */
+  it("frames the monitor in the plate frame, Enlarge on the frame's corner", () => {
+    const m = doc.querySelector("main [data-camera-monitor]");
+    const plate = m?.parentElement;
+
+    expect(
+      plate?.matches(".plate-frame > .plate-frame-plate.bracket-frame"),
+    ).toBe(true);
+
+    const btn = plate?.querySelector(":scope > .cm-enlarge");
+    expect(btn?.classList.contains("plate-frame-corner")).toBe(true);
+    expect(btn?.closest("[data-camera-monitor]")).toBeNull();
   });
 
   /* The Enlarge control is an icon box in the monitor's corner, named
      for screen readers only (0.14.0's maximize-2 glyph). */
   it("makes Enlarge an icon box named for screen readers", () => {
-    const btn = doc.querySelector("main [data-camera-monitor] .cm-enlarge");
+    const btn = doc.querySelector("main .plate-frame .cm-enlarge");
     expect(btn?.classList.contains("icon-box")).toBe(true);
     expect(btn?.getAttribute("aria-haspopup")).toBe("dialog");
     expect(btn?.querySelector('svg[aria-hidden="true"]')).not.toBeNull();

@@ -63,13 +63,15 @@ export function renderMonitor(root: HTMLElement, v: MonitorView): void {
 /* Enlarge pops the whole monitor out onto the package plate modal, the
    way the path player's box comes out. The live element moves into the
    plate, so polling keeps repainting it there, and a slot of the same
-   height holds its place in the page. Every way out (close box, veil,
-   Escape) fires the dialog's close event, which moves it back. The
-   plate is built on first use and kept. */
+   height holds its place in the page's plate frame, which stays behind
+   with its corner box hidden. Every way out (close box, veil, Escape)
+   fires the dialog's close event, which moves it back. The plate is
+   built on first use and kept. */
 function mountPopout(el: HTMLElement): { destroy(): void } {
-  const btn = el.querySelector(".cm-enlarge");
+  const box = el.closest("[data-cm-box]");
+  const btn = box?.querySelector(".cm-enlarge");
 
-  if (!(btn instanceof HTMLButtonElement)) {
+  if (!box || !(btn instanceof HTMLButtonElement)) {
     return {
       destroy() {
         /* no button, nothing mounted */
@@ -85,9 +87,9 @@ function mountPopout(el: HTMLElement): { destroy(): void } {
     if (!slot) return;
     slot.replaceWith(el);
     slot = undefined;
-    el.classList.remove("is-popped");
+    box.classList.remove("is-popped");
     /* The package returns focus before the monitor is back, while the
-       button is still hidden in the plate, so focus it again here. */
+       button is still hidden in the frame, so focus it again here. */
     btn.focus();
   };
 
@@ -105,12 +107,9 @@ function mountPopout(el: HTMLElement): { destroy(): void } {
     const refs = plate();
     slot = doc.createElement("div");
     slot.dataset.cmSlot = "";
-    slot.className = "cm-slot";
-    /* The slot takes the monitor's size modifier along with its height. */
-    slot.classList.toggle("cm-wide", el.classList.contains("cm-wide"));
     slot.style.height = `${el.getBoundingClientRect().height}px`;
     el.before(slot);
-    el.classList.add("is-popped");
+    box.classList.add("is-popped");
     refs.plate.append(el);
     refs.open(btn);
   };

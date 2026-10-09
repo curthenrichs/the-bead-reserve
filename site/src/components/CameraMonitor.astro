@@ -10,35 +10,46 @@ const { wide = false } = Astro.props;
 const v = viewFor(DARK);
 ---
 
-{/* wide: the Fault Cam page shows the monitor larger, up to 960px. */}
+{/* wide: the Fault Cam page shows the monitor larger, up to 960px.
+   The package plate frame (0.15.0) is the plate modal's frame inline,
+   so the monitor in the page echoes its pop-out. Only the monitor moves
+   into the modal; the frame and its corner box stay in the page. */}
 
-<section
-  class:list={["camera-monitor", { "cm-wide": wide }]}
-  data-camera-monitor
-  data-status={v.status}
-  aria-label="Reserve monitor"
->
-  {/* Pops the whole monitor out on the plate modal (camera-monitor.ts).
-     An icon box on the monitor's corner, like the plate's own close. */}
-  <button type="button" class="cm-enlarge icon-box" aria-haspopup="dialog">
-    <Icon name="maximize-2" size={16} />
-    <span class="screen-reader-text">Enlarge the reserve monitor</span>
-  </button>
-  <div class="cm-bar">
-    <span>Reserve Monitoring: Fault Cam 01</span>
-    <span class="cm-bar-end">
-      <span class="cm-badge" data-cm-badge>{v.badge}</span>
-    </span>
+<div class:list={["plate-frame", "cm-box", { "cm-wide": wide }]} data-cm-box>
+  <div class="plate-frame-plate bracket-frame">
+    {/* Pops the whole monitor out on the plate modal (camera-monitor.ts).
+       An icon box on the plate's corner, where the modal's close sits. */}
+    <button
+      type="button"
+      class="cm-enlarge icon-box plate-frame-corner"
+      aria-haspopup="dialog"
+    >
+      <Icon name="maximize-2" size={16} />
+      <span class="screen-reader-text">Enlarge the reserve monitor</span>
+    </button>
+    <section
+      class="camera-monitor"
+      data-camera-monitor
+      data-status={v.status}
+      aria-label="Reserve monitor"
+    >
+      <div class="cm-bar">
+        <span>Reserve Monitoring: Fault Cam 01</span>
+        <span class="cm-bar-end">
+          <span class="cm-badge" data-cm-badge>{v.badge}</span>
+        </span>
+      </div>
+      <div class="cm-cro">
+        <img data-cm-mood src={v.mood} alt={v.moodAlt} width="44" height="44" />
+        <span data-cm-mood-caption>{v.moodCaption}</span>
+      </div>
+      <div class="cm-screen" data-cm-screen>
+        <span class="cm-placeholder" data-cm-placeholder>{v.placeholder}</span>
+      </div>
+      <p class="cm-caption" data-cm-caption>{v.caption}</p>
+    </section>
   </div>
-  <div class="cm-cro">
-    <img data-cm-mood src={v.mood} alt={v.moodAlt} width="44" height="44" />
-    <span data-cm-mood-caption>{v.moodCaption}</span>
-  </div>
-  <div class="cm-screen" data-cm-screen>
-    <span class="cm-placeholder" data-cm-placeholder>{v.placeholder}</span>
-  </div>
-  <p class="cm-caption" data-cm-caption>{v.caption}</p>
-</section>
+</div>
 
 <script>
   import { mountCameraMonitor } from "../scripts/camera-monitor";
@@ -49,20 +60,16 @@ const v = viewFor(DARK);
   /* A black screen in both themes (spec section 3), the way the code
      island keeps its dark block by day. Sized like an image, not prose
      (owner call 2026-10-08): at most 640px, centered in the column, and
-     the full column on phones narrower than that. */
-  .camera-monitor,
-  :global(.cm-slot) {
+     the full column on phones narrower than that. The cap is on the
+     framed box as a whole. */
+  .cm-box {
     max-width: 640px;
     margin: clamp(40px, 5vw, 64px) auto;
   }
 
-  .camera-monitor.cm-wide,
-  :global(.cm-slot.cm-wide) {
-    max-width: 960px;
-  }
+  .cm-box.cm-wide { max-width: 960px; }
 
   .camera-monitor {
-    position: relative;
     background: var(--black-900);
     border: var(--stroke-3) solid var(--rule);
     color: var(--parchment);
@@ -76,9 +83,7 @@ const v = viewFor(DARK);
     border-bottom: var(--stroke) solid var(--gray-750);
   }
 
-  /* The right padding keeps the badge clear of the corner box. */
   .cm-bar {
-    padding-right: 22px;
     display: flex;
     flex-wrap: wrap;
     gap: 4px 12px;
@@ -95,36 +100,27 @@ const v = viewFor(DARK);
     margin-left: auto;
   }
 
-  /* The package .icon-box, straddling the monitor's top-right corner
-     with the plate close box's offset (plate-modal.css .pm-close),
-     measured from the outside of the monitor's frame. */
-  .cm-enlarge {
-    position: absolute;
-    top: calc(-17px - var(--stroke-3));
-    right: calc(-17px - var(--stroke-3));
-    z-index: 1;
-  }
-
+  /* The package places the corner box (.plate-frame-corner). */
   .cm-enlarge:focus-visible { outline-offset: 2px; }
 
-  /* Popped out: the plate has its own close, and the monitor fills the
-     plate instead of the 640px cap. */
-  .camera-monitor.is-popped {
-    max-width: none;
-    margin: 0;
-  }
+  /* Popped out: the modal has its own close. */
+  .cm-box.is-popped .cm-enlarge { display: none; }
 
-  .is-popped .cm-enlarge { display: none; }
+  /* The inline plate pads the monitor as the modal's plate does, so the
+     two read the same, and the top padding clears the corner box on
+     phones, where it tucks inside the plate. */
+  .cm-box .plate-frame-plate,
+  :global(.cm-plate) {
+    padding: 24px;
+  }
 
   /* The plate (built in camera-monitor.ts) sizes the monitor. Desktop:
      wide, and short enough that the 16:10 screen plus the monitor's
      chrome (about 230px with the plate and zone padding) fits the
      window. Phones: the full width, which the zone must also be told,
-     since a 16:10 box has no intrinsic width to fill it with. The top
-     padding clears the straddling close box. */
+     since a 16:10 box has no intrinsic width to fill it with. */
   :global(.cm-plate) {
     width: min(88vw, 1100px, max(640px, calc((100dvh - 230px) * 1.6 + 54px)));
-    padding: 24px;
   }
 
   @media (--bp-phone) {
@@ -133,12 +129,10 @@ const v = viewFor(DARK);
       width: 100%;
     }
 
-    :global(.cm-plate) { padding: 28px 9px 9px; }
-
-    /* Phones: the column has no room to straddle, so the box tucks
-       inside the corner and the bar makes room for it. */
-    .cm-enlarge { right: 9px; }
-    .cm-bar { padding-right: 48px; }
+    .cm-box .plate-frame-plate,
+    :global(.cm-plate) {
+      padding: 28px 9px 9px;
+    }
   }
 
   .camera-monitor.is-live .cm-badge { color: var(--accent-1); }
