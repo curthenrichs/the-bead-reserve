@@ -87,6 +87,7 @@ venv/
 .venv/
 dist/
 build/
+.astro/
 out/
 coverage/
 cache/
