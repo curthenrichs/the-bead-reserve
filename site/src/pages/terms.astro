@@ -1,9 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import PolicyContact from "../components/PolicyContact.astro";
-import { LEGAL_HOLDER } from "../data/site";
-
-const REPO = "https://github.com/curthenrichs/the-bead-reserve";
+import { LEGAL_HOLDER, SITE_URL, SOURCE_URL } from "../data/site";
 ---
 
 <Layout
@@ -14,10 +12,31 @@ const REPO = "https://github.com/curthenrichs/the-bead-reserve";
     <article class="policy bracket-frame">
       <h1>Terms</h1>
       <div class="prose">
-        <p>Last updated: October 7, 2026</p>
+        <p>Last updated: October 8, 2026</p>
         <p>
-          These terms cover the website of The Bead Reserve, operated by
-          {LEGAL_HOLDER}. Use of the site constitutes acceptance of these terms.
+          The Bead Reserve
+          (<a href={`${SITE_URL}/`}>beadz.half-built-robots.com</a>) is owned
+          and operated by {LEGAL_HOLDER}, a California LLC. By using the site
+          you agree to these terms.
+        </p>
+
+        <h2 id="using-the-site">Using the site</h2>
+        <p>
+          You may read, link to, and share the site's content for your own
+          personal, noncommercial purposes. The site's words, the whitepaper's
+          text, the artwork (including Henry, the robot mascot, and the reserve
+          seal), and the site design are copyright {LEGAL_HOLDER}, all rights
+          reserved. Quoting a short passage with attribution and a link back is
+          fine. Otherwise, do not republish or redistribute content from this
+          site, or present it as your own work, without written permission.
+        </p>
+        <p>
+          Third-party names, including Base, Ethereum, and the wallet brands,
+          belong to their owners.
+        </p>
+        <p>
+          Search engines and AI crawlers are welcome to index the site, and AI
+          developers are welcome to train on it.
         </p>
 
         <h2>The token</h2>
@@ -25,9 +44,9 @@ const REPO = "https://github.com/curthenrichs/the-bead-reserve";
           BEADZ is a novelty collectible issued for amusement. It has no
           monetary value, and none is promised. It carries no expectation of
           profit. It is not a stablecoin, a security, a deposit, or a payment
-          instrument, and is not pegged to any national currency. The Reserve
-          sells it to no one and seeds no market. Any market a third party
-          creates is that party's doing and risk.
+          instrument, and it is not pegged to any national currency. I sell it
+          to no one and seed no market. Any market a third party creates is that
+          party's doing and risk.
         </p>
         <p>
           Physical redemption is available by prepaid certified mail with
@@ -37,20 +56,39 @@ const REPO = "https://github.com/curthenrichs/the-bead-reserve";
         </p>
         <p>Nothing on this site is financial or legal advice.</p>
 
+        <h2>On-chain transactions</h2>
+        <p>
+          Claims and redemptions are transactions on Base that you sign with
+          your own wallet. Transactions on Base are public and permanent. Once
+          one is confirmed, it cannot be reversed. I cannot recover a lost key
+          or undo a transaction, and I cannot return tokens sent to the wrong
+          address.
+        </p>
+        <p>
+          You pay the network fee for each transaction, in ETH. A redemption
+          burns your tokens at the moment of the transaction.
+        </p>
+
         <h2>Code</h2>
         <p>
-          The software behind The Bead Reserve, this site included, is published
-          under the <a href={`${REPO}/blob/main/LICENSE`}>MIT license</a> in the
-          <a href={REPO}>public repository</a>. Anything the license allows is
-          allowed here, provided the copyright and license notice travel with
-          the code.
+          The software behind The Bead Reserve (the contract, the camera, the
+          service, and this site's code) is published under the
+          <a href={`${SOURCE_URL}/blob/main/LICENSE`}>MIT license</a> in the
+          <a href={SOURCE_URL}>public repository</a>. Anything the license
+          allows is allowed here, provided the copyright and license notice
+          travel with the code.
+        </p>
+        <p>
+          The site's words and the whitepaper's text are not covered by that
+          grant. They are reserved under
+          <a href="#using-the-site">Using the site</a> above.
         </p>
 
         <h2>Brand assets</h2>
         <p>
-          Henry and the reserve seal are excluded from that grant under the
+          Henry and the reserve seal are excluded from the MIT grant under the
           BRAND ASSETS EXCEPTION in the repository's <code>LICENSE</code>. They
-          are &copy; {LEGAL_HOLDER}, all rights reserved. They may be used to
+          are &copy; {LEGAL_HOLDER}, all rights reserved. You may use them to
           refer to The Bead Reserve. Neither they nor the name "The Bead
           Reserve" may be used as the identity of another project, a fork of
           this one included. The <a href="/brand/">brand assets</a> page sets
@@ -62,36 +100,50 @@ const REPO = "https://github.com/curthenrichs/the-bead-reserve";
           The site and the token are provided "as is" and "as available",
           without warranties of any kind, express or implied. The reserve is
           uninsured. To the maximum extent permitted by law, {LEGAL_HOLDER} is
-          not liable for any damages arising from use of the site or the token,
-          or from reliance on the site's content.
+          not liable for any damages arising from your use of, or inability to
+          use, the site or the token, or from reliance on the site's content.
         </p>
 
         <h2>Indemnity</h2>
         <p>
-          Anyone who forks the software or deploys their own vault does so at
-          their own risk. They agree to indemnify and hold harmless
-          {LEGAL_HOLDER} against claims arising from that use, to the extent the
-          law allows.
+          If you fork the software or deploy your own vault, you do so at your
+          own risk. You agree to indemnify and hold harmless {LEGAL_HOLDER}
+          against claims arising from that use, to the extent the law allows.
+        </p>
+
+        <h2>Cookies and browser storage</h2>
+        <p>
+          The site sets no cookies of its own. Cloudflare, the site's host, sets
+          one security cookie, and the site keeps two small values in your
+          browser's local storage. The
+          <a href="/privacy/#cookies-and-browser-storage">privacy policy</a>
+          lists each one and what it's for.
         </p>
 
         <h2>Links to other sites</h2>
         <p>
           The site links to the Half-Built Robots blog and to other sites. Those
-          sites are outside this site's control, and a link is not an
-          endorsement. Their terms and privacy practices are their own.
+          sites are not under my control and a link is not an endorsement. Their
+          terms and privacy practices are their own.
+        </p>
+
+        <h2>Copyright complaints</h2>
+        <p>
+          If you believe content on this site infringes your copyright, contact
+          me using the information below and I will review and address it.
         </p>
 
         <h2>Changes</h2>
         <p>
-          These terms may change. Revisions are posted on this page with a new
-          date at the top. Continued use of the site after a change constitutes
-          acceptance of the revised terms.
+          These terms may change. Updates are posted on this page with a new
+          date at the top. Continued use of the site after a change means you
+          accept the updated terms.
         </p>
 
         <h2>Governing law</h2>
         <p>
           These terms are governed by the laws of the State of California,
-          United States.
+          United States, without regard to its conflict of law provisions.
         </p>
 
         <h2>Contact</h2>
