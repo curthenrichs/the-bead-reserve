@@ -254,7 +254,7 @@ describe("accessibility", () => {
           s.boxShadow !== "none";
 
         return {
-          key: el.outerHTML.slice(0, 120),
+          key: `${el.outerHTML.slice(0, 120)}@${Math.round(el.getBoundingClientRect().top + window.scrollY)}`,
           ringed,
           seal: !!el.closest(".seal"),
         };

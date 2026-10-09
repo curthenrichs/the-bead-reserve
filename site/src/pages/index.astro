@@ -42,11 +42,14 @@ import SubscribeBand from "../components/SubscribeBand.astro";
         },
       ]}
     />
-    <Seal />
     <CameraMonitor />
     <ClaimPanel />
     <RedeemPanel />
     <Disclaimers />
+    {/* The seal has two placements. From 1780px it floats fixed in the
+       left gutter and takes no room here. Below that it sits in the flow
+       under the signature. */}
+    <Seal />
     {/* A very large pause after the Vault Keeper signs, before the
        newsletter (owner call 2026-10-08): the receipt ends, then the
        bridge back to the workshop. Scales down on phones. */}
