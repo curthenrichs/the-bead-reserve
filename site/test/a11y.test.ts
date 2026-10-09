@@ -212,16 +212,18 @@ describe("accessibility", () => {
     await bothThemes(p, "/#note-1");
   }, 60_000);
 
-  /* The camera frame's lightbox, open over a stubbed live reserve
-     (stub-api.ts), at desktop and phone width. */
+  /* The monitor popped out on the plate modal, over a stubbed live
+     reserve (stub-api.ts) so the frame is in the audit, at desktop and
+     phone width. */
   for (const phone of [false, true]) {
-    it(`the open frame lightbox has no WCAG 2.2 AA violations${phone ? " at phone width" : ""}`, async () => {
+    it(`the popped-out monitor has no WCAG 2.2 AA violations${phone ? " at phone width" : ""}`, async () => {
       const p = await open("/", phone, true);
-      const link = await p.waitForSelector("[data-cm-screen] a.lightbox-link");
-      await link?.scrollIntoView();
-      await link?.click();
-      await p.waitForSelector("dialog.lb-dialog[open] .lb-img");
-      await bothThemes(p, `/ lightbox${phone ? " @390" : ""}`);
+      await p.waitForSelector("[data-cm-screen] img.cm-frame");
+      const btn = await p.waitForSelector(".cm-enlarge");
+      await btn?.scrollIntoView();
+      await btn?.click();
+      await p.waitForSelector("dialog[open] [data-camera-monitor]");
+      await bothThemes(p, `/ monitor pop-out${phone ? " @390" : ""}`);
     }, 60_000);
   }
 

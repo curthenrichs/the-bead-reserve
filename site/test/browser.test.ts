@@ -177,39 +177,107 @@ describe("layout in a real browser", () => {
     ).toBeLessThanOrEqual(1);
   });
 
-  /* The live frame needs the Worker; stub-api.ts stands in for it. */
-  for (const phone of [false, true]) {
-    it(`the live frame opens full size in the lightbox and Escape closes it${phone ? " (phone)" : ""}`, async () => {
-      const p = await open("/", { phone, live: true });
-      const link = await p.waitForSelector("[data-cm-screen] a.lightbox-link");
-      await link?.scrollIntoView();
-      await link?.click();
-      await p.waitForSelector("dialog.lb-dialog[open]");
+  /* Enlarge moves the whole monitor (bar, CRO row, screen, caption)
+     into the package plate modal and back. The preview has no Worker,
+     so the plain runs are the dark state; stub-api.ts stands in for a
+     live reserve in the third. */
+  for (const { phone, live } of [
+    { phone: false, live: false },
+    { phone: true, live: false },
+    { phone: false, live: true },
+  ]) {
+    it(`Enlarge pops the whole monitor out and Escape puts it back${phone ? " (phone)" : ""}${live ? " (live)" : " (dark)"}`, async () => {
+      const p = await open("/", { phone, live });
+      if (live) await p.waitForSelector("[data-cm-screen] img.cm-frame");
+      const before = await box(p, "[data-camera-monitor]");
+      const btn = await p.waitForSelector("[data-camera-monitor] .cm-enlarge");
 
-      await p.waitForFunction(() => {
-        const img = document.querySelector<HTMLImageElement>(
-          "dialog.lb-dialog[open] .lb-img",
-        );
+      expect(
+        await p.$eval(".cm-enlarge", (b) => [
+          b.getAttribute("type"),
+          b.getAttribute("aria-haspopup"),
+          b.textContent.trim(),
+        ]),
+      ).toEqual(["button", "dialog", "Enlarge"]);
 
-        return (
-          !!img &&
-          img.complete &&
-          img.naturalWidth > 0 &&
-          img.getAttribute("src") === "/api/frame/latest"
-        );
+      await btn?.scrollIntoView();
+      await btn?.click();
+      await p.waitForSelector("dialog[open] [data-camera-monitor]");
+
+      const inPlate = await p.evaluate(() => {
+        const dlg = document.querySelector("dialog[open]");
+        const m = document.querySelector("[data-camera-monitor]");
+        const plate = m?.closest(".pm-plate");
+        const btn = m?.querySelector<HTMLElement>(".cm-enlarge");
+        const r = m?.getBoundingClientRect();
+        const pr = plate?.getBoundingClientRect();
+        const screen = m?.querySelector("[data-cm-screen]");
+        const sr = screen?.getBoundingClientRect();
+
+        return {
+          label: dlg?.getAttribute("aria-label"),
+          inPlate: !!plate,
+          w: r?.width ?? 0,
+          plateW: pr?.width ?? 0,
+          ratio: sr ? sr.width / sr.height : 0,
+          enlargeShown: !!btn && getComputedStyle(btn).display !== "none",
+          bar: !!m?.querySelector(".cm-bar"),
+          caption: !!m?.querySelector("[data-cm-caption]"),
+          placeholderInMain: !!document.querySelector("main [data-cm-slot]"),
+          vw: document.documentElement.clientWidth,
+        };
       });
 
-      const shown = await p.$eval("dialog.lb-dialog .lb-img", (img) => {
-        const r = img.getBoundingClientRect();
-        return { w: r.width, h: r.height, alt: img.getAttribute("alt") };
-      });
+      expect(inPlate.label).toBe("Reserve monitor");
+      expect(inPlate.inPlate).toBe(true);
+      expect(inPlate.bar && inPlate.caption).toBe(true);
+      expect(inPlate.enlargeShown).toBe(false);
+      expect(inPlate.placeholderInMain).toBe(true);
+      expect(Math.abs(inPlate.ratio - 1.6)).toBeLessThan(0.02);
 
-      expect(shown.w).toBeGreaterThan(0);
-      expect(shown.h).toBeGreaterThan(0);
-      expect(shown.alt).toBe("Camera view of the reserve jar");
+      if (phone) {
+        expect(inPlate.w).toBeGreaterThan(inPlate.plateW - 40);
+      } else {
+        expect(inPlate.w).toBeGreaterThan(640);
+      }
+
+      expect(inPlate.w).toBeLessThanOrEqual(inPlate.vw);
+
+      /* The page under the veil keeps its height: the slot holds the
+         monitor's place. */
+      const slot = await box(p, "main [data-cm-slot]");
+
+      expect(
+        Math.abs(slot.bottom - slot.top - (before.bottom - before.top)),
+      ).toBeLessThanOrEqual(1);
 
       await p.keyboard.press("Escape");
-      await p.waitForSelector("dialog.lb-dialog[open]", { hidden: true });
+      await p.waitForSelector("dialog[open]", { hidden: true });
+
+      /* The dialog's close event is a queued task, so the move back
+         lands a moment after the dialog shuts. */
+      await p.waitForSelector("[data-cm-slot]", { hidden: true });
+
+      const after = await p.evaluate(() => {
+        const m = document.querySelector("[data-camera-monitor]");
+        const b = m?.querySelector(".cm-enlarge");
+        return {
+          parent: m?.parentElement?.tagName,
+          slot: !!document.querySelector("[data-cm-slot]"),
+          focused: document.activeElement?.classList.contains("cm-enlarge"),
+          enlargeShown: !!b && getComputedStyle(b).display !== "none",
+        };
+      });
+
+      expect(after).toEqual({
+        parent: "MAIN",
+        slot: false,
+        focused: true,
+        enlargeShown: true,
+      });
+
+      const back = await box(p, "[data-camera-monitor]");
+      expect(back.right - back.left).toBeLessThanOrEqual(640);
     });
   }
 });
