@@ -7,6 +7,7 @@
   subtitle: "A Technical and Monetary Whitepaper of The Bead Reserve",
   office: meta.office,
   series: meta.series,
+  notice: meta.notice,
   draft: false,
 )
 
@@ -94,7 +95,7 @@ The model is designated *Chief Reserve Officer*. Its findings are
 advisory. It cannot count the beads but may, from time to time, claim to.
 
 = 4. Token Design
-#meta.symbol is a standard ERC-20 token deployed on #meta.chain.
+#meta.symbol is a standard ERC-20 token specified for #meta.chain.
 
 #param-table((
   ("Name / Symbol", "Beadz / BEADZ"),
@@ -402,7 +403,7 @@ The jar is on camera. The count is final. One bead is one bead.
 / The ratchet: the property that supply and reserve can only decrease, via redemption.
 
 = Appendix B: Contract Summary
-Deployed on #meta.chain. Built on OpenZeppelin's audited ERC-20. Key
+Specified for #meta.chain. Built on OpenZeppelin's audited ERC-20. Key
 entry points:
 
 - `claim()`: receive one bead from the genesis mint (one per address;
@@ -439,7 +440,7 @@ Contract address: #emph(meta.contract)
 #line(length: 100%, stroke: 0.5pt + hairline)
 #v(0.6em)
 #block(text(style: "italic", fill: ink-soft, size: 9.5pt)[
-  This document is a draft for public comment. BEADZ is a joke that is fully
+  This edition specifies a currency that was never issued. BEADZ is a joke that is fully
   collateralized. It has no monetary value and is not an offer of, or
   solicitation to buy, anything. Nothing herein is financial, legal, or
   horticultural advice. One (1) bead ≈ one (1) bead.

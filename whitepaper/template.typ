@@ -49,7 +49,7 @@
   ),
 )))
 
-#let whitepaper(title: "", title-lines: none, subtitle: "", office: "", series: "", draft: false, doc) = {
+#let whitepaper(title: "", title-lines: none, subtitle: "", office: "", series: "", notice: "", draft: false, doc) = {
   set document(title: title, author: "The Bead Reserve", description: subtitle)
   set page(
     paper: "a4",
@@ -61,7 +61,7 @@
       v(4pt)
       grid(
         columns: (1fr, auto),
-        align(left)[BEADZ · DRAFT FOR PUBLIC COMMENT],
+        align(left)[BEADZ · UNISSUED EDITION],
         align(right)[#counter(page).display() / #counter(page).final().first()],
       )
     },
@@ -117,6 +117,15 @@
     v(7pt)
     line(length: 100%, stroke: 1pt + amber)
     v(14pt)
+    // The edition notice: what this copy is, stated before anything else.
+    if notice != "" {
+      block(width: 100%, inset: 10pt, stroke: 1pt + amber)[
+        #set text(font: mono, size: 8.5pt, fill: ink)
+        #set par(justify: false)
+        #notice
+      ]
+      v(14pt)
+    }
   }
 
   doc
