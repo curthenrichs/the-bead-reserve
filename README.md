@@ -159,9 +159,10 @@ These are statements of design intent, made in earnest, and are not legal, finan
 
 ## License
 
-MIT. Fork it, deploy your own vault, reserve your own beads. Henry the mascot
-and the other brand marks (the reserve seal, favicons, token art, OG image)
-are carved out of that grant; see the BRAND ASSETS EXCEPTION in
+MIT for the code. Read it, learn from it, and reuse it in your own work under
+your own name. Henry the mascot, the other brand marks (the reserve seal,
+favicons, token art, OG image), the site's words, and the whitepaper text are
+carved out of that grant; see the BRAND ASSETS and CONTENT EXCEPTIONS in
 [`LICENSE`](./LICENSE) before reusing them.
 
 ---
