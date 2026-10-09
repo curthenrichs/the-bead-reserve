@@ -136,13 +136,36 @@ describe("/fault-cam/", () => {
     expect(btn?.closest(".cm-bar")).toBeNull();
   });
 
+  /* The record is a certificate card (owner brief 2026-10-08): the
+     package bracket frame, titled in the display serif, the fields as a
+     receipt table. */
+  it("encloses the record in a bracket-frame card titled Certificate of Attestation", () => {
+    const rec = doc.querySelector("[data-attestation]");
+    expect(rec?.tagName).toBe("SECTION");
+    expect(rec?.classList.contains("bracket-frame")).toBe(true);
+
+    const title = rec?.querySelector(":scope > h2");
+    expect(squash(title?.textContent)).toBe("Certificate of Attestation");
+    expect(rec?.getAttribute("aria-labelledby")).toBe(title?.id);
+
+    const h2s = [...doc.querySelectorAll("main h2")].map((h) =>
+      squash(h.textContent),
+    );
+
+    expect(h2s).not.toContain("Attestation record");
+  });
+
   it("server-renders the record dark: None everywhere, the key, no frame to check", () => {
     const rec = doc.querySelector("[data-attestation]");
     expect(rec?.getAttribute("data-status")).toBe("dark");
 
-    const rows = [...(rec?.querySelectorAll("dt") ?? [])].map((dt) => [
-      squash(dt.textContent),
-      squash(dt.nextElementSibling?.textContent),
+    const table = rec?.querySelector("table");
+    const ths = [...(table?.querySelectorAll("th") ?? [])];
+    expect(ths.every((th) => th.getAttribute("scope") === "row")).toBe(true);
+
+    const rows = [...(table?.querySelectorAll("tbody tr") ?? [])].map((tr) => [
+      squash(tr.querySelector("th")?.textContent),
+      squash(tr.querySelector("td")?.textContent),
     ]);
 
     expect(rows).toEqual([
@@ -152,12 +175,30 @@ describe("/fault-cam/", () => {
       ["Signature", "None"],
       ["Device key (Ed25519)", DEVICE_PUBKEY],
       ["Status", "dark"],
-      ["Verification", "No frame to check"],
     ]);
 
-    expect(
-      rec?.querySelector('[data-at="verdict"]')?.getAttribute("aria-live"),
-    ).toBe("polite");
+    const status = rec?.querySelector('[data-at="status"]');
+    expect(status?.matches(".boxed-label.micro-label")).toBe(true);
+  });
+
+  /* The verdict sits under the table's full-width rule as a stamped
+     tag, with the full sentence beside it carrying the live region. */
+  it("stamps the verdict as a boxed tag, the full sentence in the live region", () => {
+    const rec = doc.querySelector("[data-attestation]");
+    const row = rec?.querySelector("tfoot tr");
+
+    expect(squash(row?.querySelector('th[scope="row"]')?.textContent)).toBe(
+      "Verification",
+    );
+
+    const tag = row?.querySelector('[data-at="verdict-tag"]');
+    expect(tag?.matches(".boxed-label.micro-label")).toBe(true);
+    expect(squash(tag?.textContent)).toBe("NO FRAME");
+    expect(rec?.getAttribute("data-tone")).toBe("neutral");
+
+    const live = row?.querySelector('[data-at="verdict"]');
+    expect(live?.getAttribute("aria-live")).toBe("polite");
+    expect(squash(live?.textContent)).toBe("No frame to check");
   });
 
   it("sets out how frames are signed, and names nothing private", () => {

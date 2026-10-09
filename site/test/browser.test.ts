@@ -40,10 +40,10 @@ describe("layout in a real browser", () => {
 
   async function open(
     path = "/",
-    { phone = false, live = false, attested = false } = {},
+    { phone = false, live = false, attested = false, width = 390 } = {},
   ): Promise<Page> {
     if (!browser) throw new Error("no browser (beforeAll failed)");
-    page = phone ? await phonePage(browser) : await desktopPage(browser);
+    page = phone ? await phonePage(browser, width) : await desktopPage(browser);
     if (live || attested) await stubLiveReserve(page, { attested });
     await page.goto(`${ORIGIN}${path}`, { waitUntil: "networkidle0" });
     return page;
@@ -665,16 +665,44 @@ describe("layout in a real browser", () => {
 
     expect(rec.sha256).toMatch(/^[0-9a-f]{64}$/);
     expect(await sideways(p)).toBeLessThanOrEqual(0);
+
+    /* The certificate's stamp: the short form, in the error ink. */
+    expect(rec["verdict-tag"]).toBe("SIGNATURE INVALID");
+
+    const ink = await p.evaluate(() => {
+      const probe = document.createElement("span");
+      probe.style.color = "var(--error-ink)";
+      document.body.append(probe);
+      const want = getComputedStyle(probe).color;
+      probe.remove();
+      const stamp = document.querySelector('[data-at="verdict-tag"]');
+      return { want, got: stamp ? getComputedStyle(stamp).color : "" };
+    });
+
+    expect(ink.got).toBe(ink.want);
   });
 
-  it("/fault-cam/ at phone width: the hex wraps, no sideways scroll", async () => {
-    const p = await open("/fault-cam/", { phone: true, attested: true });
+  it("/fault-cam/ at 375px: the certificate's hex wraps, no sideways scroll", async () => {
+    const p = await open("/fault-cam/", {
+      phone: true,
+      attested: true,
+      width: 375,
+    });
 
     await p.waitForFunction(
       () => document.querySelector('[data-at="counter"]')?.textContent === "8",
     );
 
     expect(await sideways(p)).toBeLessThanOrEqual(0);
+
+    const spill = await p.$eval("[data-attestation]", (card) => {
+      const r = card.getBoundingClientRect();
+      return [...card.querySelectorAll("td, th")].some(
+        (c) => c.getBoundingClientRect().right > r.right + 0.5,
+      );
+    });
+
+    expect(spill).toBe(false);
   });
 
   const mid = (b: Box) => (b.left + b.right) / 2;
