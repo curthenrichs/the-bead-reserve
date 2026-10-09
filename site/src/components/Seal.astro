@@ -91,9 +91,10 @@ import { STATS, GENESIS_BEADS } from "../config";
       margin-top: 0;
     }
 
-    /* The seal travels down the gutter with the page: just under the
-       header (its box ends near 241px at 1920 wide) at the top of the
-       scroll, at the 30px bottom inset at the end, linear between. A
+    /* The seal travels down the gutter with the page: from the top-left
+       corner (30px inset) at the top of the scroll to the 30px bottom
+       inset at the end, linear between. The gutter sits outside the
+       shell, so it clears the header's frame at any height. A
        scroll timeline, so no script. Without one, or with reduced
        motion, it keeps the static bottom placement above. The end
        never rises above the start on a short window. */
@@ -110,7 +111,7 @@ import { STATS, GENESIS_BEADS } from "../config";
   }
 
   @keyframes beadz-seal-travel {
-    from { top: 272px; }
-    to { top: max(272px, calc(100% - 30px - 132px)); }
+    from { top: 30px; }
+    to { top: max(30px, calc(100% - 30px - 132px)); }
   }
 </style>

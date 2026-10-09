@@ -160,16 +160,16 @@ describe("layout in a real browser", () => {
     }, f);
   }
 
-  const SEAL_START = 272;
+  const SEAL_START = 30;
   const SEAL_INSET = 30;
 
-  it("wide screens: the seal travels from under the header to the bottom as the page scrolls", async () => {
+  it("wide screens: the seal travels from the top-left corner to the bottom as the page scrolls", async () => {
     const p = await sized(1920, 1080);
     const vh = 1080;
 
     await scrollToFraction(p, 0);
     const top = await box(p, ".seal");
-    const header = await box(p, "header#masthead");
+    const header = await box(p, "header#masthead .site-header-wrapper");
 
     expect(
       Math.abs(top.top - SEAL_START),
