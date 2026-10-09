@@ -183,13 +183,15 @@ goes.
 One-time setup on Cloudflare and GitHub before the first deploy.
 
 1. A Cloudflare Pages project, created as a direct-upload project with git
-   builds off.
+   builds off and production branch `main`. Pages decides production by
+   the deploy's branch name; with any other production branch, pushes to
+   `main` only make previews.
 2. Repo variable `CF_PAGES_PROJECT` set to that project's name.
 3. Repo secrets `CLOUDFLARE_API_TOKEN` (Pages edit permission) and
    `CLOUDFLARE_ACCOUNT_ID`.
 4. Custom domain `beadz.half-built-robots.com` on the Pages project.
-5. The Worker route for `beadz.half-built-robots.com/api/*` (see
-   `../service`).
+5. Deploy the Worker (`../service/README.md`, Deploy), then add the
+   `/api/*` route on `beadz.half-built-robots.com`.
 6. Cloudflare Web Analytics enabled on the Pages project. The privacy
    policy discloses it.
 7. Repo variable `BEADZ_LIVE=true`, which turns on the automatic smoke
