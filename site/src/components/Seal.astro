@@ -24,14 +24,15 @@ import { STATS, GENESIS_BEADS } from "../config";
 
 <style>
   /* A wax-seal stamp that flips on hover or focus to show the token on
-     its reverse. Inline by default, left-aligned under the signature.
+     its reverse. Inline by default, centered in the column under the
+     signature.
      The focus ring is the system's; never outline: none. Wide
      placement is in the media query at the end. */
   .seal {
     position: relative;
     width: 132px;
     height: 132px;
-    margin-top: clamp(32px, 5vw, 56px);
+    margin: clamp(32px, 5vw, 56px) auto 0;
     perspective: 700px;
     border-radius: 50%;
   }
@@ -81,14 +82,16 @@ import { STATS, GENESIS_BEADS } from "../config";
   /* 1380 shell + 2 x (30 offset + 132 seal + 30 air) = 1764; 1780 adds
      margin. Only here does the seal leave the flow and pin to the left
      gutter, where it covers no content or footer link, so nothing
-     reserves room for it. */
+     reserves room for it. It keeps 40px from the content's left edge on
+     very wide windows rather than drifting to the window edge, and never
+     comes closer than 30px to the window edge. */
   @media (min-width: 1780px) {
     .seal {
       position: fixed;
       bottom: 30px;
-      left: 30px;
+      left: max(30px, calc((100vw - var(--shell-max)) / 2 - 132px - 40px));
       z-index: var(--z-scroll-top);
-      margin-top: 0;
+      margin: 0;
     }
 
     /* The seal travels down the gutter with the page: from the top-left

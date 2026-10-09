@@ -262,6 +262,24 @@ describe("layout in a real browser", () => {
     const gap = await box(p, ".subscribe-gap");
     expect(seal.top).toBeGreaterThan(sig.bottom);
     expect(seal.bottom).toBeLessThan(gap.top);
+    const main = await box(p, "main");
+
+    expect(
+      Math.abs((seal.left + seal.right) / 2 - (main.left + main.right) / 2),
+    ).toBeLessThanOrEqual(2);
+  });
+
+  /* Owner call 2026-10-08: on very wide windows the floating seal keeps
+     a fixed 40px from the content instead of hugging the window edge. */
+  it("very wide screens: the floating seal stays 40px from the content", async () => {
+    const p = await sized(2560, 1440);
+    expect((await sealState(p))?.position).toBe("fixed");
+    const seal = await box(p, ".seal");
+    const shell = await box(p, "main");
+    const gap = shell.left - seal.right;
+    expect(gap, JSON.stringify({ seal, shell })).toBeGreaterThanOrEqual(30);
+    expect(gap, JSON.stringify({ seal, shell })).toBeLessThanOrEqual(70);
+    expect(seal.left).toBeGreaterThan(200);
   });
 
   it("phones: the seal is shown inline in the same place", async () => {
@@ -274,6 +292,11 @@ describe("layout in a real browser", () => {
     const gap = await box(p, ".subscribe-gap");
     expect(seal.top).toBeGreaterThan(sig.bottom);
     expect(seal.bottom).toBeLessThan(gap.top);
+    const main = await box(p, "main");
+
+    expect(
+      Math.abs((seal.left + seal.right) / 2 - (main.left + main.right) / 2),
+    ).toBeLessThanOrEqual(2);
   });
 
   /* The cap and the centering hold for the framed box as a whole. */
