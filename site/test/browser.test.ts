@@ -705,6 +705,25 @@ describe("layout in a real browser", () => {
     expect(spill).toBe(false);
   });
 
+  /* Owner call 2026-10-08: the certificate sizes to its content and
+     centers instead of spanning the column. */
+  it("/fault-cam/ desktop: the certificate is sized to its content and centered", async () => {
+    const p = await open("/fault-cam/", { attested: true });
+
+    await p.waitForFunction(
+      () => document.querySelector('[data-at="counter"]')?.textContent === "8",
+    );
+
+    const main = await box(p, "main");
+    const card = await box(p, "[data-attestation]");
+
+    expect(card.right - card.left).toBeLessThan(main.right - main.left - 40);
+
+    expect(
+      Math.abs(card.left - main.left - (main.right - card.right)),
+    ).toBeLessThanOrEqual(2);
+  });
+
   const mid = (b: Box) => (b.left + b.right) / 2;
 
   /* Owner call 2026-10-08: the two buttons centered on the column, the
