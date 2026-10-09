@@ -16,7 +16,7 @@ export const DESCRIPTION =
 export const NAV: NavItem[] = [
   { label: "Reserve", href: "/" },
   { label: "Fault Cam", href: "/fault-cam/" },
-  { label: "Whitepaper", href: "/whitepaper.pdf" },
+  { label: "Whitepaper", href: "/whitepaper.pdf", newTab: true },
 ];
 
 export const SOURCE_URL = "https://github.com/curthenrichs/the-bead-reserve";
@@ -44,7 +44,7 @@ export const FOOTER_SITEMAP: SitemapGroup[] = [
     links: [
       { label: "The Bead Reserve", href: "/" },
       { label: "Fault Cam", href: "/fault-cam/" },
-      { label: "Read the whitepaper", href: "/whitepaper.pdf" },
+      { label: "Read the whitepaper", href: "/whitepaper.pdf", newTab: true },
       { label: "Brand assets", href: "/brand/" },
       { label: "Source on GitHub", href: SOURCE_URL },
     ],

@@ -84,7 +84,7 @@ describe("layout chrome", () => {
     );
 
     const links = [...(site?.querySelectorAll("a") ?? [])].map((a) => [
-      a.textContent.trim(),
+      a.firstChild?.textContent?.trim(),
       a.getAttribute("href"),
     ]);
 
@@ -117,7 +117,7 @@ describe("layout chrome", () => {
     expect(hrefs).toEqual(["/", "/fault-cam/", "/whitepaper.pdf"]);
 
     const labels = [...doc.querySelectorAll(".masthead-nav a")].map((a) =>
-      a.textContent.trim(),
+      a.firstChild?.textContent?.trim(),
     );
 
     expect(labels).toEqual(["Reserve", "Fault Cam", "Whitepaper"]);
@@ -127,6 +127,51 @@ describe("layout chrome", () => {
     );
 
     expect(footer).toContain("/brand/");
+  });
+
+  /* The whitepaper is a PDF; both links to it open a new tab and say
+     so to screen readers (0.14.0 newTab). Nothing else does. */
+  it("opens the whitepaper in a new tab from the nav and the footer", () => {
+    const newTab = (sel: string) =>
+      [...doc.querySelectorAll(sel)]
+        .filter((a) => a.getAttribute("target") === "_blank")
+        .map((a) => ({
+          href: a.getAttribute("href"),
+          rel: a.getAttribute("rel"),
+          hint: a.querySelector(".screen-reader-text")?.textContent.trim(),
+        }));
+
+    const want = [
+      {
+        href: "/whitepaper.pdf",
+        rel: "noopener",
+        hint: "(opens in a new tab)",
+      },
+    ];
+
+    expect(newTab(".masthead-nav a")).toEqual(want);
+
+    const site = [...doc.querySelectorAll("footer .footer-sitemap-group")].find(
+      (g) => g.querySelector("h2, summary")?.textContent.trim() === "Site",
+    );
+
+    expect(site, "footer Site group").toBeDefined();
+    const inSite = [...(site?.querySelectorAll("a") ?? [])];
+
+    const paper = inSite.find(
+      (a) => a.getAttribute("href") === "/whitepaper.pdf",
+    );
+
+    expect(paper?.getAttribute("target")).toBe("_blank");
+    expect(paper?.getAttribute("rel")).toBe("noopener");
+
+    expect(
+      paper?.querySelector(".screen-reader-text")?.textContent.trim(),
+    ).toBe("(opens in a new tab)");
+
+    expect(
+      inSite.filter((a) => a.getAttribute("target") === "_blank"),
+    ).toHaveLength(1);
   });
 
   it("drops the package search: the site has no search page", () => {
