@@ -24,9 +24,11 @@
   color: var(--accent-1-ink);
 }
 
-/* The claim and redemption panels share one form (site-specific). */
+/* The claim and redemption panels share one form (site-specific).
+   The top margin is the even rhythm between sections I, II and III,
+   and gives the reserve ledger room above section I. */
 .panel {
-  margin-top: 38px;
+  margin-top: clamp(56px, 7vw, 80px);
 }
 
 .panel h2 {
