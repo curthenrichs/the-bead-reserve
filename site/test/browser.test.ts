@@ -62,6 +62,21 @@ describe("layout in a real browser", () => {
       return { top: r.top, bottom: r.bottom, left: r.left, right: r.right };
     });
 
+  /* The padding box, which an absolute child is placed against: the
+     plate's .bracket-frame has top and bottom rules. */
+  const paddingBox = (p: Page, sel: string): Promise<Box> =>
+    p.$eval(sel, (e) => {
+      const r = e.getBoundingClientRect();
+      const top = r.top + e.clientTop;
+      const left = r.left + e.clientLeft;
+      return {
+        top,
+        left,
+        bottom: top + e.clientHeight,
+        right: left + e.clientWidth,
+      };
+    });
+
   const intersects = (a: Box, b: Box): boolean =>
     a.left < b.right &&
     b.left < a.right &&
@@ -261,9 +276,10 @@ describe("layout in a real browser", () => {
     expect(seal.bottom).toBeLessThan(gap.top);
   });
 
-  it("the monitor is at most 640px wide and centered in main", async () => {
+  /* The cap and the centering hold for the framed box as a whole. */
+  it("the framed monitor is at most 640px wide and centered in main", async () => {
     const p = await open();
-    const m = await box(p, "[data-camera-monitor]");
+    const m = await box(p, ".plate-frame:has([data-camera-monitor])");
     const main = await box(p, "main");
 
     expect(m.right - m.left).toBeLessThanOrEqual(640);
@@ -273,6 +289,51 @@ describe("layout in a real browser", () => {
       JSON.stringify({ m, main }),
     ).toBeLessThanOrEqual(1);
   });
+
+  /* The monitor sits in the package plate frame (0.15.0), the plate
+     modal's frame inline: the four accent corner strokes on the frame,
+     the plate inside it, and the Enlarge box on the plate's top-right
+     corner where the modal's close box sits. */
+  for (const phone of [false, true]) {
+    it(`the Enlarge box sits on the frame's top-right corner${phone ? " (phone)" : ""}`, async () => {
+      const p = await open("/", { phone });
+      const frame = await box(p, ".plate-frame:has([data-camera-monitor])");
+
+      const plate = await paddingBox(
+        p,
+        ".plate-frame-plate:has([data-camera-monitor])",
+      );
+
+      const btn = await box(p, ".plate-frame .cm-enlarge");
+      const cx = (btn.left + btn.right) / 2;
+      const cy = (btn.top + btn.bottom) / 2;
+
+      /* Inside the frame's top-right region either way. */
+      expect(btn.right).toBeLessThanOrEqual(frame.right);
+      expect(btn.top).toBeGreaterThanOrEqual(frame.top);
+      expect(frame.right - cx).toBeLessThan(60);
+      expect(cy - frame.top).toBeLessThan(40);
+
+      if (phone) {
+        expect(Math.abs(plate.right - btn.right - 16)).toBeLessThanOrEqual(1);
+      } else {
+        /* Straddling the plate's corner, centered on it within a few px. */
+        expect(Math.abs(cx - plate.right)).toBeLessThanOrEqual(3);
+        expect(Math.abs(cy - plate.top)).toBeLessThanOrEqual(3);
+      }
+
+      expect(Math.abs(btn.top - plate.top + 17)).toBeLessThanOrEqual(1);
+
+      const strokes = await p.$eval(
+        ".plate-frame:has([data-camera-monitor])",
+        (f) =>
+          getComputedStyle(f).backgroundImage.split("linear-gradient").length -
+          1,
+      );
+
+      expect(strokes).toBe(phone ? 0 : 8);
+    });
+  }
 
   /* Enlarge moves the whole monitor (bar, CRO row, screen, caption)
      into the package plate modal and back. The preview has no Worker,
@@ -290,8 +351,10 @@ describe("layout in a real browser", () => {
 
       /* Where the monitor lives in the page, to check it comes back
          there: section III on the home page, main on /fault-cam/. */
+      const FRAME = ".plate-frame:has([data-camera-monitor])";
+
       const home = await p.$eval(
-        "[data-camera-monitor]",
+        FRAME,
         (m) =>
           m.parentElement?.getAttribute("aria-labelledby") ??
           m.parentElement?.tagName,
@@ -299,7 +362,8 @@ describe("layout in a real browser", () => {
 
       if (live) await p.waitForSelector("[data-cm-screen] img.cm-frame");
       const before = await box(p, "[data-camera-monitor]");
-      const btn = await p.waitForSelector("[data-camera-monitor] .cm-enlarge");
+      const plate = await paddingBox(p, `${FRAME} > .plate-frame-plate`);
+      const btn = await p.waitForSelector(`${FRAME} .cm-enlarge`);
 
       expect(
         await p.$eval(".cm-enlarge", (b) => [
@@ -309,30 +373,33 @@ describe("layout in a real browser", () => {
         ]),
       ).toEqual(["button", "dialog", "Enlarge the reserve monitor"]);
 
-      /* An icon box at the monitor's top-right corner: straddling it on
-         desktop, the way the plate's close box straddles the plate, and
-         tucked inside the corner on phones. */
-      const corner = await box(p, "[data-camera-monitor] .cm-enlarge");
+      /* An icon box at the frame's plate's top-right corner: straddling
+         it on desktop, the way the modal's close box straddles its
+         plate, and tucked inside the corner on phones. */
+      const corner = await box(p, `${FRAME} .cm-enlarge`);
 
       expect(corner.bottom - corner.top).toBeCloseTo(30, 0);
 
       if (phone) {
-        expect(corner.right).toBeLessThanOrEqual(before.right);
-        expect(before.right - corner.right).toBeLessThanOrEqual(20);
+        expect(corner.right).toBeLessThanOrEqual(plate.right);
+        expect(plate.right - corner.right).toBeLessThanOrEqual(20);
       } else {
-        expect(Math.abs(corner.right - before.right - 17)).toBeLessThanOrEqual(
+        expect(Math.abs(corner.right - plate.right - 17)).toBeLessThanOrEqual(
           1,
         );
       }
 
-      expect(Math.abs(corner.top - before.top + 17)).toBeLessThanOrEqual(1);
+      expect(Math.abs(corner.top - plate.top + 17)).toBeLessThanOrEqual(1);
+
+      /* The corner box stays clear of the monitor itself. */
+      expect(intersects(before, corner)).toBe(false);
 
       /* The bar's badge, and whatever sits above the monitor, stay
          clear of the corner box. */
       const badge = await box(p, "[data-cm-badge]");
       expect(intersects(badge, corner)).toBe(false);
 
-      const above = await p.$eval("[data-camera-monitor]", (m) => {
+      const above = await p.$eval(FRAME, (m) => {
         const r = m.previousElementSibling?.getBoundingClientRect();
         return r ? r.bottom : -Infinity;
       });
@@ -343,11 +410,23 @@ describe("layout in a real browser", () => {
       await btn?.click();
       await p.waitForSelector("dialog[open] [data-camera-monitor]");
 
+      /* The inline corner box sits exactly where the modal's close does. */
+      const pmPlate = await paddingBox(p, "dialog[open] .pm-plate");
+      const pmClose = await box(p, "dialog[open] .pm-close");
+
+      expect(
+        Math.abs(pmClose.top - pmPlate.top - (corner.top - plate.top)),
+      ).toBeLessThanOrEqual(1);
+
+      expect(
+        Math.abs(pmClose.right - pmPlate.right - (corner.right - plate.right)),
+      ).toBeLessThanOrEqual(1);
+
       const inPlate = await p.evaluate(() => {
         const dlg = document.querySelector("dialog[open]");
         const m = document.querySelector("[data-camera-monitor]");
         const plate = m?.closest(".pm-plate");
-        const btn = m?.querySelector<HTMLElement>(".cm-enlarge");
+        const btn = document.querySelector<HTMLElement>("main .cm-enlarge");
         const r = m?.getBoundingClientRect();
         const pr = plate?.getBoundingClientRect();
         const screen = m?.querySelector("[data-cm-screen]");
@@ -362,7 +441,10 @@ describe("layout in a real browser", () => {
           enlargeShown: !!btn && getComputedStyle(btn).display !== "none",
           bar: !!m?.querySelector(".cm-bar"),
           caption: !!m?.querySelector("[data-cm-caption]"),
-          placeholderInMain: !!document.querySelector("main [data-cm-slot]"),
+          placeholderInMain: !!document.querySelector(
+            "main .plate-frame-plate > [data-cm-slot]",
+          ),
+          secondFrame: !!m?.closest(".plate-frame"),
           vw: document.documentElement.clientWidth,
         };
       });
@@ -372,6 +454,7 @@ describe("layout in a real browser", () => {
       expect(inPlate.bar && inPlate.caption).toBe(true);
       expect(inPlate.enlargeShown).toBe(false);
       expect(inPlate.placeholderInMain).toBe(true);
+      expect(inPlate.secondFrame).toBe(false);
       expect(Math.abs(inPlate.ratio - 1.6)).toBeLessThan(0.02);
 
       if (phone) {
@@ -399,11 +482,12 @@ describe("layout in a real browser", () => {
 
       const after = await p.evaluate(() => {
         const m = document.querySelector("[data-camera-monitor]");
-        const b = m?.querySelector(".cm-enlarge");
+        const f = m?.closest(".plate-frame");
+        const b = f?.querySelector(".cm-enlarge");
         return {
           parent:
-            m?.parentElement?.getAttribute("aria-labelledby") ??
-            m?.parentElement?.tagName,
+            f?.parentElement?.getAttribute("aria-labelledby") ??
+            f?.parentElement?.tagName,
           slot: !!document.querySelector("[data-cm-slot]"),
           focused: document.activeElement?.classList.contains("cm-enlarge"),
           enlargeShown: !!b && getComputedStyle(b).display !== "none",
@@ -437,7 +521,7 @@ describe("layout in a real browser", () => {
 
   it("/fault-cam/: the monitor is wider than the home page's, at most 960px, centered", async () => {
     const p = await open("/fault-cam/");
-    const m = await box(p, "[data-camera-monitor]");
+    const m = await box(p, ".plate-frame:has([data-camera-monitor])");
     const main = await box(p, "main");
     const w = m.right - m.left;
     expect(w, JSON.stringify({ m, main })).toBeGreaterThan(640);
