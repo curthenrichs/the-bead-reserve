@@ -36,7 +36,7 @@ const v = viewFor(DARK);
      the full column on phones narrower than that. */
   .camera-monitor {
     max-width: 480px;
-    margin: 24px auto;
+    margin: clamp(40px, 5vw, 64px) auto;
     background: var(--black-900);
     border: var(--stroke-3) solid var(--rule);
     color: var(--parchment);
