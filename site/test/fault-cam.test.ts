@@ -40,12 +40,36 @@ describe("home page: the monitor is section III", () => {
     expect(iii?.compareDocumentPosition(fine as Node)).toBe(FOLLOWING);
   });
 
-  it("links the Fault Cam from under the monitor", () => {
+  /* Section III reads like I and II: the heading, a plain intro
+     paragraph, then the line to the Fault Cam, then the monitor (owner
+     calls 2026-10-08). */
+  it("orders section III: heading, intro, the Fault Cam line, the monitor", () => {
     const iii = doc.querySelector('[aria-labelledby="observation-heading"]');
-    const link = iii?.querySelector('a[href="/fault-cam/"]');
+
+    const kids = [...(iii?.children ?? [])]
+      .filter((el) => el.tagName !== "SCRIPT")
+      .map((el) =>
+        el.matches("[data-camera-monitor]")
+          ? "monitor"
+          : el.tagName.toLowerCase(),
+      );
+
+    expect(kids).toEqual(["h2", "p", "p", "monitor"]);
+
+    const ps = [...(iii?.querySelectorAll(":scope > p") ?? [])];
+    const intro = ps.at(0);
+    const linkLine = ps.at(1);
+
+    expect(squash(intro?.textContent)).toBe(
+      "The reserve is held under continuous observation. One frame is captured each hour and signed on the device before it is shown here.",
+    );
+
+    expect(intro?.className).toBe("");
+    expect(linkLine?.className).toBe("");
+    const link = linkLine?.querySelector('a[href="/fault-cam/"]');
     expect(squash(link?.textContent)).toBe("the Fault Cam");
 
-    expect(squash(link?.closest("p")?.textContent)).toBe(
+    expect(squash(linkLine?.textContent)).toBe(
       "The attestation record for the current frame is kept at the Fault Cam.",
     );
   });

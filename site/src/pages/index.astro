@@ -44,15 +44,19 @@ import SubscribeBand from "../components/SubscribeBand.astro";
     />
     <ClaimPanel />
     <RedeemPanel />
-    {/* Section III: the monitor under its numbered heading, with the
-       way to the full attestation record on /fault-cam/. */}
+    {/* Section III: an intro and the way to the full attestation record
+       on /fault-cam/, then the monitor, under its numbered heading. */}
     <section class="panel observation" aria-labelledby="observation-heading">
       <h2 id="observation-heading">III. Observation of the Reserve</h2>
-      <CameraMonitor />
-      <p class="observation-link">
+      <p>
+        The reserve is held under continuous observation. One frame is captured
+        each hour and signed on the device before it is shown here.
+      </p>
+      <p>
         The attestation record for the current frame is kept at
         <a href="/fault-cam/">the Fault Cam</a>.
       </p>
+      <CameraMonitor />
     </section>
     <Disclaimers />
     {/* The seal has two placements. From 1780px it floats fixed in the
@@ -69,14 +73,13 @@ import SubscribeBand from "../components/SubscribeBand.astro";
 </Layout>
 
 <style>
-  /* Under its heading the monitor sits closer than its own default
-     margins, the way the panels' contents do. */
+  /* Under the section's text the monitor sits closer than its own
+     default margins, the way the panels' contents do, with room above
+     for the Enlarge box that straddles its corner. */
   .observation :global(.camera-monitor),
   .observation :global(.cm-slot) {
-    margin: 16px auto;
+    margin: 28px auto 16px;
   }
-
-  .observation-link { text-align: center; }
 
   .subscribe-gap {
     margin-top: clamp(96px, 14vw, 180px);

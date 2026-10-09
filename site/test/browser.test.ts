@@ -230,9 +230,17 @@ describe("layout in a real browser", () => {
 
       expect(Math.abs(corner.top - before.top + 17)).toBeLessThanOrEqual(1);
 
-      /* The bar's badge stays clear of the corner box. */
+      /* The bar's badge, and whatever sits above the monitor, stay
+         clear of the corner box. */
       const badge = await box(p, "[data-cm-badge]");
       expect(intersects(badge, corner)).toBe(false);
+
+      const above = await p.$eval("[data-camera-monitor]", (m) => {
+        const r = m.previousElementSibling?.getBoundingClientRect();
+        return r ? r.bottom : -Infinity;
+      });
+
+      expect(corner.top).toBeGreaterThan(above);
 
       await btn?.scrollIntoView();
       await btn?.click();
