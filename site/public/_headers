@@ -1,0 +1,6 @@
+# The production pages.dev alias serves the same build as the custom
+# domain; keep it out of search indexes. Matches only the pages.dev
+# host, never beadz.half-built-robots.com. Branch previews already get
+# Cloudflare's own noindex.
+https://:project.pages.dev/*
+  X-Robots-Tag: noindex

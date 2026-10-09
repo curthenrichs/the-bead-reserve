@@ -20,6 +20,7 @@
     "lint:fix": "prettier --write . && eslint --fix . && stylelint --fix \"src/**/*.css\" \"src/**/*.astro\" && prettier --write ."
   },
   "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
     "@fontsource/roboto-serif": "^5.0.0",
     "@half-built/astro": "0.15.0",
     "@half-built/css": "0.15.0",
