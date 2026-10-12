@@ -93,4 +93,5 @@ keeper-signed act, so the keeper key never needs to be present at deployment.
 
 ## License
 
-MIT, same as the rest of the repository.
+Source-available, same as the rest of the repository. See the root `LICENSE`; deploying
+this contract to any mainnet is not permitted.

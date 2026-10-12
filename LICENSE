@@ -1,41 +1,69 @@
-MIT License
+BEADZ SOURCE-AVAILABLE LICENSE
 
-Copyright (c) 2026 Curt Henrichs LLC
+Copyright (c) 2026 Curt Henrichs LLC. All rights reserved, except as granted
+below.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+This repository is published so that people can read it and learn from it. It
+is not open source, and it is not a launch kit. The permissions below are the
+only rights granted. Everything not expressly granted is reserved.
 
 
----
+1. WHAT YOU MAY DO
 
-BRAND ASSETS EXCEPTION
+Subject to the conditions in this license, you may:
 
-The MIT License above applies to the software in this repository. It does NOT
-apply to the brand assets listed below, which are excluded from that grant:
+  (a) view, read, and study the source code and documentation;
+
+  (b) clone or download copies of this repository, and fork it on GitHub as
+      GitHub's terms of service allow, for the purposes in this section;
+
+  (c) build, run, and test the software on your own machines, on local
+      development chains (such as Anvil), and on public test networks whose
+      tokens carry no monetary value (such as Base Sepolia);
+
+  (d) quote short excerpts of the code or documentation with attribution and
+      a link back to this repository; and
+
+  (e) use what you learn from this repository, including short snippets of
+      code, in your own independently written work, so long as that work is
+      not a deployment of this software or of a token, contract, or service
+      derived from it.
+
+
+2. WHAT YOU MAY NOT DO
+
+You may not, and this license grants no right to:
+
+  (a) deploy the BEADZ contract, or any modified or derived version of it, to
+      any blockchain mainnet, or to any network on which tokens carry or may
+      come to carry monetary value;
+
+  (b) operate the camera, the service, the site, or any claim, redemption,
+      or attestation interface derived from them, for use by the public;
+
+  (c) issue, sell, airdrop, list, market, or promote any token, NFT,
+      liquidity pool, or other asset derived from this software, or that
+      presents itself as BEADZ or The Bead Reserve;
+
+  (d) distribute copies or modified versions of this software, other than
+      forks on GitHub as permitted in section 1(b); or
+
+  (e) sublicense any of the rights granted here.
+
+
+3. BRAND ASSETS
+
+No right is granted in the brand assets listed below:
 
   - site/brand/            (excluding site/brand/vendor/RobotoMono-Bold.ttf,
                              site/brand/vendor/RobotoMono-Regular.ttf, and
                              site/brand/vendor/OFL.txt; those three files are
-                             covered under THIRD-PARTY FONTS below instead)
+                             covered under THIRD-PARTY CODE AND FONTS below
+                             instead)
   - site/brand/vendor/henry-master.svg   (listed explicitly, in addition to
                              being covered by "site/brand/" above, so that no
-                             reading of the vendor/ font carve-out below can
-                             be construed to include Henry's master artwork)
+                             reading of the vendor/ font carve-out can be
+                             construed to include Henry's master artwork)
   - site/public/favicon.ico
   - site/public/favicon-16x16.png
   - site/public/favicon-32x32.png
@@ -49,56 +77,59 @@ apply to the brand assets listed below, which are excluded from that grant:
   - site/public/og-image.png
   - site/public/henry-cro-*.svg
 
-These files depict "Henry," a robot mascot that is Copyright (c) Curt Henrichs LLC,
-all rights reserved. Henry is a brand mascot, not clip art.
+These files depict "Henry," a robot mascot that is Copyright (c) Curt Henrichs
+LLC, all rights reserved. Henry is a brand mascot, not clip art.
 
-You may fork this repository, deploy your own vault, and use the software
-freely under the MIT License. You may not use Henry, the BEADZ reserve seal, or
-the name "The Bead Reserve" as the identity of your own project, whether or not
-your copy is derived from this one.
+You may use Henry, the BEADZ reserve seal, and the names "BEADZ" and "The Bead
+Reserve" to refer to this project, for example in an article or a review. You
+may not use any of them as the identity of another project, a fork of this one
+included.
 
-Removing or replacing these assets is expressly permitted, and is the intended
-path for a fork: the software carries no dependency on them that a substitute
-mark cannot satisfy.
 
-THIRD-PARTY FONTS
+4. WRITTEN CONTENT
 
-site/brand/vendor/RobotoMono-Bold.ttf, site/brand/vendor/RobotoMono-Regular.ttf,
-and site/brand/vendor/OFL.txt are Roboto Mono, Copyright (c) The Roboto Mono
-Project Authors, licensed under the SIL Open Font License, Version 1.1. The
-full license text is at site/brand/vendor/OFL.txt. The OFL governs those three
-files in place of both the MIT License and the exception above.
-
-No other file in site/brand/vendor/ is a font, and none is governed by the
-OFL. In particular, site/brand/vendor/henry-master.svg is Henry's canonical
-master artwork, covered by the BRAND ASSETS EXCEPTION above like every other
-Henry asset, all rights reserved.
-
-CONTENT EXCEPTION
-
-The MIT License above applies to the software in this repository. It does NOT
-apply to the written content listed below, which is excluded from that grant:
+The following written content is Copyright (c) Curt Henrichs LLC, all rights
+reserved:
 
   - the site's words, wherever they are written in site/src/ (pages,
     components, and data such as the tagline and page descriptions), as
     rendered on the site's pages and in their metadata
   - the prose of the whitepaper in whitepaper/*.typ, and the whitepaper PDF
-    built from it wherever it is published (including /whitepaper.pdf on
-    the site)
+    built from it wherever it is published
 
-That content is Copyright (c) Curt Henrichs LLC, all rights reserved. Quoting
-a short passage with attribution and a link back is permitted.
+Quoting a short passage with attribution and a link back is permitted.
+Publishing that content as your own site or document is not.
 
-Copies of this repository, including forks, may carry that content unmodified
-as part of the repository. Publishing it as your own site or document is not
-permitted.
 
-The code in those same files remains under the MIT License. That includes the
-markup, component logic, scripts, styles, and the Typst layout and template
-code. A fork may keep all of it and is expected to replace the prose with its
-own.
+5. THIRD-PARTY CODE AND FONTS
 
-NO ADVICE, USE AT YOUR OWN RISK, AND INDEMNIFICATION
+Third-party code included in or referenced by this repository, such as
+OpenZeppelin Contracts and forge-std under contract/lib/, remains under its
+own license. Nothing in this license changes those terms.
+
+site/brand/vendor/RobotoMono-Bold.ttf, site/brand/vendor/RobotoMono-Regular.ttf,
+and site/brand/vendor/OFL.txt are Roboto Mono, Copyright (c) The Roboto Mono
+Project Authors, licensed under the SIL Open Font License, Version 1.1. The
+full license text is at site/brand/vendor/OFL.txt. The OFL governs those three
+files in place of this license.
+
+No other file in site/brand/vendor/ is a font, and none is governed by the
+OFL. In particular, site/brand/vendor/henry-master.svg is Henry's canonical
+master artwork, covered by BRAND ASSETS above, all rights reserved.
+
+
+6. NO WARRANTY AND LIMITATION OF LIABILITY
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL CURT
+HENRICHS LLC OR ITS MEMBERS, MANAGERS, OR AFFILIATES BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+7. NO ADVICE, USE AT YOUR OWN RISK, AND INDEMNIFICATION
 
 Nothing in this repository, its documentation, the whitepaper, the site, or
 any related writing is legal, financial, tax, or investment advice. Curt
@@ -106,17 +137,29 @@ Henrichs LLC does not advise anyone on whether or how to deploy, launch,
 issue, market, or operate a token, smart contract, or any other financial
 instrument, and has chosen not to deploy this software itself.
 
-Deploying, operating, or distributing this software, or any work derived from
-it, on any blockchain or network is done entirely at your own risk. You alone
-are responsible for complying with every law and regulation that applies to
-you. Consult your own lawyer before doing any of it.
+Anything you do with this software, or with any work derived from it, is done
+entirely at your own risk. You alone are responsible for complying with every
+law and regulation that applies to you. Consult your own lawyer.
 
-As a condition of the license granted above, by using, copying, modifying,
-deploying, operating, or distributing this software or any work derived from
-it, you agree to indemnify, defend, and hold harmless Curt Henrichs LLC and
-its members, managers, and affiliates from and against any and all claims,
-demands, actions, liabilities, losses, damages, fines, penalties, costs, and
-expenses (including reasonable attorneys' fees) arising out of or relating to
-(a) your use, deployment, operation, or distribution of the software or any
-derived work, (b) any token, contract, or service you create with it, or
-(c) your violation of any law or any third party's rights.
+As a condition of the rights granted in this license, by using, copying,
+modifying, deploying, operating, or distributing this software or any work
+derived from it, you agree to indemnify, defend, and hold harmless Curt
+Henrichs LLC and its members, managers, and affiliates from and against any
+and all claims, demands, actions, liabilities, losses, damages, fines,
+penalties, costs, and expenses (including reasonable attorneys' fees) arising
+out of or relating to (a) your use, deployment, operation, or distribution of
+the software or any derived work, (b) any token, contract, or service you
+create with it, whether or not this license permits it, or (c) your violation
+of this license, of any law, or of any third party's rights.
+
+
+8. TERMINATION
+
+If you break any term of this license, every right it grants you ends
+automatically and immediately. Sections 6 and 7 survive termination.
+
+
+9. NOTICE
+
+This license notice, and the copyright notice above, must stay with every copy
+of this software, including forks.

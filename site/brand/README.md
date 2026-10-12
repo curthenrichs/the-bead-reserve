@@ -95,8 +95,8 @@ its own if they go stale.
 
 ## Licensing
 
-Henry is © Curt Henrichs LLC, all rights reserved, and is excluded from this
-repository's MIT grant — see the BRAND ASSETS EXCEPTION in the root `LICENSE`.
+Henry is © Curt Henrichs LLC, all rights reserved, and no right in him is
+granted by this repository's license — see BRAND ASSETS in the root `LICENSE`.
 That exclusion covers `vendor/henry-master.svg` too.
 
 Only the three Roboto Mono files in `vendor/` (`RobotoMono-Bold.ttf`,

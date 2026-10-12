@@ -37,7 +37,7 @@ describe("/brand", () => {
       "favicon-32x32.png",
       "beadz-seal-small.svg",
       "256×256",
-      "MIT",
+      "source-available",
       "LICENSE",
     ]) {
       expect(text).toContain(s);

@@ -203,10 +203,10 @@ describe("/terms/ as released", () => {
     );
   });
 
-  it("keeps the code MIT and points the words back to Using the site", () => {
+  it("keeps the code source-available and points the words back to Using the site", () => {
     expect(
       doc.querySelector('main a[href$="/blob/main/LICENSE"]')?.textContent,
-    ).toBe("MIT license");
+    ).toBe("source-available license");
 
     expect(paras).toContain(
       "The site's words and the whitepaper's text are not covered by that grant. They are reserved under Using the site above.",

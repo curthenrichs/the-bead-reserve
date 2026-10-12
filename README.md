@@ -131,8 +131,8 @@ deploy it. The whitepaper is published as the Unissued Edition.
 **No BEADZ has been deployed to any chain, and none will be by its authors.** Any token, NFT,
 liquidity pool, or claim site wearing this name or ticker was not made by Curt Henrichs LLC or
 anyone affiliated with it, is not endorsed, and holds no claim on the jar. The name, the seal, and
-the mascot are reserved under this repository's LICENSE, so a fork that deploys must take its own
-name. One tell is definitive: any "BEADZ" you can buy is, by construction, a counterfeit bead
+the mascot are reserved under this repository's LICENSE, and the LICENSE does not permit deploying
+this code to any mainnet. One tell is definitive: any "BEADZ" you can buy is, by construction, a counterfeit bead
 reserve. The counterfeit is also worth nothing, but less honestly.
 
 ## Reserve facts
@@ -159,11 +159,12 @@ These are statements of design intent, made in earnest, and are not legal, finan
 
 ## License
 
-MIT for the code. Read it, learn from it, and reuse it in your own work under
-your own name. Henry the mascot, the other brand marks (the reserve seal,
-favicons, token art, OG image), the site's words, and the whitepaper text are
-carved out of that grant; see the BRAND ASSETS and CONTENT EXCEPTIONS in
-[`LICENSE`](./LICENSE) before reusing them.
+Source-available, not open source. Read it, study it, run it locally and on
+testnets, and use what you learn in your own work. Deploying it, or anything
+derived from it, to a mainnet or as a public service is not permitted. Henry
+the mascot, the other brand marks (the reserve seal, favicons, token art, OG
+image), the site's words, and the whitepaper text are reserved outright. The
+terms, including no warranty and an indemnity, are in [`LICENSE`](./LICENSE).
 
 ---
 
