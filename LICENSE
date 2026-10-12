@@ -97,3 +97,26 @@ The code in those same files remains under the MIT License. That includes the
 markup, component logic, scripts, styles, and the Typst layout and template
 code. A fork may keep all of it and is expected to replace the prose with its
 own.
+
+NO ADVICE, USE AT YOUR OWN RISK, AND INDEMNIFICATION
+
+Nothing in this repository, its documentation, the whitepaper, the site, or
+any related writing is legal, financial, tax, or investment advice. Curt
+Henrichs LLC does not advise anyone on whether or how to deploy, launch,
+issue, market, or operate a token, smart contract, or any other financial
+instrument, and has chosen not to deploy this software itself.
+
+Deploying, operating, or distributing this software, or any work derived from
+it, on any blockchain or network is done entirely at your own risk. You alone
+are responsible for complying with every law and regulation that applies to
+you. Consult your own lawyer before doing any of it.
+
+As a condition of the license granted above, by using, copying, modifying,
+deploying, operating, or distributing this software or any work derived from
+it, you agree to indemnify, defend, and hold harmless Curt Henrichs LLC and
+its members, managers, and affiliates from and against any and all claims,
+demands, actions, liabilities, losses, damages, fines, penalties, costs, and
+expenses (including reasonable attorneys' fees) arising out of or relating to
+(a) your use, deployment, operation, or distribution of the software or any
+derived work, (b) any token, contract, or service you create with it, or
+(c) your violation of any law or any third party's rights.
