@@ -1,5 +1,5 @@
 {
-  "_comment": "Canonical CRO mood rotation ('same guy, shifting moods'). One persona (variants/v5-flustered/flavor_persona.txt); the mood modulates intensity via a one-line cue appended to the flavor task plus its sampling. Held hold_hours per phase, seeded deterministically from the capture timestamp. Validated on real Pi frames 2026-07-20; the production CRO (docs/superpowers/specs/2026-07-20-cro-pi-integration-design.md) bakes these in.",
+  "_comment": "Canonical CRO mood rotation ('same guy, shifting moods'). One persona (variants/v5-flustered/flavor_persona.txt); the mood modulates intensity via a one-line cue appended to the flavor task plus its sampling. Held hold_hours per phase, seeded deterministically from the capture timestamp. Validated on real Pi frames 2026-07-20; the production CRO (camera/src/cro_assets.py) bakes these in.",
   "hold_hours": 3,
   "best_of": 3,
   "moods": [

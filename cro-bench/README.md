@@ -71,7 +71,7 @@ not timing measurements. Production will **not** have a resident server: on a
 ## Settled CRO (what production bakes in)
 
 Two committed artifacts are the canonical result of these experiments, lifted by
-the production CRO (`docs/superpowers/specs/2026-07-20-cro-pi-integration-design.md`):
+the production CRO (`camera/src/cro_assets.py`):
 
 - **`variants/v5-flustered/`** — the persona (an incompetent, over-their-head
   Chief Reserve Officer), slot prompts, GBNF grammars, and the audit template.

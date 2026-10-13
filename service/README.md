@@ -6,9 +6,6 @@ paired with `camera/`'s capture-and-sign half. TypeScript, zero runtime npm
 dependencies: HMAC-SHA256, SHA-256, and Ed25519 verification are all native
 `crypto.subtle` (WebCrypto), not a library.
 
-Internal design spec (private, not part of this repository):
-`docs/superpowers/specs/2026-07-19-service-poc-ingest-worker-design.md`.
-
 This is a PoC: retiring the platform unknowns (wrangler, R2/KV bindings,
 secrets, deploy, remote behavior) before a production subsystem-B spec, not
 the production backend itself. It reproduces the camera's local ingest-sink

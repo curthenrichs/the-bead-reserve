@@ -3,7 +3,7 @@ runs the identical code path. SmolVLMCRO spawns llama-server per capture, reads
 grammar-constrained slots, generates one mood-rotating flavor sentence, and
 renders the audit template. It is strictly optional and NEVER load-bearing:
 audit() never raises; on any failure it returns None and capture/sign/push
-proceed. See docs/superpowers/specs/2026-07-20-cro-pi-integration-design.md."""
+proceed."""
 
 from __future__ import annotations
 
